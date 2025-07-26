@@ -1,0 +1,283 @@
+{
+  "nav": {
+    "home": "首页",
+    "about": "关于",
+    "contact": "联系我们",
+    "user": "用户详情"
+  },
+  "toolbar": {
+    "toggleTheme": "切换主题"
+  },
+  "footer": {
+    "copyright": "© 2024 LDesign Router. 保留所有权利。",
+    "currentRoute": "当前路由",
+    "navigationCount": "导航次数"
+  },
+  "home": {
+    "title": "欢迎使用 LDesign Router",
+    "subtitle": "一个功能强大、灵活且易于使用的 Vue 3 路由解决方案",
+    "learnMore": "了解更多",
+    "getStarted": "开始使用",
+    "features": {
+      "title": "核心功能",
+      "deviceAdaptive": {
+        "title": "设备自适应",
+        "description": "根据设备类型自动调整路由和组件，提供最佳的用户体验"
+      },
+      "tabManagement": {
+        "title": "标签页管理",
+        "description": "支持多标签页导航，包括拖拽排序、持久化存储等功能"
+      },
+      "breadcrumbs": {
+        "title": "面包屑导航",
+        "description": "自动生成面包屑导航，帮助用户了解当前位置和导航路径"
+      },
+      "caching": {
+        "title": "智能缓存",
+        "description": "支持多种缓存策略，提升应用性能和用户体验"
+      },
+      "animations": {
+        "title": "路由动画",
+        "description": "丰富的路由切换动画效果，让应用更加生动有趣"
+      },
+      "permissions": {
+        "title": "权限管理",
+        "description": "完善的权限控制系统，支持角色和权限的精细化管理"
+      },
+      "themes": {
+        "title": "主题切换",
+        "description": "支持多主题切换，包括明暗模式和自定义主题"
+      },
+      "i18n": {
+        "title": "国际化",
+        "description": "完整的国际化支持，轻松构建多语言应用"
+      }
+    },
+    "stats": {
+      "title": "实时统计",
+      "routes": "路由数量",
+      "navigations": "导航次数",
+      "cached": "缓存组件",
+      "device": "设备类型"
+    },
+    "demo": {
+      "title": "功能演示",
+      "addTab": "添加标签页",
+      "toggleTheme": "切换主题",
+      "switchLanguage": "切换语言",
+      "clearCache": "清除缓存"
+    }
+  },
+  "about": {
+    "title": "关于 LDesign Router",
+    "subtitle": "了解我们的设计理念、技术架构和核心功能",
+    "intro": {
+      "title": "项目介绍",
+      "description": "LDesign Router 是一个专为 Vue 3 设计的现代化路由解决方案。它不仅提供了基础的路由功能，还集成了设备适配、标签页管理、权限控制、主题切换等高级特性，帮助开发者快速构建功能丰富的单页应用。"
+    },
+    "techStack": {
+      "title": "技术栈"
+    },
+    "architecture": {
+      "title": "架构设计",
+      "description": "采用分层架构设计，各个模块职责清晰，易于扩展和维护。",
+      "layers": {
+        "presentation": "表现层",
+        "composables": "组合式API层",
+        "managers": "管理器层",
+        "core": "核心层"
+      }
+    },
+    "features": {
+      "title": "功能特性",
+      "deviceAdaptive": {
+        "title": "设备自适应路由",
+        "description": "根据用户设备类型（桌面、平板、手机）自动选择最适合的组件和布局。",
+        "benefits": {
+          "responsive": "响应式设计",
+          "adaptive": "自适应组件",
+          "optimized": "性能优化"
+        }
+      },
+      "tabManagement": {
+        "title": "多标签页管理",
+        "description": "提供完整的标签页管理功能，支持添加、删除、拖拽排序等操作。",
+        "benefits": {
+          "multiTab": "多标签导航",
+          "persistent": "状态持久化",
+          "draggable": "拖拽排序"
+        }
+      },
+      "caching": {
+        "title": "智能缓存系统",
+        "description": "支持多种缓存策略，包括 LRU、LFU、FIFO 等，有效提升应用性能。",
+        "benefits": {
+          "performance": "性能提升",
+          "strategies": "多种策略",
+          "persistent": "持久化存储"
+        }
+      },
+      "animations": {
+        "title": "路由动画效果",
+        "description": "内置多种路由切换动画，支持自定义动画效果。",
+        "benefits": {
+          "smooth": "流畅过渡",
+          "customizable": "可自定义",
+          "performant": "高性能"
+        }
+      }
+    },
+    "performance": {
+      "title": "性能指标",
+      "description": "我们致力于提供高性能的路由解决方案，以下是一些关键性能指标。",
+      "metrics": {
+        "bundleSize": "打包大小",
+        "navigationTime": "导航耗时",
+        "cacheHitRate": "缓存命中率",
+        "memoryUsage": "内存占用"
+      }
+    }
+  },
+  "contact": {
+    "title": "联系我们",
+    "subtitle": "有任何问题或建议？我们很乐意为您提供帮助",
+    "form": {
+      "title": "发送消息",
+      "name": "姓名",
+      "namePlaceholder": "请输入您的姓名",
+      "email": "邮箱",
+      "emailPlaceholder": "请输入您的邮箱地址",
+      "subject": "主题",
+      "selectSubject": "请选择主题",
+      "subjects": {
+        "general": "一般咨询",
+        "support": "技术支持",
+        "feature": "功能建议",
+        "bug": "问题反馈"
+      },
+      "message": "消息内容",
+      "messagePlaceholder": "请详细描述您的问题或建议",
+      "send": "发送消息",
+      "sending": "发送中...",
+      "reset": "重置"
+    },
+    "info": {
+      "title": "联系方式",
+      "email": {
+        "title": "邮件联系",
+        "description": "发送邮件给我们，我们会在24小时内回复",
+        "action": "发送邮件"
+      },
+      "chat": {
+        "title": "在线客服",
+        "description": "与我们的技术支持团队实时交流",
+        "action": "开始聊天",
+        "comingSoon": "在线客服功能即将上线！"
+      },
+      "docs": {
+        "title": "文档中心",
+        "description": "查看详细的使用文档和API参考",
+        "action": "查看文档"
+      },
+      "github": {
+        "title": "GitHub",
+        "description": "在GitHub上提交问题或贡献代码",
+        "action": "访问仓库"
+      }
+    },
+    "faq": {
+      "title": "常见问题",
+      "items": {
+        "installation": {
+          "question": "如何安装 LDesign Router？",
+          "answer": "您可以通过 npm 或 yarn 安装：npm install @ldesign/router 或 yarn add @ldesign/router"
+        },
+        "configuration": {
+          "question": "如何配置路由器？",
+          "answer": "使用 createLDesignRouter 函数创建路由器实例，传入路由配置和选项即可。详细配置请参考文档。"
+        },
+        "performance": {
+          "question": "性能如何？",
+          "answer": "LDesign Router 经过性能优化，支持懒加载、缓存等特性，能够有效提升应用性能。"
+        },
+        "compatibility": {
+          "question": "兼容性如何？",
+          "answer": "完全兼容 Vue 3，支持 Composition API，可与现有的 Vue 生态系统无缝集成。"
+        },
+        "support": {
+          "question": "如何获得技术支持？",
+          "answer": "您可以通过邮件、GitHub Issues 或在线文档获得技术支持。我们的团队会及时回复您的问题。"
+        }
+      }
+    },
+    "success": {
+      "title": "发送成功！",
+      "message": "感谢您的消息，我们会尽快回复您。",
+      "close": "关闭"
+    }
+  },
+  "user": {
+    "refresh": "刷新",
+    "refreshing": "刷新中...",
+    "edit": "编辑",
+    "editComingSoon": "编辑功能即将上线！",
+    "details": {
+      "title": "基本信息",
+      "email": "邮箱",
+      "phone": "电话",
+      "department": "部门",
+      "location": "地点",
+      "joinDate": "入职日期",
+      "lastLogin": "最后登录"
+    },
+    "permissions": {
+      "title": "权限管理",
+      "groups": {
+        "system": "系统权限",
+        "content": "内容权限",
+        "user": "用户权限"
+      },
+      "items": {
+        "read": "读取",
+        "write": "写入",
+        "admin": "管理员",
+        "create": "创建",
+        "edit": "编辑",
+        "delete": "删除",
+        "publish": "发布",
+        "view": "查看",
+        "manage": "管理",
+        "invite": "邀请"
+      }
+    },
+    "activity": {
+      "title": "最近活动",
+      "types": {
+        "login": "登录系统",
+        "edit": "编辑内容",
+        "create": "创建内容",
+        "comment": "添加评论"
+      }
+    },
+    "stats": {
+      "title": "统计数据",
+      "logins": "登录次数",
+      "projects": "项目数量",
+      "tasks": "任务数量",
+      "score": "积分"
+    },
+    "preferences": {
+      "title": "偏好设置",
+      "theme": "主题",
+      "themes": {
+        "light": "浅色",
+        "dark": "深色",
+        "auto": "自动"
+      },
+      "language": "语言",
+      "notifications": "通知设置",
+      "emailNotifications": "邮件通知",
+      "pushNotifications": "推送通知"
+    }
+  }
+}

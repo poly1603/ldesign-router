@@ -1,0 +1,283 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "contact": "Contact",
+    "user": "User Profile"
+  },
+  "toolbar": {
+    "toggleTheme": "Toggle Theme"
+  },
+  "footer": {
+    "copyright": "© 2024 LDesign Router. All rights reserved.",
+    "currentRoute": "Current Route",
+    "navigationCount": "Navigation Count"
+  },
+  "home": {
+    "title": "Welcome to LDesign Router",
+    "subtitle": "A powerful, flexible, and easy-to-use Vue 3 routing solution",
+    "learnMore": "Learn More",
+    "getStarted": "Get Started",
+    "features": {
+      "title": "Core Features",
+      "deviceAdaptive": {
+        "title": "Device Adaptive",
+        "description": "Automatically adjust routes and components based on device type for optimal user experience"
+      },
+      "tabManagement": {
+        "title": "Tab Management",
+        "description": "Support multi-tab navigation with drag-and-drop sorting and persistent storage"
+      },
+      "breadcrumbs": {
+        "title": "Breadcrumb Navigation",
+        "description": "Automatically generate breadcrumb navigation to help users understand current location"
+      },
+      "caching": {
+        "title": "Smart Caching",
+        "description": "Support multiple caching strategies to improve application performance and user experience"
+      },
+      "animations": {
+        "title": "Route Animations",
+        "description": "Rich route transition animation effects to make applications more vivid and interesting"
+      },
+      "permissions": {
+        "title": "Permission Management",
+        "description": "Complete permission control system with fine-grained role and permission management"
+      },
+      "themes": {
+        "title": "Theme Switching",
+        "description": "Support multiple theme switching including light/dark mode and custom themes"
+      },
+      "i18n": {
+        "title": "Internationalization",
+        "description": "Complete internationalization support for easy multi-language application development"
+      }
+    },
+    "stats": {
+      "title": "Real-time Statistics",
+      "routes": "Routes",
+      "navigations": "Navigations",
+      "cached": "Cached",
+      "device": "Device"
+    },
+    "demo": {
+      "title": "Feature Demo",
+      "addTab": "Add Tab",
+      "toggleTheme": "Toggle Theme",
+      "switchLanguage": "Switch Language",
+      "clearCache": "Clear Cache"
+    }
+  },
+  "about": {
+    "title": "About LDesign Router",
+    "subtitle": "Learn about our design philosophy, technical architecture, and core features",
+    "intro": {
+      "title": "Project Introduction",
+      "description": "LDesign Router is a modern routing solution designed specifically for Vue 3. It not only provides basic routing functionality but also integrates advanced features such as device adaptation, tab management, permission control, and theme switching to help developers quickly build feature-rich single-page applications."
+    },
+    "techStack": {
+      "title": "Technology Stack"
+    },
+    "architecture": {
+      "title": "Architecture Design",
+      "description": "Adopts layered architecture design with clear module responsibilities, easy to extend and maintain.",
+      "layers": {
+        "presentation": "Presentation Layer",
+        "composables": "Composables Layer",
+        "managers": "Managers Layer",
+        "core": "Core Layer"
+      }
+    },
+    "features": {
+      "title": "Feature Highlights",
+      "deviceAdaptive": {
+        "title": "Device Adaptive Routing",
+        "description": "Automatically select the most suitable components and layouts based on user device type (desktop, tablet, mobile).",
+        "benefits": {
+          "responsive": "Responsive Design",
+          "adaptive": "Adaptive Components",
+          "optimized": "Performance Optimized"
+        }
+      },
+      "tabManagement": {
+        "title": "Multi-tab Management",
+        "description": "Provides complete tab management functionality with support for adding, deleting, drag-and-drop sorting, and more.",
+        "benefits": {
+          "multiTab": "Multi-tab Navigation",
+          "persistent": "State Persistence",
+          "draggable": "Drag & Drop"
+        }
+      },
+      "caching": {
+        "title": "Smart Caching System",
+        "description": "Supports multiple caching strategies including LRU, LFU, FIFO, effectively improving application performance.",
+        "benefits": {
+          "performance": "Performance Boost",
+          "strategies": "Multiple Strategies",
+          "persistent": "Persistent Storage"
+        }
+      },
+      "animations": {
+        "title": "Route Animation Effects",
+        "description": "Built-in multiple route transition animations with support for custom animation effects.",
+        "benefits": {
+          "smooth": "Smooth Transitions",
+          "customizable": "Customizable",
+          "performant": "High Performance"
+        }
+      }
+    },
+    "performance": {
+      "title": "Performance Metrics",
+      "description": "We are committed to providing high-performance routing solutions. Here are some key performance indicators.",
+      "metrics": {
+        "bundleSize": "Bundle Size",
+        "navigationTime": "Navigation Time",
+        "cacheHitRate": "Cache Hit Rate",
+        "memoryUsage": "Memory Usage"
+      }
+    }
+  },
+  "contact": {
+    "title": "Contact Us",
+    "subtitle": "Have any questions or suggestions? We'd love to help you",
+    "form": {
+      "title": "Send Message",
+      "name": "Name",
+      "namePlaceholder": "Please enter your name",
+      "email": "Email",
+      "emailPlaceholder": "Please enter your email address",
+      "subject": "Subject",
+      "selectSubject": "Please select a subject",
+      "subjects": {
+        "general": "General Inquiry",
+        "support": "Technical Support",
+        "feature": "Feature Request",
+        "bug": "Bug Report"
+      },
+      "message": "Message",
+      "messagePlaceholder": "Please describe your question or suggestion in detail",
+      "send": "Send Message",
+      "sending": "Sending...",
+      "reset": "Reset"
+    },
+    "info": {
+      "title": "Contact Information",
+      "email": {
+        "title": "Email Contact",
+        "description": "Send us an email and we'll respond within 24 hours",
+        "action": "Send Email"
+      },
+      "chat": {
+        "title": "Live Chat",
+        "description": "Chat with our technical support team in real-time",
+        "action": "Start Chat",
+        "comingSoon": "Live chat feature coming soon!"
+      },
+      "docs": {
+        "title": "Documentation",
+        "description": "View detailed usage documentation and API reference",
+        "action": "View Docs"
+      },
+      "github": {
+        "title": "GitHub",
+        "description": "Submit issues or contribute code on GitHub",
+        "action": "Visit Repository"
+      }
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "items": {
+        "installation": {
+          "question": "How to install LDesign Router?",
+          "answer": "You can install via npm or yarn: npm install @ldesign/router or yarn add @ldesign/router"
+        },
+        "configuration": {
+          "question": "How to configure the router?",
+          "answer": "Use the createLDesignRouter function to create a router instance with route configuration and options. See documentation for detailed configuration."
+        },
+        "performance": {
+          "question": "How is the performance?",
+          "answer": "LDesign Router is performance-optimized with features like lazy loading and caching to effectively improve application performance."
+        },
+        "compatibility": {
+          "question": "What about compatibility?",
+          "answer": "Fully compatible with Vue 3, supports Composition API, and seamlessly integrates with the existing Vue ecosystem."
+        },
+        "support": {
+          "question": "How to get technical support?",
+          "answer": "You can get technical support through email, GitHub Issues, or online documentation. Our team will respond to your questions promptly."
+        }
+      }
+    },
+    "success": {
+      "title": "Message Sent Successfully!",
+      "message": "Thank you for your message. We will get back to you as soon as possible.",
+      "close": "Close"
+    }
+  },
+  "user": {
+    "refresh": "Refresh",
+    "refreshing": "Refreshing...",
+    "edit": "Edit",
+    "editComingSoon": "Edit feature coming soon!",
+    "details": {
+      "title": "Basic Information",
+      "email": "Email",
+      "phone": "Phone",
+      "department": "Department",
+      "location": "Location",
+      "joinDate": "Join Date",
+      "lastLogin": "Last Login"
+    },
+    "permissions": {
+      "title": "Permission Management",
+      "groups": {
+        "system": "System Permissions",
+        "content": "Content Permissions",
+        "user": "User Permissions"
+      },
+      "items": {
+        "read": "Read",
+        "write": "Write",
+        "admin": "Admin",
+        "create": "Create",
+        "edit": "Edit",
+        "delete": "Delete",
+        "publish": "Publish",
+        "view": "View",
+        "manage": "Manage",
+        "invite": "Invite"
+      }
+    },
+    "activity": {
+      "title": "Recent Activity",
+      "types": {
+        "login": "System Login",
+        "edit": "Content Edit",
+        "create": "Content Creation",
+        "comment": "Comment Added"
+      }
+    },
+    "stats": {
+      "title": "Statistics",
+      "logins": "Login Count",
+      "projects": "Projects",
+      "tasks": "Tasks",
+      "score": "Score"
+    },
+    "preferences": {
+      "title": "Preferences",
+      "theme": "Theme",
+      "themes": {
+        "light": "Light",
+        "dark": "Dark",
+        "auto": "Auto"
+      },
+      "language": "Language",
+      "notifications": "Notification Settings",
+      "emailNotifications": "Email Notifications",
+      "pushNotifications": "Push Notifications"
+    }
+  }
+}
