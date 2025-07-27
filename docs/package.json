@@ -1,0 +1,19 @@
+{
+  "name": "@ldesign/router-docs",
+  "version": "2.0.0",
+  "description": "@ldesign/router 文档",
+  "private": true,
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "vitepress build",
+    "preview": "vitepress preview",
+    "serve": "vitepress serve"
+  },
+  "devDependencies": {
+    "vitepress": "^1.0.0",
+    "vue": "^3.3.0"
+  },
+  "peerDependencies": {
+    "@ldesign/router": "^2.0.0"
+  }
+}

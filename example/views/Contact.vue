@@ -1,162 +1,6 @@
-<template>
-  <div class="contact-page">
-    <div class="page-header">
-      <h1 class="page-title">{{ t('contact.title') }}</h1>
-      <p class="page-subtitle">{{ t('contact.subtitle') }}</p>
-    </div>
-    
-    <div class="contact-content">
-      <div class="contact-form-section">
-        <div class="form-card">
-          <h2>{{ t('contact.form.title') }}</h2>
-          <form @submit.prevent="handleSubmit" class="contact-form">
-            <div class="form-group">
-              <label for="name">{{ t('contact.form.name') }}</label>
-              <input 
-                id="name"
-                v-model="form.name" 
-                type="text" 
-                :placeholder="t('contact.form.namePlaceholder')"
-                required
-              >
-            </div>
-            
-            <div class="form-group">
-              <label for="email">{{ t('contact.form.email') }}</label>
-              <input 
-                id="email"
-                v-model="form.email" 
-                type="email" 
-                :placeholder="t('contact.form.emailPlaceholder')"
-                required
-              >
-            </div>
-            
-            <div class="form-group">
-              <label for="subject">{{ t('contact.form.subject') }}</label>
-              <select id="subject" v-model="form.subject" required>
-                <option value="">{{ t('contact.form.selectSubject') }}</option>
-                <option value="general">{{ t('contact.form.subjects.general') }}</option>
-                <option value="support">{{ t('contact.form.subjects.support') }}</option>
-                <option value="feature">{{ t('contact.form.subjects.feature') }}</option>
-                <option value="bug">{{ t('contact.form.subjects.bug') }}</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label for="message">{{ t('contact.form.message') }}</label>
-              <textarea 
-                id="message"
-                v-model="form.message" 
-                :placeholder="t('contact.form.messagePlaceholder')"
-                rows="6"
-                required
-              ></textarea>
-            </div>
-            
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary" :disabled="submitting">
-                {{ submitting ? t('contact.form.sending') : t('contact.form.send') }}
-              </button>
-              <button type="button" @click="resetForm" class="btn btn-secondary">
-                {{ t('contact.form.reset') }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-      
-      <div class="contact-info-section">
-        <div class="info-card">
-          <h2>{{ t('contact.info.title') }}</h2>
-          
-          <div class="contact-methods">
-            <div class="contact-method">
-              <div class="method-icon">📧</div>
-              <div class="method-content">
-                <h3>{{ t('contact.info.email.title') }}</h3>
-                <p>{{ t('contact.info.email.description') }}</p>
-                <a href="mailto:contact@ldesign.com" class="contact-link">
-                  contact@ldesign.com
-                </a>
-              </div>
-            </div>
-            
-            <div class="contact-method">
-              <div class="method-icon">💬</div>
-              <div class="method-content">
-                <h3>{{ t('contact.info.chat.title') }}</h3>
-                <p>{{ t('contact.info.chat.description') }}</p>
-                <button @click="openChat" class="contact-link">
-                  {{ t('contact.info.chat.action') }}
-                </button>
-              </div>
-            </div>
-            
-            <div class="contact-method">
-              <div class="method-icon">📚</div>
-              <div class="method-content">
-                <h3>{{ t('contact.info.docs.title') }}</h3>
-                <p>{{ t('contact.info.docs.description') }}</p>
-                <RouterLink to="/docs" class="contact-link">
-                  {{ t('contact.info.docs.action') }}
-                </RouterLink>
-              </div>
-            </div>
-            
-            <div class="contact-method">
-              <div class="method-icon">🐛</div>
-              <div class="method-content">
-                <h3>{{ t('contact.info.github.title') }}</h3>
-                <p>{{ t('contact.info.github.description') }}</p>
-                <a href="https://github.com/ldesign/router" target="_blank" class="contact-link">
-                  {{ t('contact.info.github.action') }}
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div class="faq-card">
-          <h2>{{ t('contact.faq.title') }}</h2>
-          <div class="faq-list">
-            <div 
-              class="faq-item" 
-              v-for="(faq, index) in faqs" 
-              :key="index"
-              @click="toggleFaq(index)"
-            >
-              <div class="faq-question">
-                <span>{{ t(`contact.faq.items.${faq.key}.question`) }}</span>
-                <span class="faq-toggle">{{ faq.open ? '−' : '+' }}</span>
-              </div>
-              <div class="faq-answer" v-show="faq.open">
-                {{ t(`contact.faq.items.${faq.key}.answer`) }}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    
-    <!-- 成功提示 -->
-    <div v-if="showSuccess" class="success-message">
-      <div class="success-content">
-        <div class="success-icon">✅</div>
-        <h3>{{ t('contact.success.title') }}</h3>
-        <p>{{ t('contact.success.message') }}</p>
-        <button @click="showSuccess = false" class="btn btn-primary">
-          {{ t('contact.success.close') }}
-        </button>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, reactive } from 'vue'
-import { RouterLink } from '../../src'
-import { useI18n } from '../../src'
+import { reactive, ref } from 'vue'
+import { RouterLink, useI18n } from '../../src'
 
 const { t } = useI18n()
 
@@ -165,7 +9,7 @@ const form = reactive({
   name: '',
   email: '',
   subject: '',
-  message: ''
+  message: '',
 })
 
 const submitting = ref(false)
@@ -177,29 +21,31 @@ const faqs = ref([
   { key: 'configuration', open: false },
   { key: 'performance', open: false },
   { key: 'compatibility', open: false },
-  { key: 'support', open: false }
+  { key: 'support', open: false },
 ])
 
 // 处理表单提交
-const handleSubmit = async () => {
+async function handleSubmit() {
   submitting.value = true
-  
+
   try {
     // 模拟API调用
     await new Promise(resolve => setTimeout(resolve, 2000))
-    
+
     console.log('Form submitted:', form)
     showSuccess.value = true
     resetForm()
-  } catch (error) {
+  }
+ catch (error) {
     console.error('Failed to submit form:', error)
-  } finally {
+  }
+ finally {
     submitting.value = false
   }
 }
 
 // 重置表单
-const resetForm = () => {
+function resetForm() {
   form.name = ''
   form.email = ''
   form.subject = ''
@@ -207,16 +53,195 @@ const resetForm = () => {
 }
 
 // 切换FAQ
-const toggleFaq = (index: number) => {
+function toggleFaq(index: number) {
   faqs.value[index].open = !faqs.value[index].open
 }
 
 // 打开聊天
-const openChat = () => {
+function openChat() {
   console.log('Opening chat...')
   alert(t('contact.info.chat.comingSoon'))
 }
 </script>
+
+<template>
+  <div class="contact-page">
+    <div class="page-header">
+      <h1 class="page-title">
+        {{ t('contact.title') }}
+      </h1>
+      <p class="page-subtitle">
+        {{ t('contact.subtitle') }}
+      </p>
+    </div>
+
+    <div class="contact-content">
+      <div class="contact-form-section">
+        <div class="form-card">
+          <h2>{{ t('contact.form.title') }}</h2>
+          <form class="contact-form" @submit.prevent="handleSubmit">
+            <div class="form-group">
+              <label for="name">{{ t('contact.form.name') }}</label>
+              <input
+                id="name"
+                v-model="form.name"
+                type="text"
+                :placeholder="t('contact.form.namePlaceholder')"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="email">{{ t('contact.form.email') }}</label>
+              <input
+                id="email"
+                v-model="form.email"
+                type="email"
+                :placeholder="t('contact.form.emailPlaceholder')"
+                required
+              >
+            </div>
+
+            <div class="form-group">
+              <label for="subject">{{ t('contact.form.subject') }}</label>
+              <select id="subject" v-model="form.subject" required>
+                <option value="">
+                  {{ t('contact.form.selectSubject') }}
+                </option>
+                <option value="general">
+                  {{ t('contact.form.subjects.general') }}
+                </option>
+                <option value="support">
+                  {{ t('contact.form.subjects.support') }}
+                </option>
+                <option value="feature">
+                  {{ t('contact.form.subjects.feature') }}
+                </option>
+                <option value="bug">
+                  {{ t('contact.form.subjects.bug') }}
+                </option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="message">{{ t('contact.form.message') }}</label>
+              <textarea
+                id="message"
+                v-model="form.message"
+                :placeholder="t('contact.form.messagePlaceholder')"
+                rows="6"
+                required
+              />
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn btn-primary" :disabled="submitting">
+                {{ submitting ? t('contact.form.sending') : t('contact.form.send') }}
+              </button>
+              <button type="button" class="btn btn-secondary" @click="resetForm">
+                {{ t('contact.form.reset') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <div class="contact-info-section">
+        <div class="info-card">
+          <h2>{{ t('contact.info.title') }}</h2>
+
+          <div class="contact-methods">
+            <div class="contact-method">
+              <div class="method-icon">
+                📧
+              </div>
+              <div class="method-content">
+                <h3>{{ t('contact.info.email.title') }}</h3>
+                <p>{{ t('contact.info.email.description') }}</p>
+                <a href="mailto:contact@ldesign.com" class="contact-link">
+                  contact@ldesign.com
+                </a>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="method-icon">
+                💬
+              </div>
+              <div class="method-content">
+                <h3>{{ t('contact.info.chat.title') }}</h3>
+                <p>{{ t('contact.info.chat.description') }}</p>
+                <button class="contact-link" @click="openChat">
+                  {{ t('contact.info.chat.action') }}
+                </button>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="method-icon">
+                📚
+              </div>
+              <div class="method-content">
+                <h3>{{ t('contact.info.docs.title') }}</h3>
+                <p>{{ t('contact.info.docs.description') }}</p>
+                <RouterLink to="/docs" class="contact-link">
+                  {{ t('contact.info.docs.action') }}
+                </RouterLink>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="method-icon">
+                🐛
+              </div>
+              <div class="method-content">
+                <h3>{{ t('contact.info.github.title') }}</h3>
+                <p>{{ t('contact.info.github.description') }}</p>
+                <a href="https://github.com/ldesign/router" target="_blank" class="contact-link">
+                  {{ t('contact.info.github.action') }}
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="faq-card">
+          <h2>{{ t('contact.faq.title') }}</h2>
+          <div class="faq-list">
+            <div
+              v-for="(faq, index) in faqs"
+              :key="index"
+              class="faq-item"
+              @click="toggleFaq(index)"
+            >
+              <div class="faq-question">
+                <span>{{ t(`contact.faq.items.${faq.key}.question`) }}</span>
+                <span class="faq-toggle">{{ faq.open ? '−' : '+' }}</span>
+              </div>
+              <div v-show="faq.open" class="faq-answer">
+                {{ t(`contact.faq.items.${faq.key}.answer`) }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 成功提示 -->
+    <div v-if="showSuccess" class="success-message">
+      <div class="success-content">
+        <div class="success-icon">
+          ✅
+        </div>
+        <h3>{{ t('contact.success.title') }}</h3>
+        <p>{{ t('contact.success.message') }}</p>
+        <button class="btn btn-primary" @click="showSuccess = false">
+          {{ t('contact.success.close') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .contact-page {
@@ -484,15 +509,15 @@ const openChat = () => {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-  
+
   .page-title {
     font-size: 2rem;
   }
-  
+
   .form-actions {
     flex-direction: column;
   }
-  
+
   .contact-method {
     flex-direction: column;
     text-align: center;

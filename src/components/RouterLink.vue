@@ -1,22 +1,6 @@
-<template>
-  <component
-    :is="tag"
-    :class="linkClass"
-    :href="href"
-    :target="target"
-    :rel="rel"
-    :aria-current="isExactActive ? 'page' : null"
-    @click="handleClick"
-    @mouseenter="handleMouseEnter"
-    @mouseleave="handleMouseLeave"
-  >
-    <slot />
-  </component>
-</template>
-
 <script setup lang="ts">
 import { computed, inject, ref } from 'vue'
-import type { LDesignRouter } from '../router'
+import type { LDesignRouter } from '../core/router'
 import type { RouteLocationRaw } from '../types'
 
 interface RouterLinkProps {
@@ -41,7 +25,7 @@ const props = withDefaults(defineProps<RouterLinkProps>(), {
   tag: 'a',
   prefetch: true,
   disabled: false,
-  external: false
+  external: false,
 })
 
 const emit = defineEmits<{
@@ -60,11 +44,13 @@ const isPrefetched = ref(false)
 
 // 解析目标路由
 const resolvedRoute = computed(() => {
-  if (props.external) return null
-  
+  if (props.external)
+return null
+
   try {
     return router.resolve(props.to)
-  } catch (error) {
+  }
+ catch (error) {
     console.warn('Failed to resolve route:', props.to, error)
     return null
   }
@@ -75,103 +61,107 @@ const href = computed(() => {
   if (props.external) {
     return typeof props.to === 'string' ? props.to : '#'
   }
-  
+
   if (resolvedRoute.value) {
     return resolvedRoute.value.fullPath
   }
-  
+
   return '#'
 })
 
 // 检查是否激活
 const isActive = computed(() => {
-  if (props.external || !resolvedRoute.value) return false
-  
+  if (props.external || !resolvedRoute.value)
+return false
+
   const current = router.currentRoute.value
-  if (!current) return false
-  
+  if (!current)
+return false
+
   return current.path.startsWith(resolvedRoute.value.path)
 })
 
 // 检查是否精确激活
 const isExactActive = computed(() => {
-  if (props.external || !resolvedRoute.value) return false
-  
+  if (props.external || !resolvedRoute.value)
+return false
+
   const current = router.currentRoute.value
-  if (!current) return false
-  
-  return current.path === resolvedRoute.value.path &&
-         JSON.stringify(current.query) === JSON.stringify(resolvedRoute.value.query) &&
-         JSON.stringify(current.params) === JSON.stringify(resolvedRoute.value.params)
+  if (!current)
+return false
+
+  return current.path === resolvedRoute.value.path
+    && JSON.stringify(current.query) === JSON.stringify(resolvedRoute.value.query)
+    && JSON.stringify(current.params) === JSON.stringify(resolvedRoute.value.params)
 })
 
 // 生成CSS类
 const linkClass = computed(() => {
   const classes: string[] = ['router-link']
-  
+
   if (props.disabled) {
     classes.push('router-link-disabled')
   }
-  
+
   if (isActive.value) {
     classes.push(props.activeClass)
   }
-  
+
   if (isExactActive.value) {
     classes.push(props.exactActiveClass)
   }
-  
+
   if (isHovered.value) {
     classes.push('router-link-hover')
   }
-  
+
   return classes
 })
 
 // 处理点击事件
-const handleClick = (event: MouseEvent) => {
+function handleClick(event: MouseEvent) {
   emit('click', event)
-  
+
   if (props.disabled) {
     event.preventDefault()
     return
   }
-  
+
   if (props.external) {
     return // 让浏览器处理外部链接
   }
-  
+
   // 检查是否应该阻止默认行为
   if (
-    event.defaultPrevented ||
-    event.button !== 0 ||
-    event.metaKey ||
-    event.altKey ||
-    event.ctrlKey ||
-    event.shiftKey
+    event.defaultPrevented
+    || event.button !== 0
+    || event.metaKey
+    || event.altKey
+    || event.ctrlKey
+    || event.shiftKey
   ) {
     return
   }
-  
+
   if (props.target && props.target !== '_self') {
     return
   }
-  
+
   event.preventDefault()
-  
+
   if (resolvedRoute.value) {
     const method = props.replace ? 'replace' : 'push'
-    router[method](props.to).catch(error => {
+    router[method](props.to).catch((error) => {
       console.error('Navigation failed:', error)
     })
   }
 }
 
 // 处理鼠标进入事件
-const handleMouseEnter = (event: MouseEvent) => {
+function handleMouseEnter(event: MouseEvent) {
   isHovered.value = true
   emit('mouseenter', event)
-  
+
   // 预加载
   if (props.prefetch && !props.external && !isPrefetched.value && resolvedRoute.value) {
     prefetchRoute()
@@ -179,31 +169,49 @@ const handleMouseEnter = (event: MouseEvent) => {
 }
 
 // 处理鼠标离开事件
-const handleMouseLeave = (event: MouseEvent) => {
+function handleMouseLeave(event: MouseEvent) {
   isHovered.value = false
   emit('mouseleave', event)
 }
 
 // 预加载路由组件
-const prefetchRoute = async () => {
-  if (isPrefetched.value || !resolvedRoute.value) return
-  
+async function prefetchRoute() {
+  if (isPrefetched.value || !resolvedRoute.value)
+return
+
   isPrefetched.value = true
-  
+
   try {
     const matched = resolvedRoute.value.matched
     if (matched.length > 0) {
       const component = matched[matched.length - 1].component
-      
+
       if (typeof component === 'function') {
         await component()
       }
     }
-  } catch (error) {
+  }
+ catch (error) {
     console.warn('Failed to prefetch route component:', error)
   }
 }
 </script>
+
+<template>
+  <component
+    :is="tag"
+    :class="linkClass"
+    :href="href"
+    :target="target"
+    :rel="rel"
+    :aria-current="isExactActive ? 'page' : null"
+    @click="handleClick"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
+  >
+    <slot />
+  </component>
+</template>
 
 <style scoped>
 .router-link {

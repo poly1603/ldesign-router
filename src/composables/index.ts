@@ -1,6 +1,5 @@
-import { inject, computed } from 'vue'
-import type { LDesignRouter } from '../router'
-import type { RouteLocationNormalized } from '../types'
+import { computed, inject } from 'vue'
+import type { LDesignRouter } from '../core/router'
 
 /**
  * 获取路由器实例
@@ -86,30 +85,6 @@ export function usePermissionManager() {
 }
 
 /**
- * 获取主题管理器
- */
-export function useThemeManager() {
-  const router = useRouter()
-  return router.themeManager
-}
-
-/**
- * 获取国际化管理器
- */
-export function useI18nManager() {
-  const router = useRouter()
-  return router.i18nManager
-}
-
-/**
- * 获取插件管理器
- */
-export function usePluginManager() {
-  const router = useRouter()
-  return router.pluginManager
-}
-
-/**
  * 获取开发工具
  */
 export function useDevTools() {
@@ -122,13 +97,13 @@ export function useDevTools() {
  */
 export function useRouteNavigation() {
   const router = useRouter()
-  
+
   return {
     push: router.push.bind(router),
     replace: router.replace.bind(router),
     go: router.go.bind(router),
     back: router.back.bind(router),
-    forward: router.forward.bind(router)
+    forward: router.forward.bind(router),
   }
 }
 
@@ -137,7 +112,7 @@ export function useRouteNavigation() {
  */
 export function useRouteParams() {
   const route = useRoute()
-  
+
   return computed(() => route.value?.params || {})
 }
 
@@ -146,7 +121,7 @@ export function useRouteParams() {
  */
 export function useRouteQuery() {
   const route = useRoute()
-  
+
   return computed(() => route.value?.query || {})
 }
 
@@ -155,7 +130,7 @@ export function useRouteQuery() {
  */
 export function useRouteMeta() {
   const route = useRoute()
-  
+
   return computed(() => route.value?.meta || {})
 }
 
@@ -164,13 +139,13 @@ export function useRouteMeta() {
  */
 export function useDevice() {
   const deviceRouter = useDeviceRouter()
-  
+
   return {
     deviceType: computed(() => deviceRouter.deviceType.value),
     isMobile: computed(() => deviceRouter.isMobile.value),
     isTablet: computed(() => deviceRouter.isTablet.value),
     isDesktop: computed(() => deviceRouter.isDesktop.value),
-    deviceClass: computed(() => deviceRouter.deviceClass.value)
+    deviceClass: computed(() => deviceRouter.deviceClass.value),
   }
 }
 
@@ -179,7 +154,7 @@ export function useDevice() {
  */
 export function useTabs() {
   const tabsManager = useTabsManager()
-  
+
   return {
     tabs: computed(() => tabsManager.tabs.value),
     activeTab: computed(() => tabsManager.activeTab.value),
@@ -188,7 +163,7 @@ export function useTabs() {
     activateTab: tabsManager.activateTab.bind(tabsManager),
     refreshTab: tabsManager.refreshTab.bind(tabsManager),
     closeOtherTabs: tabsManager.closeOtherTabs.bind(tabsManager),
-    closeAllTabs: tabsManager.closeAllTabs.bind(tabsManager)
+    closeAllTabs: tabsManager.closeAllTabs.bind(tabsManager),
   }
 }
 
@@ -197,11 +172,11 @@ export function useTabs() {
  */
 export function useBreadcrumbs() {
   const breadcrumbManager = useBreadcrumbManager()
-  
+
   return {
     breadcrumbs: computed(() => breadcrumbManager.breadcrumbs.value),
     generateText: breadcrumbManager.generateText.bind(breadcrumbManager),
-    navigateTo: breadcrumbManager.navigateTo.bind(breadcrumbManager)
+    navigateTo: breadcrumbManager.navigateTo.bind(breadcrumbManager),
   }
 }
 
@@ -210,7 +185,7 @@ export function useBreadcrumbs() {
  */
 export function useMenu() {
   const menuManager = useMenuManager()
-  
+
   return {
     menus: computed(() => menuManager.menus.value),
     activeMenus: computed(() => menuManager.activeMenus.value),
@@ -218,7 +193,7 @@ export function useMenu() {
     collapsed: computed(() => menuManager.collapsed.value),
     setMenus: menuManager.setMenus.bind(menuManager),
     toggleCollapse: menuManager.toggleCollapse.bind(menuManager),
-    handleMenuClick: menuManager.handleMenuClick.bind(menuManager)
+    handleMenuClick: menuManager.handleMenuClick.bind(menuManager),
   }
 }
 
@@ -227,45 +202,13 @@ export function useMenu() {
  */
 export function usePermissions() {
   const permissionManager = usePermissionManager()
-  
+
   return {
     permissions: computed(() => permissionManager.permissions.value),
     roles: computed(() => permissionManager.roles.value),
     hasPermission: permissionManager.hasPermission.bind(permissionManager),
     hasRole: permissionManager.hasRole.bind(permissionManager),
     hasAnyPermission: permissionManager.hasAnyPermission.bind(permissionManager),
-    hasAnyRole: permissionManager.hasAnyRole.bind(permissionManager)
-  }
-}
-
-/**
- * 主题钩子
- */
-export function useTheme() {
-  const themeManager = useThemeManager()
-  
-  return {
-    theme: computed(() => themeManager.theme.value),
-    themes: computed(() => themeManager.themes.value),
-    setTheme: themeManager.setTheme.bind(themeManager),
-    toggleTheme: themeManager.toggleTheme.bind(themeManager),
-    addTheme: themeManager.addTheme.bind(themeManager)
-  }
-}
-
-/**
- * 国际化钩子
- */
-export function useI18n() {
-  const i18nManager = useI18nManager()
-  
-  return {
-    locale: computed(() => i18nManager.locale.value),
-    locales: computed(() => i18nManager.locales.value),
-    t: i18nManager.t.bind(i18nManager),
-    setLocale: i18nManager.setLocale.bind(i18nManager),
-    formatNumber: i18nManager.formatNumber.bind(i18nManager),
-    formatDate: i18nManager.formatDate.bind(i18nManager),
-    formatRelativeTime: i18nManager.formatRelativeTime.bind(i18nManager)
+    hasAnyRole: permissionManager.hasAnyRole.bind(permissionManager),
   }
 }

@@ -1,80 +1,5 @@
-<template>
-  <div class="about-page">
-    <div class="page-header">
-      <h1 class="page-title">{{ t('about.title') }}</h1>
-      <p class="page-subtitle">{{ t('about.subtitle') }}</p>
-    </div>
-    
-    <div class="content-section">
-      <div class="intro-card">
-        <h2>{{ t('about.intro.title') }}</h2>
-        <p>{{ t('about.intro.description') }}</p>
-        
-        <div class="tech-stack">
-          <h3>{{ t('about.techStack.title') }}</h3>
-          <div class="tech-items">
-            <span class="tech-item" v-for="tech in techStack" :key="tech">
-              {{ tech }}
-            </span>
-          </div>
-        </div>
-      </div>
-      
-      <div class="architecture-card">
-        <h2>{{ t('about.architecture.title') }}</h2>
-        <p>{{ t('about.architecture.description') }}</p>
-        
-        <div class="architecture-diagram">
-          <div class="layer" v-for="layer in architectureLayers" :key="layer.name">
-            <div class="layer-name">{{ t(`about.architecture.layers.${layer.name}`) }}</div>
-            <div class="layer-components">
-              <span 
-                class="component" 
-                v-for="component in layer.components" 
-                :key="component"
-              >
-                {{ component }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="features-card">
-        <h2>{{ t('about.features.title') }}</h2>
-        <div class="features-list">
-          <div class="feature-item" v-for="feature in features" :key="feature.key">
-            <div class="feature-icon">{{ feature.icon }}</div>
-            <div class="feature-content">
-              <h3>{{ t(`about.features.${feature.key}.title`) }}</h3>
-              <p>{{ t(`about.features.${feature.key}.description`) }}</p>
-              <ul class="feature-benefits">
-                <li v-for="benefit in feature.benefits" :key="benefit">
-                  {{ t(`about.features.${feature.key}.benefits.${benefit}`) }}
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="performance-card">
-        <h2>{{ t('about.performance.title') }}</h2>
-        <p>{{ t('about.performance.description') }}</p>
-        
-        <div class="performance-metrics">
-          <div class="metric" v-for="metric in performanceMetrics" :key="metric.key">
-            <div class="metric-value">{{ metric.value }}</div>
-            <div class="metric-label">{{ t(`about.performance.metrics.${metric.key}`) }}</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n, useRouter } from '../../src'
 
 const { t } = useI18n()
@@ -88,27 +13,27 @@ const techStack = ref([
   'Reactive System',
   'ES Modules',
   'Vite',
-  'Rollup'
+  'Rollup',
 ])
 
 // 架构层次
 const architectureLayers = ref([
   {
     name: 'presentation',
-    components: ['RouterView', 'RouterLink', 'Components']
+    components: ['RouterView', 'RouterLink', 'Components'],
   },
   {
     name: 'composables',
-    components: ['useRouter', 'useRoute', 'useDevice', 'useTabs']
+    components: ['useRouter', 'useRoute', 'useDevice', 'useTabs'],
   },
   {
     name: 'managers',
-    components: ['DeviceRouter', 'TabsManager', 'CacheManager', 'ThemeManager']
+    components: ['DeviceRouter', 'TabsManager', 'CacheManager', 'ThemeManager'],
   },
   {
     name: 'core',
-    components: ['LDesignRouter', 'RouteResolver', 'NavigationGuards']
-  }
+    components: ['LDesignRouter', 'RouteResolver', 'NavigationGuards'],
+  },
 ])
 
 // 功能特性
@@ -116,23 +41,23 @@ const features = ref([
   {
     key: 'deviceAdaptive',
     icon: '📱',
-    benefits: ['responsive', 'adaptive', 'optimized']
+    benefits: ['responsive', 'adaptive', 'optimized'],
   },
   {
     key: 'tabManagement',
     icon: '📑',
-    benefits: ['multiTab', 'persistent', 'draggable']
+    benefits: ['multiTab', 'persistent', 'draggable'],
   },
   {
     key: 'caching',
     icon: '💾',
-    benefits: ['performance', 'strategies', 'persistent']
+    benefits: ['performance', 'strategies', 'persistent'],
   },
   {
     key: 'animations',
     icon: '✨',
-    benefits: ['smooth', 'customizable', 'performant']
-  }
+    benefits: ['smooth', 'customizable', 'performant'],
+  },
 ])
 
 // 性能指标
@@ -141,23 +66,110 @@ const performanceMetrics = computed(() => {
   return [
     {
       key: 'bundleSize',
-      value: '< 50KB'
+      value: '< 50KB',
     },
     {
       key: 'navigationTime',
-      value: devTools?.data.performance.averageNavigationTime.toFixed(1) + 'ms' || 'N/A'
+      value: `${devTools?.data.performance.averageNavigationTime.toFixed(1)}ms` || 'N/A',
     },
     {
       key: 'cacheHitRate',
-      value: Math.round((devTools?.data.cache.hitRate || 0) * 100) + '%'
+      value: `${Math.round((devTools?.data.cache.hitRate || 0) * 100)}%`,
     },
     {
       key: 'memoryUsage',
-      value: '< 5MB'
-    }
+      value: '< 5MB',
+    },
   ]
 })
 </script>
+
+<template>
+  <div class="about-page">
+    <div class="page-header">
+      <h1 class="page-title">
+        {{ t('about.title') }}
+      </h1>
+      <p class="page-subtitle">
+        {{ t('about.subtitle') }}
+      </p>
+    </div>
+
+    <div class="content-section">
+      <div class="intro-card">
+        <h2>{{ t('about.intro.title') }}</h2>
+        <p>{{ t('about.intro.description') }}</p>
+
+        <div class="tech-stack">
+          <h3>{{ t('about.techStack.title') }}</h3>
+          <div class="tech-items">
+            <span v-for="tech in techStack" :key="tech" class="tech-item">
+              {{ tech }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div class="architecture-card">
+        <h2>{{ t('about.architecture.title') }}</h2>
+        <p>{{ t('about.architecture.description') }}</p>
+
+        <div class="architecture-diagram">
+          <div v-for="layer in architectureLayers" :key="layer.name" class="layer">
+            <div class="layer-name">
+              {{ t(`about.architecture.layers.${layer.name}`) }}
+            </div>
+            <div class="layer-components">
+              <span
+                v-for="component in layer.components"
+                :key="component"
+                class="component"
+              >
+                {{ component }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="features-card">
+        <h2>{{ t('about.features.title') }}</h2>
+        <div class="features-list">
+          <div v-for="feature in features" :key="feature.key" class="feature-item">
+            <div class="feature-icon">
+              {{ feature.icon }}
+            </div>
+            <div class="feature-content">
+              <h3>{{ t(`about.features.${feature.key}.title`) }}</h3>
+              <p>{{ t(`about.features.${feature.key}.description`) }}</p>
+              <ul class="feature-benefits">
+                <li v-for="benefit in feature.benefits" :key="benefit">
+                  {{ t(`about.features.${feature.key}.benefits.${benefit}`) }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="performance-card">
+        <h2>{{ t('about.performance.title') }}</h2>
+        <p>{{ t('about.performance.description') }}</p>
+
+        <div class="performance-metrics">
+          <div v-for="metric in performanceMetrics" :key="metric.key" class="metric">
+            <div class="metric-value">
+              {{ metric.value }}
+            </div>
+            <div class="metric-label">
+              {{ t(`about.performance.metrics.${metric.key}`) }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .about-page {
@@ -363,20 +375,20 @@ const performanceMetrics = computed(() => {
   .page-title {
     font-size: 2rem;
   }
-  
+
   .feature-item {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .feature-benefits {
     justify-content: center;
   }
-  
+
   .performance-metrics {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .layer-components {
     justify-content: center;
   }

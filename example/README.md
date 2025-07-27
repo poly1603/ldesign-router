@@ -123,7 +123,7 @@ The example demonstrates various configuration options:
 const router = createLDesignRouter({
   history: createWebHashHistory(),
   routes: [...],
-  
+
   // Device management
   deviceManager: {
     enabled: true,
@@ -132,7 +132,7 @@ const router = createLDesignRouter({
       tablet: 1024
     }
   },
-  
+
   // Tab management
   tabsManager: {
     enabled: true,
@@ -140,7 +140,7 @@ const router = createLDesignRouter({
     closable: true,
     draggable: true
   },
-  
+
   // Theme management
   themeManager: {
     enabled: true,
@@ -148,7 +148,7 @@ const router = createLDesignRouter({
     persistent: true,
     systemDetection: true
   },
-  
+
   // Internationalization
   i18nManager: {
     enabled: true,
@@ -165,7 +165,9 @@ const router = createLDesignRouter({
 ### Basic Navigation
 ```vue
 <template>
-  <RouterLink to="/about">About</RouterLink>
+  <RouterLink to="/about">
+    About
+  </RouterLink>
   <RouterView />
 </template>
 ```
@@ -173,7 +175,7 @@ const router = createLDesignRouter({
 ### Using Composables
 ```vue
 <script setup>
-import { useRouter, useRoute, useDevice, useTabs } from '@ldesign/router'
+import { useDevice, useRoute, useRouter, useTabs } from '@ldesign/router'
 
 const router = useRouter()
 const route = useRoute()
@@ -181,12 +183,12 @@ const device = useDevice()
 const tabs = useTabs()
 
 // Navigate programmatically
-const goToUser = () => {
+function goToUser() {
   router.push('/user/123')
 }
 
 // Add a new tab
-const addTab = () => {
+function addTab() {
   tabs.addTab({
     name: 'new-tab',
     path: '/new-page',
@@ -203,7 +205,7 @@ import { useTheme } from '@ldesign/router'
 
 const theme = useTheme()
 
-const toggleTheme = () => {
+function toggleTheme() {
   theme.setTheme(theme.currentTheme === 'light' ? 'dark' : 'light')
 }
 </script>
@@ -216,7 +218,7 @@ import { useI18n } from '@ldesign/router'
 
 const i18n = useI18n()
 
-const switchLanguage = () => {
+function switchLanguage() {
   i18n.setLocale(i18n.currentLocale === 'zh-CN' ? 'en-US' : 'zh-CN')
 }
 </script>

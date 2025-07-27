@@ -1,33 +1,8 @@
-<template>
-  <component
-    :is="currentComponent"
-    v-if="currentComponent"
-    v-bind="componentProps"
-    :key="routeKey"
-  />
-  <div v-else-if="!loading" class="router-view-fallback">
-    <slot name="fallback">
-      <div class="router-view-error">
-        <h3>页面未找到</h3>
-        <p>请检查路由配置或URL是否正确</p>
-      </div>
-    </slot>
-  </div>
-  <div v-else class="router-view-loading">
-    <slot name="loading">
-      <div class="loading-spinner">
-        <div class="spinner"></div>
-        <p>加载中...</p>
-      </div>
-    </slot>
-  </div>
-</template>
-
 <script setup lang="ts">
-import { computed, inject, watch, ref, onMounted, onUnmounted } from 'vue'
+import { computed, inject, onMounted, onUnmounted, ref, watch } from 'vue'
 import type { Component } from 'vue'
-import type { LDesignRouter } from '../router'
-import type { RouteLocationNormalized, RouteMeta } from '../types'
+import type { LDesignRouter } from '../core/router'
+import type { RouteLocationNormalized } from '../types'
 
 interface RouterViewProps {
   name?: string
@@ -35,7 +10,7 @@ interface RouterViewProps {
 }
 
 const props = withDefaults(defineProps<RouterViewProps>(), {
-  name: 'default'
+  name: 'default',
 })
 
 const router = inject<LDesignRouter>('$router')
@@ -55,17 +30,18 @@ const currentRoute = computed(() => {
 // 获取组件属性
 const componentProps = computed(() => {
   const route = currentRoute.value
-  if (!route) return {}
+  if (!route)
+return {}
 
   return {
     ...route.params,
     ...route.query,
-    route: route
+    route,
   }
 })
 
 // 加载组件
-const loadComponent = async (route: RouteLocationNormalized) => {
+async function loadComponent(route: RouteLocationNormalized) {
   if (!route.matched.length) {
     currentComponent.value = null
     return
@@ -84,16 +60,19 @@ const loadComponent = async (route: RouteLocationNormalized) => {
     if (typeof matched.component === 'function') {
       const component = await matched.component()
       currentComponent.value = component.default || component
-    } else {
+    }
+ else {
       currentComponent.value = matched.component
     }
 
     // 更新路由key以触发组件重新渲染
     routeKey.value++
-  } catch (error) {
+  }
+ catch (error) {
     console.error('Failed to load component:', error)
     currentComponent.value = null
-  } finally {
+  }
+ finally {
     loading.value = false
   }
 }
@@ -106,7 +85,7 @@ watch(
       loadComponent(newRoute)
     }
   },
-  { immediate: true }
+  { immediate: true },
 )
 
 // 生命周期
@@ -120,6 +99,31 @@ onUnmounted(() => {
   currentComponent.value = null
 })
 </script>
+
+<template>
+  <component
+    :is="currentComponent"
+    v-if="currentComponent"
+    v-bind="componentProps"
+    :key="routeKey"
+  />
+  <div v-else-if="!loading" class="router-view-fallback">
+    <slot name="fallback">
+      <div class="router-view-error">
+        <h3>页面未找到</h3>
+        <p>请检查路由配置或URL是否正确</p>
+      </div>
+    </slot>
+  </div>
+  <div v-else class="router-view-loading">
+    <slot name="loading">
+      <div class="loading-spinner">
+        <div class="spinner" />
+        <p>加载中...</p>
+      </div>
+    </slot>
+  </div>
+</template>
 
 <style scoped>
 .router-view-fallback {

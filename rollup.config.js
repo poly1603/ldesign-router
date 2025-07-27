@@ -12,7 +12,7 @@ const external = [
   ...Object.keys(pkg.peerDependencies || {}),
   ...Object.keys(pkg.dependencies || {}),
   'vue',
-  'pinia',
+  'vue-router',
 ]
 
 const banner = `/*!
@@ -97,16 +97,16 @@ export default [
       {
         file: 'dist/index.js',
         format: 'umd',
-        name: 'LDesignStore',
+        name: 'LDesignRouter',
         banner,
         sourcemap: true,
         globals: {
-          vue: 'Vue',
-          pinia: 'Pinia',
+          'vue': 'Vue',
+          'vue-router': 'VueRouter',
         },
       },
     ],
-    external: ['vue', 'pinia'],
+    external: ['vue', 'vue-router'],
     plugins: [
       nodeResolve({
         preferBuiltins: false,

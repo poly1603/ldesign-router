@@ -1,6 +1,6 @@
+import { resolve } from 'node:path'
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -8,24 +8,24 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': resolve(__dirname, '.'),
-      '@ldesign/router': resolve(__dirname, '../src')
-    }
+      '@ldesign/router': resolve(__dirname, '../src'),
+    },
   },
   server: {
     port: 3000,
     open: true,
-    host: true
+    host: true,
   },
   build: {
     outDir: 'dist',
     sourcemap: true,
     rollupOptions: {
       input: {
-        main: resolve(__dirname, 'index.html')
-      }
-    }
+        main: resolve(__dirname, 'index.html'),
+      },
+    },
   },
   optimizeDeps: {
-    include: ['vue', 'vue-router']
-  }
+    include: ['vue', 'vue-router'],
+  },
 })

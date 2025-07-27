@@ -1,115 +1,16 @@
-<template>
-  <div id="app" :class="themeClass">
-    <!-- 顶部导航栏 -->
-    <header class="app-header">
-      <div class="header-content">
-        <h1 class="logo">LDesign Router Demo</h1>
-        
-        <!-- 主导航菜单 -->
-        <nav class="main-nav">
-          <RouterLink to="/" class="nav-link">{{ t('nav.home') }}</RouterLink>
-          <RouterLink to="/about" class="nav-link">{{ t('nav.about') }}</RouterLink>
-          <RouterLink to="/contact" class="nav-link">{{ t('nav.contact') }}</RouterLink>
-          <RouterLink to="/user/123" class="nav-link">{{ t('nav.user') }}</RouterLink>
-        </nav>
-        
-        <!-- 工具栏 -->
-        <div class="toolbar">
-          <!-- 语言切换 -->
-          <select v-model="currentLocale" @change="handleLocaleChange" class="locale-selector">
-            <option value="zh-CN">中文</option>
-            <option value="en-US">English</option>
-          </select>
-          
-          <!-- 主题切换 -->
-          <button @click="toggleTheme" class="theme-toggle" :title="t('toolbar.toggleTheme')">
-            {{ currentTheme === 'light' ? '🌙' : '☀️' }}
-          </button>
-          
-          <!-- 设备信息 -->
-          <span class="device-info">{{ deviceType }}</span>
-        </div>
-      </div>
-    </header>
-    
-    <!-- 面包屑导航 -->
-    <div class="breadcrumb-container" v-if="breadcrumbs.length > 1">
-      <nav class="breadcrumb">
-        <span 
-          v-for="(item, index) in breadcrumbs" 
-          :key="index"
-          class="breadcrumb-item"
-        >
-          <RouterLink 
-            v-if="index < breadcrumbs.length - 1" 
-            :to="item.path"
-            class="breadcrumb-link"
-          >
-            {{ item.text }}
-          </RouterLink>
-          <span v-else class="breadcrumb-current">{{ item.text }}</span>
-          <span v-if="index < breadcrumbs.length - 1" class="breadcrumb-separator">></span>
-        </span>
-      </nav>
-    </div>
-    
-    <!-- 标签页 -->
-    <div class="tabs-container" v-if="tabsEnabled && tabs.length > 0">
-      <div class="tabs">
-        <div 
-          v-for="tab in tabs" 
-          :key="tab.path"
-          :class="['tab', { active: tab.path === activeTab?.path }]"
-          @click="activateTab(tab.path)"
-        >
-          <span class="tab-title">{{ tab.title }}</span>
-          <button 
-            v-if="tab.closable && tabs.length > 1"
-            @click.stop="removeTab(tab.path)"
-            class="tab-close"
-          >
-            ×
-          </button>
-        </div>
-      </div>
-    </div>
-    
-    <!-- 主要内容区域 -->
-    <main class="app-main">
-      <div class="content-wrapper">
-        <!-- 路由视图 -->
-        <transition :name="animationType" mode="out-in">
-          <RouterView :key="routeKey" />
-        </transition>
-      </div>
-    </main>
-    
-    <!-- 底部信息 -->
-    <footer class="app-footer">
-      <div class="footer-content">
-        <p>{{ t('footer.copyright') }}</p>
-        <div class="footer-stats">
-          <span>{{ t('footer.currentRoute') }}: {{ currentRoute?.path || 'N/A' }}</span>
-          <span>{{ t('footer.navigationCount') }}: {{ navigationCount }}</span>
-        </div>
-      </div>
-    </footer>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { computed, watch } from 'vue'
-import { 
-  RouterView, 
+import {
   RouterLink,
+  RouterView,
+  useAnimationManager,
+  useBreadcrumbs,
+  useDevice,
+  useI18n,
   useRoute,
   useRouter,
-  useDevice,
   useTabs,
-  useBreadcrumbs,
   useTheme,
-  useI18n,
-  useAnimationManager
 } from '../src'
 
 // 获取路由信息
@@ -151,7 +52,7 @@ const navigationCount = computed(() => {
 })
 
 // 处理语言切换
-const handleLocaleChange = (event: Event) => {
+function handleLocaleChange(event: Event) {
   const target = event.target as HTMLSelectElement
   setLocale(target.value)
 }
@@ -161,6 +62,119 @@ watch(currentRoute, (newRoute) => {
   console.log('Route changed to:', newRoute?.path)
 }, { immediate: true })
 </script>
+
+<template>
+  <div id="app" :class="themeClass">
+    <!-- 顶部导航栏 -->
+    <header class="app-header">
+      <div class="header-content">
+        <h1 class="logo">
+          LDesign Router Demo
+        </h1>
+
+        <!-- 主导航菜单 -->
+        <nav class="main-nav">
+          <RouterLink to="/" class="nav-link">
+            {{ t('nav.home') }}
+          </RouterLink>
+          <RouterLink to="/about" class="nav-link">
+            {{ t('nav.about') }}
+          </RouterLink>
+          <RouterLink to="/contact" class="nav-link">
+            {{ t('nav.contact') }}
+          </RouterLink>
+          <RouterLink to="/user/123" class="nav-link">
+            {{ t('nav.user') }}
+          </RouterLink>
+        </nav>
+
+        <!-- 工具栏 -->
+        <div class="toolbar">
+          <!-- 语言切换 -->
+          <select v-model="currentLocale" class="locale-selector" @change="handleLocaleChange">
+            <option value="zh-CN">
+              中文
+            </option>
+            <option value="en-US">
+              English
+            </option>
+          </select>
+
+          <!-- 主题切换 -->
+          <button class="theme-toggle" :title="t('toolbar.toggleTheme')" @click="toggleTheme">
+            {{ currentTheme === 'light' ? '🌙' : '☀️' }}
+          </button>
+
+          <!-- 设备信息 -->
+          <span class="device-info">{{ deviceType }}</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- 面包屑导航 -->
+    <div v-if="breadcrumbs.length > 1" class="breadcrumb-container">
+      <nav class="breadcrumb">
+        <span
+          v-for="(item, index) in breadcrumbs"
+          :key="index"
+          class="breadcrumb-item"
+        >
+          <RouterLink
+            v-if="index < breadcrumbs.length - 1"
+            :to="item.path"
+            class="breadcrumb-link"
+          >
+            {{ item.text }}
+          </RouterLink>
+          <span v-else class="breadcrumb-current">{{ item.text }}</span>
+          <span v-if="index < breadcrumbs.length - 1" class="breadcrumb-separator">></span>
+        </span>
+      </nav>
+    </div>
+
+    <!-- 标签页 -->
+    <div v-if="tabsEnabled && tabs.length > 0" class="tabs-container">
+      <div class="tabs">
+        <div
+          v-for="tab in tabs"
+          :key="tab.path"
+          class="tab" :class="[{ active: tab.path === activeTab?.path }]"
+          @click="activateTab(tab.path)"
+        >
+          <span class="tab-title">{{ tab.title }}</span>
+          <button
+            v-if="tab.closable && tabs.length > 1"
+            class="tab-close"
+            @click.stop="removeTab(tab.path)"
+          >
+            ×
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主要内容区域 -->
+    <main class="app-main">
+      <div class="content-wrapper">
+        <!-- 路由视图 -->
+        <transition :name="animationType" mode="out-in">
+          <RouterView :key="routeKey" />
+        </transition>
+      </div>
+    </main>
+
+    <!-- 底部信息 -->
+    <footer class="app-footer">
+      <div class="footer-content">
+        <p>{{ t('footer.copyright') }}</p>
+        <div class="footer-stats">
+          <span>{{ t('footer.currentRoute') }}: {{ currentRoute?.path || 'N/A' }}</span>
+          <span>{{ t('footer.navigationCount') }}: {{ navigationCount }}</span>
+        </div>
+      </div>
+    </footer>
+  </div>
+</template>
 
 <style scoped>
 /* 基础样式 */
@@ -461,16 +475,16 @@ watch(currentRoute, (newRoute) => {
     height: auto;
     padding: 1rem 0;
   }
-  
+
   .main-nav {
     margin: 1rem 0;
   }
-  
+
   .footer-content {
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .footer-stats {
     flex-direction: column;
     gap: 0.25rem;

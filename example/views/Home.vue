@@ -1,82 +1,6 @@
-<template>
-  <div class="home-page">
-    <div class="hero-section">
-      <h1 class="hero-title">{{ t('home.title') }}</h1>
-      <p class="hero-subtitle">{{ t('home.subtitle') }}</p>
-      <div class="hero-actions">
-        <RouterLink to="/about" class="btn btn-primary">
-          {{ t('home.learnMore') }}
-        </RouterLink>
-        <RouterLink to="/contact" class="btn btn-secondary">
-          {{ t('home.getStarted') }}
-        </RouterLink>
-      </div>
-    </div>
-    
-    <div class="features-section">
-      <h2 class="section-title">{{ t('home.features.title') }}</h2>
-      <div class="features-grid">
-        <div class="feature-card" v-for="feature in features" :key="feature.key">
-          <div class="feature-icon">{{ feature.icon }}</div>
-          <h3 class="feature-title">{{ t(`home.features.${feature.key}.title`) }}</h3>
-          <p class="feature-description">{{ t(`home.features.${feature.key}.description`) }}</p>
-        </div>
-      </div>
-    </div>
-    
-    <div class="stats-section">
-      <h2 class="section-title">{{ t('home.stats.title') }}</h2>
-      <div class="stats-grid">
-        <div class="stat-item">
-          <div class="stat-value">{{ routeCount }}</div>
-          <div class="stat-label">{{ t('home.stats.routes') }}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{{ navigationCount }}</div>
-          <div class="stat-label">{{ t('home.stats.navigations') }}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{{ cacheSize }}</div>
-          <div class="stat-label">{{ t('home.stats.cached') }}</div>
-        </div>
-        <div class="stat-item">
-          <div class="stat-value">{{ deviceType }}</div>
-          <div class="stat-label">{{ t('home.stats.device') }}</div>
-        </div>
-      </div>
-    </div>
-    
-    <div class="demo-section">
-      <h2 class="section-title">{{ t('home.demo.title') }}</h2>
-      <div class="demo-controls">
-        <button @click="addRandomTab" class="btn btn-outline">
-          {{ t('home.demo.addTab') }}
-        </button>
-        <button @click="toggleTheme" class="btn btn-outline">
-          {{ t('home.demo.toggleTheme') }}
-        </button>
-        <button @click="switchLanguage" class="btn btn-outline">
-          {{ t('home.demo.switchLanguage') }}
-        </button>
-        <button @click="clearCache" class="btn btn-outline">
-          {{ t('home.demo.clearCache') }}
-        </button>
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { RouterLink } from '../../src'
-import { 
-  useRouter,
-  useDevice,
-  useTabs,
-  useTheme,
-  useI18n,
-  useCacheManager
-} from '../../src'
+import { RouterLink, useCacheManager, useDevice, useI18n, useRouter, useTabs, useTheme } from '../../src'
 
 // 获取各种管理器
 const router = useRouter()
@@ -95,7 +19,7 @@ const features = ref([
   { key: 'animations', icon: '✨' },
   { key: 'permissions', icon: '🔐' },
   { key: 'themes', icon: '🎨' },
-  { key: 'i18n', icon: '🌍' }
+  { key: 'i18n', icon: '🌍' },
 ])
 
 // 统计数据
@@ -112,26 +36,126 @@ const cacheSize = computed(() => {
 })
 
 // 演示功能
-const addRandomTab = () => {
+function addRandomTab() {
   const randomId = Math.floor(Math.random() * 1000)
   addTab({
     path: `/user/${randomId}`,
     title: `用户 ${randomId}`,
-    closable: true
+    closable: true,
   })
   router.push(`/user/${randomId}`)
 }
 
-const switchLanguage = () => {
+function switchLanguage() {
   const newLocale = locale.value === 'zh-CN' ? 'en-US' : 'zh-CN'
   setLocale(newLocale)
 }
 
-const clearCache = () => {
+function clearCache() {
   cacheManager.clear()
   console.log('Cache cleared')
 }
 </script>
+
+<template>
+  <div class="home-page">
+    <div class="hero-section">
+      <h1 class="hero-title">
+        {{ t('home.title') }}
+      </h1>
+      <p class="hero-subtitle">
+        {{ t('home.subtitle') }}
+      </p>
+      <div class="hero-actions">
+        <RouterLink to="/about" class="btn btn-primary">
+          {{ t('home.learnMore') }}
+        </RouterLink>
+        <RouterLink to="/contact" class="btn btn-secondary">
+          {{ t('home.getStarted') }}
+        </RouterLink>
+      </div>
+    </div>
+
+    <div class="features-section">
+      <h2 class="section-title">
+        {{ t('home.features.title') }}
+      </h2>
+      <div class="features-grid">
+        <div v-for="feature in features" :key="feature.key" class="feature-card">
+          <div class="feature-icon">
+            {{ feature.icon }}
+          </div>
+          <h3 class="feature-title">
+            {{ t(`home.features.${feature.key}.title`) }}
+          </h3>
+          <p class="feature-description">
+            {{ t(`home.features.${feature.key}.description`) }}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="stats-section">
+      <h2 class="section-title">
+        {{ t('home.stats.title') }}
+      </h2>
+      <div class="stats-grid">
+        <div class="stat-item">
+          <div class="stat-value">
+            {{ routeCount }}
+          </div>
+          <div class="stat-label">
+            {{ t('home.stats.routes') }}
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">
+            {{ navigationCount }}
+          </div>
+          <div class="stat-label">
+            {{ t('home.stats.navigations') }}
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">
+            {{ cacheSize }}
+          </div>
+          <div class="stat-label">
+            {{ t('home.stats.cached') }}
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value">
+            {{ deviceType }}
+          </div>
+          <div class="stat-label">
+            {{ t('home.stats.device') }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2 class="section-title">
+        {{ t('home.demo.title') }}
+      </h2>
+      <div class="demo-controls">
+        <button class="btn btn-outline" @click="addRandomTab">
+          {{ t('home.demo.addTab') }}
+        </button>
+        <button class="btn btn-outline" @click="toggleTheme">
+          {{ t('home.demo.toggleTheme') }}
+        </button>
+        <button class="btn btn-outline" @click="switchLanguage">
+          {{ t('home.demo.switchLanguage') }}
+        </button>
+        <button class="btn btn-outline" @click="clearCache">
+          {{ t('home.demo.clearCache') }}
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .home-page {
@@ -313,21 +337,21 @@ const clearCache = () => {
   .hero-title {
     font-size: 2rem;
   }
-  
+
   .hero-subtitle {
     font-size: 1rem;
   }
-  
+
   .hero-actions {
     flex-direction: column;
     align-items: center;
   }
-  
+
   .features-grid,
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .demo-controls {
     flex-direction: column;
     align-items: center;

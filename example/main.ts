@@ -16,8 +16,8 @@ const router = createLDesignRouter({
       meta: {
         title: '首页',
         requiresAuth: false,
-        keepAlive: true
-      }
+        keepAlive: true,
+      },
     },
     {
       path: '/about',
@@ -26,8 +26,8 @@ const router = createLDesignRouter({
       meta: {
         title: '关于我们',
         requiresAuth: false,
-        keepAlive: false
-      }
+        keepAlive: false,
+      },
     },
     {
       path: '/contact',
@@ -36,8 +36,8 @@ const router = createLDesignRouter({
       meta: {
         title: '联系我们',
         requiresAuth: true,
-        keepAlive: false
-      }
+        keepAlive: false,
+      },
     },
     {
       path: '/user/:id',
@@ -46,9 +46,9 @@ const router = createLDesignRouter({
       meta: {
         title: '用户详情',
         requiresAuth: true,
-        keepAlive: true
-      }
-    }
+        keepAlive: true,
+      },
+    },
   ],
   // 启用标签页管理
   tabsManager: {
@@ -56,7 +56,7 @@ const router = createLDesignRouter({
     persistent: true,
     maxTabs: 8,
     closable: true,
-    draggable: true
+    draggable: true,
   },
   // 启用面包屑导航
   breadcrumbManager: {
@@ -64,20 +64,20 @@ const router = createLDesignRouter({
     separator: '>',
     showHome: true,
     homeText: '首页',
-    homePath: '/'
+    homePath: '/',
   },
   // 启用权限管理
   permissionManager: {
     enabled: true,
     strict: true,
-    redirectPath: '/login'
+    redirectPath: '/login',
   },
   // 启用主题管理
   themeManager: {
     enabled: true,
     defaultTheme: 'light',
     persistent: true,
-    systemTheme: true
+    systemTheme: true,
   },
   // 启用国际化
   i18nManager: {
@@ -85,22 +85,22 @@ const router = createLDesignRouter({
     defaultLocale: 'zh-CN',
     fallbackLocale: 'en-US',
     persistent: true,
-    detectBrowserLanguage: true
+    detectBrowserLanguage: true,
   },
   // 启用缓存
   cacheManager: {
     enabled: true,
     strategy: 'lru',
     maxSize: 10,
-    persistent: true
+    persistent: true,
   },
   // 启用动画
   animationManager: {
     enabled: true,
     type: 'slide',
     duration: 300,
-    easing: 'ease-in-out'
-  }
+    easing: 'ease-in-out',
+  },
 })
 
 // 设置权限和角色
@@ -110,7 +110,7 @@ router.permissionManager.setRoles(['user', 'admin'])
 // 添加全局前置守卫
 router.beforeEach(async (to, from, next) => {
   console.log('Navigation from', from?.path, 'to', to.path)
-  
+
   // 检查权限
   if (to.meta?.requiresAuth) {
     const hasPermission = router.permissionManager.hasRole('user')
@@ -120,12 +120,12 @@ router.beforeEach(async (to, from, next) => {
       return
     }
   }
-  
+
   // 更新页面标题
   if (to.meta?.title) {
     document.title = `${to.meta.title} - LDesign Router Demo`
   }
-  
+
   next()
 })
 
