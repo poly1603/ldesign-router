@@ -1,284 +1,270 @@
 /**
- * @ldesign/router 守卫执行器
+ * 守卫执行器 - 优化版
  * 
- * 支持依赖分析、并行执行、智能跳过和优先级队列
+ * 支持并行执行独立守卫和智能缓存
  */
 
 import type {
   NavigationGuard,
   NavigationGuardReturn,
-  RouteLocationNormalized,
+  RouteLocationNormalized
 } from '../types'
+import type { UnknownRecord } from '../types/strict-types'
 
 /**
  * 守卫元数据
  */
-interface GuardMetadata {
+export interface GuardMetadata {
+  /** 守卫函数 */
   guard: NavigationGuard
-  id: string
-  priority: number
-  dependencies: string[]
-  cacheable: boolean
-  skipCondition?: (to: RouteLocationNormalized, from: RouteLocationNormalized) => boolean
+  /** 是否可缓存（无状态守卫） */
+  cacheable?: boolean
+  /** 依赖的其他守卫名称 */
+  dependencies?: string[]
+  /** 守卫名称 */
+  name?: string
+  /** 优先级（数字越大越先执行） */
+  priority?: number
 }
 
 /**
  * 守卫执行结果
  */
-interface GuardExecutionResult {
-  guardId: string
-  result: NavigationGuardReturn
+export interface GuardExecutionResult {
+  success: boolean
+  result?: NavigationGuardReturn
+  error?: Error
   duration: number
   cached: boolean
 }
 
 /**
- * 守卫依赖图节点
+ * 守卫执行配置
  */
-interface DependencyNode {
-  id: string
-  metadata: GuardMetadata
-  dependents: Set<string>
-  dependencies: Set<string>
-  executed: boolean
-  result?: NavigationGuardReturn
+export interface GuardExecutorConfig {
+  /** 是否启用并行执行 */
+  enableParallel?: boolean
+  /** 是否启用缓存 */
+  enableCache?: boolean
+  /** 缓存大小 */
+  cacheSize?: number
+  /** 执行超时（毫秒） */
+  timeout?: number
 }
 
 /**
- * 优化的守卫执行器
+ * 守卫执行器
  */
 export class GuardExecutor {
-  private guards: Map<string, GuardMetadata> = new Map()
-  private dependencyGraph: Map<string, DependencyNode> = new Map()
-  private resultCache: Map<string, { result: NavigationGuardReturn; timestamp: number }> = new Map()
+  private config: Required<GuardExecutorConfig>
+  private cache = new Map<string, { result: NavigationGuardReturn, timestamp: number }>()
   private readonly CACHE_TTL = 5000 // 5秒缓存
 
-  // 性能统计
-  private stats = {
-    totalExecutions: 0,
-    parallelExecutions: 0,
-    cacheHits: 0,
-    skipped: 0,
-    averageDuration: 0,
-  }
-
-  /**
-   * 注册守卫
-   */
-  registerGuard(metadata: GuardMetadata): void {
-    this.guards.set(metadata.id, metadata)
-    this.rebuildDependencyGraph()
-  }
-
-  /**
-   * 批量注册守卫
-   */
-  registerGuards(metadatas: GuardMetadata[]): void {
-    for (const metadata of metadatas) {
-      this.guards.set(metadata.id, metadata)
+  constructor(config: GuardExecutorConfig = {}) {
+    this.config = {
+      enableParallel: true,
+      enableCache: true,
+      cacheSize: 100,
+      timeout: 5000,
+      ...config
     }
-    this.rebuildDependencyGraph()
-  }
-
-  /**
-   * 移除守卫
-   */
-  unregisterGuard(id: string): void {
-    this.guards.delete(id)
-    this.rebuildDependencyGraph()
-  }
-
-  /**
-   * 执行所有守卫（优化版）
-   */
-  async executeAll(
-    to: RouteLocationNormalized,
-    from: RouteLocationNormalized
-  ): Promise<NavigationGuardReturn> {
-    const startTime = performance.now()
-    this.stats.totalExecutions++
-
-    // 检测路由变化并智能跳过
-    const guardsToExecute = this.filterGuardsToExecute(to, from)
-
-    if (guardsToExecute.length === 0) {
-      return undefined
-    }
-
-    // 构建执行计划（基于依赖和优先级）
-    const executionPlan = this.buildExecutionPlan(guardsToExecute)
-
-    // 执行守卫
-    const results: GuardExecutionResult[] = []
-
-    for (const batch of executionPlan) {
-      // 并行执行无依赖的守卫
-      const batchResults = await this.executeBatch(batch, to, from)
-      results.push(...batchResults)
-
-      // 检查是否有守卫返回了中断导航的结果
-      const abortResult = batchResults.find(r =>
-        r.result === false ||
-        (r.result && typeof r.result !== 'boolean')
-      )
-
-      if (abortResult) {
-        this.updateStats(results, startTime)
-        return abortResult.result
-      }
-    }
-
-    this.updateStats(results, startTime)
-    return undefined
-  }
-
-  /**
-   * 过滤需要执行的守卫
-   */
-  private filterGuardsToExecute(
-    to: RouteLocationNormalized,
-    from: RouteLocationNormalized
-  ): GuardMetadata[] {
-    const result: GuardMetadata[] = []
-
-    for (const metadata of this.guards.values()) {
-      // 检查是否可以跳过
-      if (metadata.skipCondition && metadata.skipCondition(to, from)) {
-        this.stats.skipped++
-        continue
-      }
-
-      // 检查缓存
-      if (metadata.cacheable) {
-        const cacheKey = this.getCacheKey(metadata.id, to, from)
-        const cached = this.resultCache.get(cacheKey)
-
-        if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
-          this.stats.cacheHits++
-          continue
-        }
-      }
-
-      result.push(metadata)
-    }
-
-    return result
-  }
-
-  /**
-   * 构建执行计划（按依赖和优先级分批）
-   */
-  private buildExecutionPlan(guards: GuardMetadata[]): GuardMetadata[][] {
-    const plan: GuardMetadata[][] = []
-    const remaining = new Set(guards.map(g => g.id))
-    const executed = new Set<string>()
-
-    while (remaining.size > 0) {
-      const batch: GuardMetadata[] = []
-
-      for (const guardId of remaining) {
-        const metadata = this.guards.get(guardId)!
-        const node = this.dependencyGraph.get(guardId)
-
-        // 检查依赖是否都已执行
-        const dependenciesMet = !node ||
-          Array.from(node.dependencies).every(dep => executed.has(dep))
-
-        if (dependenciesMet) {
-          batch.push(metadata)
-        }
-      }
-
-      if (batch.length === 0) {
-        // 检测到循环依赖，打破循环
-        const first = Array.from(remaining)[0]
-        const metadata = this.guards.get(first)!
-        batch.push(metadata)
-      }
-
-      // 按优先级排序
-      batch.sort((a, b) => b.priority - a.priority)
-
-      for (const guard of batch) {
-        remaining.delete(guard.id)
-        executed.add(guard.id)
-      }
-
-      plan.push(batch)
-    }
-
-    return plan
-  }
-
-  /**
-   * 并行执行一批守卫
-   */
-  private async executeBatch(
-    batch: GuardMetadata[],
-    to: RouteLocationNormalized,
-    from: RouteLocationNormalized
-  ): Promise<GuardExecutionResult[]> {
-    if (batch.length > 1) {
-      this.stats.parallelExecutions++
-    }
-
-    const promises = batch.map(metadata =>
-      this.executeGuard(metadata, to, from)
-    )
-
-    return Promise.all(promises)
   }
 
   /**
    * 执行单个守卫
    */
-  private async executeGuard(
-    metadata: GuardMetadata,
+  async executeSingle(
+    guard: NavigationGuard,
     to: RouteLocationNormalized,
-    from: RouteLocationNormalized
+    from: RouteLocationNormalized,
+    metadata?: Partial<GuardMetadata>
   ): Promise<GuardExecutionResult> {
     const startTime = performance.now()
+    const cacheKey = this.getCacheKey(guard, to, from)
+
+    // 检查缓存
+    if (metadata?.cacheable && this.config.enableCache) {
+      const cached = this.cache.get(cacheKey)
+      if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+        return {
+          success: true,
+          result: cached.result,
+          duration: performance.now() - startTime,
+          cached: true
+        }
+      }
+    }
 
     try {
-      const result = await this.runGuard(metadata.guard, to, from)
+      const result = await this.runGuardWithTimeout(guard, to, from)
+      const duration = performance.now() - startTime
 
       // 缓存结果
-      if (metadata.cacheable) {
-        const cacheKey = this.getCacheKey(metadata.id, to, from)
-        this.resultCache.set(cacheKey, {
-          result,
-          timestamp: Date.now()
-        })
+      if (metadata?.cacheable && this.config.enableCache) {
+        this.updateCache(cacheKey, result)
       }
 
       return {
-        guardId: metadata.id,
+        success: true,
         result,
-        duration: performance.now() - startTime,
-        cached: false,
+        duration,
+        cached: false
       }
     } catch (error) {
-      throw error
+      return {
+        success: false,
+        error: error as Error,
+        duration: performance.now() - startTime,
+        cached: false
+      }
     }
   }
 
   /**
-   * 运行守卫（带超时和重试）
+   * 并行执行多个独立守卫
    */
-  private async runGuard(
+  async executeParallel(
+    guards: GuardMetadata[],
+    to: RouteLocationNormalized,
+    from: RouteLocationNormalized
+  ): Promise<GuardExecutionResult[]> {
+    if (!this.config.enableParallel || guards.length === 0) {
+      return this.executeSequential(guards, to, from)
+    }
+
+    // 分析依赖关系
+    const { independent, dependent } = this.analyzeDependencies(guards)
+
+    const results: GuardExecutionResult[] = []
+
+    // 并行执行独立守卫
+    if (independent.length > 0) {
+      const independentResults = await Promise.all(
+        independent.map(metadata =>
+          this.executeSingle(metadata.guard, to, from, metadata)
+        )
+      )
+
+      // 检查是否有失败的守卫
+      for (const result of independentResults) {
+        if (!result.success || result.result === false) {
+          return [...independentResults]
+        }
+      }
+
+      results.push(...independentResults)
+    }
+
+    // 顺序执行有依赖的守卫
+    if (dependent.length > 0) {
+      const dependentResults = await this.executeSequential(dependent, to, from)
+      results.push(...dependentResults)
+    }
+
+    return results
+  }
+
+  /**
+   * 顺序执行守卫
+   */
+  async executeSequential(
+    guards: GuardMetadata[],
+    to: RouteLocationNormalized,
+    from: RouteLocationNormalized
+  ): Promise<GuardExecutionResult[]> {
+    const results: GuardExecutionResult[] = []
+
+    for (const metadata of guards) {
+      const result = await this.executeSingle(metadata.guard, to, from, metadata)
+      results.push(result)
+
+      // 如果守卫返回 false 或错误，停止执行
+      if (!result.success || result.result === false) {
+        break
+      }
+
+      // 如果守卫返回重定向，停止执行
+      if (result.result && typeof result.result !== 'boolean') {
+        break
+      }
+    }
+
+    return results
+  }
+
+  /**
+   * 执行守卫组（自动选择并行或顺序）
+   */
+  async executeGroup(
+    guards: (NavigationGuard | GuardMetadata)[],
+    to: RouteLocationNormalized,
+    from: RouteLocationNormalized
+  ): Promise<GuardExecutionResult[]> {
+    // 规范化守卫元数据
+    const guardMetadata = guards.map(g =>
+      typeof g === 'function'
+        ? { guard: g, cacheable: false }
+        : g
+    )
+
+    // 按优先级排序
+    const sorted = this.sortByPriority(guardMetadata)
+
+    // 执行
+    return this.config.enableParallel
+      ? this.executeParallel(sorted, to, from)
+      : this.executeSequential(sorted, to, from)
+  }
+
+  /**
+   * 分析守卫依赖关系
+   */
+  private analyzeDependencies(guards: GuardMetadata[]): {
+    independent: GuardMetadata[]
+    dependent: GuardMetadata[]
+  } {
+    const independent: GuardMetadata[] = []
+    const dependent: GuardMetadata[] = []
+
+    for (const guard of guards) {
+      if (!guard.dependencies || guard.dependencies.length === 0) {
+        independent.push(guard)
+      } else {
+        dependent.push(guard)
+      }
+    }
+
+    return { independent, dependent }
+  }
+
+  /**
+   * 按优先级排序
+   */
+  private sortByPriority(guards: GuardMetadata[]): GuardMetadata[] {
+    return guards.sort((a, b) => {
+      const priorityA = a.priority ?? 0
+      const priorityB = b.priority ?? 0
+      return priorityB - priorityA // 高优先级在前
+    })
+  }
+
+  /**
+   * 执行守卫（带超时）
+   */
+  private async runGuardWithTimeout(
     guard: NavigationGuard,
     to: RouteLocationNormalized,
     from: RouteLocationNormalized
   ): Promise<NavigationGuardReturn> {
-    return new Promise((resolve, reject) => {
-      let resolved = false
+    return new Promise<NavigationGuardReturn>((resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`Guard execution timeout after ${this.config.timeout}ms`))
+      }, this.config.timeout)
 
       const next = (result?: NavigationGuardReturn) => {
-        if (resolved) return
-        resolved = true
-
+        clearTimeout(timer)
         if (result === false) {
-          resolve(false)
+          reject(new Error('Navigation cancelled by guard'))
         } else if (result instanceof Error) {
           reject(result)
         } else {
@@ -286,97 +272,79 @@ export class GuardExecutor {
         }
       }
 
-      // 设置超时
-      const timeout = setTimeout(() => {
-        if (!resolved) {
-          resolved = true
-          reject(new Error(`Guard timeout: ${guard.name || 'anonymous'}`))
-        }
-      }, 3000)
-
       try {
         const guardResult = guard(to, from, next)
 
-        // 处理Promise返回
         if (guardResult && typeof guardResult === 'object' && 'then' in guardResult) {
           (guardResult as Promise<NavigationGuardReturn>).then(
-            result => {
-              clearTimeout(timeout)
-              if (!resolved) {
-                resolved = true
-                resolve(result)
-              }
+            res => {
+              clearTimeout(timer)
+              resolve(res)
             },
-            error => {
-              clearTimeout(timeout)
-              if (!resolved) {
-                resolved = true
-                reject(error)
-              }
+            err => {
+              clearTimeout(timer)
+              reject(err)
             }
           )
-        } else {
-          clearTimeout(timeout)
         }
       } catch (error) {
-        clearTimeout(timeout)
-        if (!resolved) {
-          resolved = true
-          reject(error)
-        }
+        clearTimeout(timer)
+        reject(error)
       }
     })
-  }
-
-  /**
-   * 重建依赖图
-   */
-  private rebuildDependencyGraph(): void {
-    this.dependencyGraph.clear()
-
-    // 创建节点
-    for (const [id, metadata] of this.guards) {
-      this.dependencyGraph.set(id, {
-        id,
-        metadata,
-        dependents: new Set(),
-        dependencies: new Set(metadata.dependencies),
-        executed: false,
-      })
-    }
-
-    // 建立依赖关系
-    for (const node of this.dependencyGraph.values()) {
-      for (const depId of node.dependencies) {
-        const depNode = this.dependencyGraph.get(depId)
-        if (depNode) {
-          depNode.dependents.add(node.id)
-        }
-      }
-    }
   }
 
   /**
    * 生成缓存键
    */
   private getCacheKey(
-    guardId: string,
+    guard: NavigationGuard,
     to: RouteLocationNormalized,
     from: RouteLocationNormalized
   ): string {
-    return `${guardId}_${to.path}_${from.path}`
+    const guardKey = guard.name || guard.toString().slice(0, 50)
+    return `${guardKey}:${to.path}:${from.path}`
   }
 
   /**
-   * 更新统计信息
+   * 更新缓存
    */
-  private updateStats(results: GuardExecutionResult[], startTime: number): void {
-    const totalDuration = performance.now() - startTime
-    const avgDuration = results.reduce((sum, r) => sum + r.duration, 0) / results.length
+  private updateCache(key: string, result: NavigationGuardReturn): void {
+    if (this.cache.size >= this.config.cacheSize) {
+      // 删除最旧的缓存项
+      const firstKey = this.cache.keys().next().value
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey)
+      }
+    }
 
-    this.stats.averageDuration =
-      (this.stats.averageDuration * (this.stats.totalExecutions - 1) + avgDuration) /
-      this.stats.totalExecutions
+    this.cache.set(key, {
+      result,
+      timestamp: Date.now()
+    })
+  }
+
+  /**
+   * 清理过期缓存
+   */
+  cleanupCache(): void {
+    const now = Date.now()
+    const keysToDelete: string[] = []
+
+    for (const [key, value] of this.cache.entries()) {
+      if (now - value.timestamp > this.CACHE_TTL) {
+        keysToDelete.push(key)
+      }
+    }
+
+    keysToDelete.forEach(key => this.cache.delete(key))
+  }
+
+  /**
+   * 清空缓存
+   */
+  clearCache(): void {
+    this.cache.clear()
   }
 
   /**
@@ -384,76 +352,92 @@ export class GuardExecutor {
    */
   getStats() {
     return {
-      ...this.stats,
-      registeredGuards: this.guards.size,
-      cacheSize: this.resultCache.size,
+      cacheSize: this.cache.size,
+      maxCacheSize: this.config.cacheSize,
+      enableParallel: this.config.enableParallel,
+      enableCache: this.config.enableCache
     }
   }
 
   /**
-   * 清理缓存
+   * 销毁执行器
    */
-  clearCache(): void {
-    this.resultCache.clear()
+  destroy(): void {
+    this.clearCache()
+  }
+}
+
+/**
+ * 导航会话管理器（使用 WeakMap 优化）
+ */
+export class NavigationSessionManager {
+  private sessions = new WeakMap<object, NavigationSession>()
+  private activeSession?: NavigationSession
+
+  /**
+   * 创建新会话
+   */
+  createSession(to: RouteLocationNormalized, from: RouteLocationNormalized): NavigationSession {
+    const session: NavigationSession = {
+      id: this.generateSessionId(),
+      to,
+      from,
+      startTime: Date.now(),
+      redirectCount: 0,
+      guardResults: new Map()
+    }
+
+    // 使用 to 对象作为 WeakMap 的键
+    this.sessions.set(to as any, session)
+    this.activeSession = session
+
+    return session
   }
 
   /**
-   * 重置统计
+   * 获取会话
    */
-  resetStats(): void {
-    this.stats = {
-      totalExecutions: 0,
-      parallelExecutions: 0,
-      cacheHits: 0,
-      skipped: 0,
-      averageDuration: 0,
-    }
+  getSession(route: RouteLocationNormalized): NavigationSession | undefined {
+    return this.sessions.get(route as any) || this.activeSession
+  }
+
+  /**
+   * 结束会话
+   */
+  endSession(): void {
+    this.activeSession = undefined
+  }
+
+  /**
+   * 生成会话ID
+   */
+  private generateSessionId(): string {
+    return `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
   }
 }
 
 /**
- * 创建守卫元数据的辅助函数
+ * 导航会话
  */
-export function createGuardMetadata(
-  guard: NavigationGuard,
-  options: {
-    id?: string
-    priority?: number
-    dependencies?: string[]
-    cacheable?: boolean
-    skipCondition?: (to: RouteLocationNormalized, from: RouteLocationNormalized) => boolean
-  } = {}
-): GuardMetadata {
-  return {
-    guard,
-    id: options.id || guard.name || `guard_${Date.now()}_${Math.random()}`,
-    priority: options.priority ?? 0,
-    dependencies: options.dependencies || [],
-    cacheable: options.cacheable ?? false,
-    skipCondition: options.skipCondition,
-  }
+export interface NavigationSession {
+  id: string
+  to: RouteLocationNormalized
+  from: RouteLocationNormalized
+  startTime: number
+  redirectCount: number
+  guardResults: Map<string, NavigationGuardReturn>
 }
 
 /**
- * 常用的跳过条件
+ * 创建守卫执行器
  */
-export const commonSkipConditions = {
-  // 当路径相同时跳过
-  samePath: (to: RouteLocationNormalized, from: RouteLocationNormalized) =>
-    to.path === from.path,
-
-  // 当查询参数相同时跳过
-  sameQuery: (to: RouteLocationNormalized, from: RouteLocationNormalized) =>
-    JSON.stringify(to.query) === JSON.stringify(from.query),
-
-  // 当参数相同时跳过
-  sameParams: (to: RouteLocationNormalized, from: RouteLocationNormalized) =>
-    JSON.stringify(to.params) === JSON.stringify(from.params),
-
-  // 组合条件
-  sameRoute: (to: RouteLocationNormalized, from: RouteLocationNormalized) =>
-    to.path === from.path &&
-    JSON.stringify(to.query) === JSON.stringify(from.query) &&
-    JSON.stringify(to.params) === JSON.stringify(from.params),
+export function createGuardExecutor(config?: GuardExecutorConfig): GuardExecutor {
+  return new GuardExecutor(config)
 }
 
+/**
+ * 创建导航会话管理器
+ */
+export function createNavigationSessionManager(): NavigationSessionManager {
+  return new NavigationSessionManager()
+}

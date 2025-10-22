@@ -110,7 +110,7 @@ class EnhancedWeakRefManager {
     if (this.refs.size > 100) {
       this.cleanup()
     }
-    
+
     // 清理旧引用
     this.removeRef(key)
 
@@ -127,19 +127,19 @@ class EnhancedWeakRefManager {
       }
     }
   }
-  
+
   /**
    * 清理无效的弱引用
    */
   private cleanup(): void {
     const keysToDelete: string[] = []
-    
+
     for (const [key, ref] of this.refs.entries()) {
       if (!ref.deref()) {
         keysToDelete.push(key)
       }
     }
-    
+
     keysToDelete.forEach(key => {
       this.refs.delete(key)
       this.metadata.delete(key)
@@ -289,7 +289,7 @@ class TieredCacheManager<T = any> {
     size?: number
   }): void {
     const now = Date.now()
-    
+
     // 优化：自动清理过期项
     if (this.l1Cache.size + this.l2Cache.size + this.l3Cache.size > 100) {
       this.cleanupExpired(now)
@@ -538,24 +538,81 @@ class TieredCacheManager<T = any> {
     return CachePriority.COLD
   }
 
-  private estimateSize(value: any): number {
-    // 优化：更快的大小估算
+  /**
+   * 精确的内存大小估算（优化版，支持更多类型）
+   */
+  private estimateSize(value: any, visited = new WeakSet()): number {
     if (value === null || value === undefined) return 0
-    
+
     const type = typeof value
-    if (type === 'string') return value.length * 2
+
+    // 基本类型快速路径
+    if (type === 'string') return value.length * 2 // UTF-16
     if (type === 'number') return 8
     if (type === 'boolean') return 4
-    
-    if (type === 'object') {
-      // 粗略估算，避免序列化开销
-      if (Array.isArray(value)) {
-        return value.length * 50
-      }
-      return Object.keys(value).length * 100
+    if (type === 'symbol') return 8
+    if (type === 'function') return 0 // 函数不占用数据内存
+
+    // 防止循环引用
+    if (visited.has(value)) return 0
+    visited.add(value)
+
+    // 特殊对象类型
+    if (value instanceof ArrayBuffer) {
+      return value.byteLength
     }
-    
-    return 100
+
+    if (value instanceof DataView) {
+      return value.byteLength
+    }
+
+    if (ArrayBuffer.isView(value)) {
+      // TypedArray (Int8Array, Uint8Array, etc.)
+      return (value as any).byteLength
+    }
+
+    if (value instanceof Date) {
+      return 24
+    }
+
+    if (value instanceof RegExp) {
+      return value.source.length * 2 + 24
+    }
+
+    if (value instanceof Map) {
+      let size = 24 // Map对象基础开销
+      for (const [k, v] of value.entries()) {
+        size += this.estimateSize(k, visited) + this.estimateSize(v, visited) + 16
+      }
+      return size
+    }
+
+    if (value instanceof Set) {
+      let size = 24 // Set对象基础开销
+      for (const v of value.values()) {
+        size += this.estimateSize(v, visited) + 8
+      }
+      return size
+    }
+
+    // 数组
+    if (Array.isArray(value)) {
+      let size = 24 // Array对象基础开销
+      for (let i = 0; i < value.length; i++) {
+        size += this.estimateSize(value[i], visited)
+      }
+      return size
+    }
+
+    // 普通对象
+    let size = 24 // Object基础开销
+    for (const key in value) {
+      if (Object.prototype.hasOwnProperty.call(value, key)) {
+        size += key.length * 2 + this.estimateSize(value[key], visited) + 16
+      }
+    }
+
+    return size
   }
 
   private cleanupExpired(now: number): void {
@@ -592,7 +649,7 @@ class TieredCacheManager<T = any> {
       }
     }
   }
-  
+
   /**
    * 获取 L3 缓存的键列表
    */
@@ -784,10 +841,35 @@ export class UnifiedMemoryManager {
     if (typeof window === 'undefined')
       return
 
-    this.monitorTimer = window.setInterval(() => {
+    // 优化：根据内存压力动态调整监控频率
+    const adaptiveMonitor = () => {
       this.updateStats()
       this.checkThresholds()
-    }, this.config.monitoring.interval)
+
+      // 根据内存压力调整下次监控间隔（30-120秒）
+      const memoryPressure = this.state.stats.totalMemory / this.config.monitoring.criticalThreshold!
+      let nextInterval = this.config.monitoring.interval
+
+      if (memoryPressure > 0.8) {
+        // 高压力：30秒
+        nextInterval = 30000
+      } else if (memoryPressure > 0.5) {
+        // 中压力：60秒（默认）
+        nextInterval = 60000
+      } else {
+        // 低压力：120秒
+        nextInterval = 120000
+      }
+
+      // 清除旧定时器并设置新的
+      if (this.monitorTimer) {
+        clearInterval(this.monitorTimer)
+      }
+      this.monitorTimer = window.setTimeout(adaptiveMonitor, nextInterval)
+    }
+
+    // 启动自适应监控
+    adaptiveMonitor()
   }
 
   private stopMonitoring(): void {
@@ -858,16 +940,66 @@ export class UnifiedMemoryManager {
     }
   }
 
+  /**
+   * 内存泄漏检测
+   */
+  private leakDetectionData = new Map<string, { size: number, count: number, firstSeen: number }>()
+
+  private detectMemoryLeak(): boolean {
+    const currentMemory = this.state.stats.totalMemory
+    const cacheMemory = this.state.stats.cacheMemory
+
+    const key = 'total'
+    const data = this.leakDetectionData.get(key) || {
+      size: currentMemory,
+      count: 0,
+      firstSeen: Date.now()
+    }
+
+    // 检测持续增长
+    if (currentMemory > data.size * 1.3) {
+      data.count++
+
+      // 连续5次检测到增长，且超过10分钟
+      if (data.count >= 5 && Date.now() - data.firstSeen > 600000) {
+        console.warn('[MemoryManager] Potential memory leak detected:', {
+          initialSize: data.size,
+          currentSize: currentMemory,
+          cacheSize: cacheMemory,
+          duration: Date.now() - data.firstSeen
+        })
+
+        // 重置检测
+        this.leakDetectionData.delete(key)
+        return true
+      }
+    } else {
+      // 重置计数
+      data.count = 0
+    }
+
+    data.size = currentMemory
+    this.leakDetectionData.set(key, data)
+
+    return false
+  }
+
   private performCleanup(level?: 'aggressive' | 'moderate' | 'conservative'): void {
     const strategy = level || this.config.cleanup.strategy
-    
+
     // 优化：根据内存压力动态调整清理策略
     const memoryPressure = this.state.stats.totalMemory / this.config.monitoring.criticalThreshold!
-    
-    if (memoryPressure > 0.9 || strategy === 'aggressive') {
+
+    // 检测内存泄漏
+    const hasLeak = this.detectMemoryLeak()
+
+    if (memoryPressure > 0.9 || strategy === 'aggressive' || hasLeak) {
       // 激进清理：清除大部分缓存
       this.tieredCache.clear()
       this.weakRefManager.clear()
+
+      // 强制触发 GC
+      this.forceGC()
     }
     else if (memoryPressure > 0.7 || strategy === 'moderate') {
       // 中等清理：优化缓存层级，清理L3
@@ -877,6 +1009,11 @@ export class UnifiedMemoryManager {
       l3Keys.slice(0, Math.floor(l3Keys.length / 2)).forEach(key => {
         this.tieredCache.delete(key)
       })
+
+      // 可选GC
+      if (memoryPressure > 0.8) {
+        this.forceGC()
+      }
     }
     else {
       // 保守清理：仅清理过期项
@@ -885,10 +1022,19 @@ export class UnifiedMemoryManager {
 
     this.state.lastCleanup = new Date()
     this.updateStats()
-    
-    // 触发垃圾回收（如果可用）
+  }
+
+  /**
+   * 强制触发垃圾回收（如果可用）
+   */
+  private forceGC(): void {
     if (typeof globalThis !== 'undefined' && typeof (globalThis as any).gc === 'function') {
-      (globalThis as any).gc()
+      try {
+        (globalThis as any).gc()
+        console.log('[MemoryManager] Forced GC completed')
+      } catch (error) {
+        console.warn('[MemoryManager] Failed to force GC:', error)
+      }
     }
   }
 
@@ -898,13 +1044,13 @@ export class UnifiedMemoryManager {
   destroy(): void {
     // 停止监控定时器
     this.stopMonitoring()
-    
+
     // 停止自动清理定时器
     this.stopAutoCleanup()
-    
+
     // 清空所有缓存
     this.clear()
-    
+
     // 重置状态
     this.state.stats = {
       totalMemory: 0,
