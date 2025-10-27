@@ -1,0 +1,59 @@
+/**
+ * 自定义样式
+ */
+
+:root {
+  --vp-c-brand: #3eaf7c;
+  --vp-c-brand-light: #4abf8a;
+  --vp-c-brand-lighter: #56d09a;
+  --vp-c-brand-dark: #299764;
+  --vp-c-brand-darker: #1e7a50;
+}
+
+.dark {
+  --vp-c-brand: #4abf8a;
+  --vp-c-brand-light: #56d09a;
+  --vp-c-brand-lighter: #62dba9;
+  --vp-c-brand-dark: #3eaf7c;
+  --vp-c-brand-darker: #299764;
+}
+
+/* 代码块样式 */
+.vp-code-group {
+  margin: 16px 0;
+}
+
+/* 自定义容器样式 */
+.custom-block {
+  margin: 16px 0;
+}
+
+.custom-block.tip {
+  border-color: var(--vp-c-brand);
+}
+
+/* API 表格样式 */
+.api-table {
+  width: 100%;
+  margin: 16px 0;
+  border-collapse: collapse;
+}
+
+.api-table th,
+.api-table td {
+  padding: 12px;
+  border: 1px solid var(--vp-c-divider);
+  text-align: left;
+}
+
+.api-table th {
+  background-color: var(--vp-c-bg-soft);
+  font-weight: 600;
+}
+
+.api-table code {
+  padding: 2px 6px;
+  background-color: var(--vp-c-bg-soft);
+  border-radius: 4px;
+  font-size: 0.9em;
+}
