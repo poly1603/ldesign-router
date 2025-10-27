@@ -187,3 +187,4 @@ export function useStructuredData(data: any | any[]): void {
   })
 }
 
+

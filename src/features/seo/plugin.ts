@@ -145,3 +145,4 @@ export function createSEOVuePlugin(options: SEOPluginOptions = {}) {
 export { SEOManager, createSEOManager } from './index'
 export type { SEOConfig, SEOMeta, OpenGraphMeta, TwitterCardMeta, StructuredData } from './index'
 
+
