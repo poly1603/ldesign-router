@@ -1,7 +1,26 @@
 /**
  * @ldesign/router 组合式 API
  *
- * 提供便捷的 Vue 3 Composition API 钩子函数
+ * 提供完整的 Vue 3 Composition API 支持，让路由使用更加便捷和类型安全。
+ * 
+ * **核心 Composables**：
+ * - useRouter - 获取路由器实例
+ * - useRoute - 获取当前路由
+ * - useParams - 获取路由参数
+ * - useQuery - 获取查询参数
+ * - useLink - 创建路由链接
+ * 
+ * **守卫 Composables**：
+ * - onBeforeRouteUpdate - 路由更新守卫
+ * - onBeforeRouteLeave - 路由离开守卫
+ * 
+ * **增强 Composables**：
+ * - useNavigation - 导航控制
+ * - useDeviceRoute - 设备路由
+ * - useDeviceComponent - 设备组件
+ * 
+ * @module composables
+ * @author ldesign
  */
 
 import type { ComputedRef, Ref } from 'vue'
@@ -34,6 +53,38 @@ import {
 
 /**
  * 获取路由器实例（增强版）
+ * 
+ * 返回路由器实例，并提供额外的便捷方法和状态。
+ * 
+ * **增强功能**：
+ * - 导航状态追踪（isNavigating）
+ * - 历史导航能力判断
+ * - 路由历史记录
+ * - 便捷导航方法
+ * - 路由预取功能
+ * 
+ * @returns 增强的路由器实例
+ * 
+ * @example
+ * ```vue
+ * <script setup>
+ * import { useRouter } from '@ldesign/router'
+ * 
+ * const router = useRouter()
+ * 
+ * // 基础导航
+ * router.push('/about')
+ * router.replace('/home')
+ * router.back()
+ * 
+ * // 增强功能
+ * console.log('正在导航:', router.isNavigating.value)
+ * console.log('可以后退:', router.canGoBack.value)
+ * router.goHome()  // 快速回到首页
+ * router.reload()  // 刷新当前页
+ * router.prefetch('/products')  // 预取路由
+ * </script>
+ * ```
  */
 export function useRouter(): UseRouterReturn & {
   // 新增的便捷方法
@@ -148,6 +199,41 @@ export function useRouter(): UseRouterReturn & {
 
 /**
  * 获取当前路由信息（增强版）
+ * 
+ * 返回当前路由的响应式引用，并提供丰富的便捷属性和方法。
+ * 
+ * **增强功能**：
+ * - 面包屑导航
+ * - 父路由访问
+ * - 参数/查询存在判断
+ * - 路由深度计算
+ * - 便捷的取值方法
+ * 
+ * @returns 增强的路由对象
+ * 
+ * @example
+ * ```vue
+ * <script setup>
+ * import { useRoute } from '@ldesign/router'
+ * 
+ * const route = useRoute()
+ * 
+ * // 基础属性
+ * console.log('路径:', route.value.path)
+ * console.log('参数:', route.value.params)
+ * console.log('查询:', route.value.query)
+ * 
+ * // 增强属性
+ * console.log('是否首页:', route.value.isHome.value)
+ * console.log('面包屑:', route.value.breadcrumbs.value)
+ * console.log('路由深度:', route.value.depth.value)
+ * 
+ * // 便捷方法
+ * const userId = route.value.getParam('id', 'default')
+ * const searchQuery = route.value.getQuery('q', '')
+ * const isUserRoute = route.value.is(['user', 'userProfile'])
+ * </script>
+ * ```
  */
 export function useRoute(): UseRouteReturn & {
   // 新增的便捷属性和方法
@@ -266,6 +352,25 @@ export function useRoute(): UseRouteReturn & {
 
 /**
  * 获取路由参数
+ * 
+ * 返回当前路由的参数对象的响应式引用。
+ * 
+ * @returns 路由参数的 ComputedRef
+ * 
+ * @example
+ * ```vue
+ * <script setup>
+ * import { useParams } from '@ldesign/router'
+ * 
+ * const params = useParams()
+ * console.log('用户ID:', params.value.id)
+ * 
+ * // 监听参数变化
+ * watch(params, (newParams) => {
+ *   console.log('参数已更新:', newParams)
+ * })
+ * </script>
+ * ```
  */
 export function useParams(): ComputedRef<RouteParams> {
   const route = useRoute()
@@ -274,6 +379,21 @@ export function useParams(): ComputedRef<RouteParams> {
 
 /**
  * 获取查询参数
+ * 
+ * 返回当前路由的查询参数对象的响应式引用。
+ * 
+ * @returns 查询参数的 ComputedRef
+ * 
+ * @example
+ * ```vue
+ * <script setup>
+ * import { useQuery } from '@ldesign/router'
+ * 
+ * const query = useQuery()
+ * console.log('搜索词:', query.value.q)
+ * console.log('页码:', query.value.page)
+ * </script>
+ * ```
  */
 export function useQuery(): ComputedRef<RouteQuery> {
   const route = useRoute()
@@ -282,6 +402,25 @@ export function useQuery(): ComputedRef<RouteQuery> {
 
 /**
  * 获取哈希值
+ * 
+ * 返回当前路由的哈希值的响应式引用。
+ * 
+ * @returns 哈希值的 ComputedRef
+ * 
+ * @example
+ * ```vue
+ * <script setup>
+ * import { useHash } from '@ldesign/router'
+ * 
+ * const hash = useHash()
+ * 
+ * // 监听锚点变化
+ * watch(hash, (newHash) => {
+ *   console.log('锚点已更新:', newHash)
+ *   scrollToElement(newHash)
+ * })
+ * </script>
+ * ```
  */
 export function useHash(): ComputedRef<string> {
   const route = useRoute()
@@ -290,6 +429,28 @@ export function useHash(): ComputedRef<string> {
 
 /**
  * 获取路由元信息
+ * 
+ * 返回当前路由的元数据对象的响应式引用。
+ * 
+ * @returns 路由元信息的 ComputedRef
+ * 
+ * @example
+ * ```vue
+ * <script setup>
+ * import { useMeta } from '@ldesign/router'
+ * 
+ * const meta = useMeta()
+ * 
+ * // 访问元数据
+ * console.log('页面标题:', meta.value.title)
+ * console.log('需要认证:', meta.value.requiresAuth)
+ * 
+ * // 监听元数据变化
+ * watch(() => meta.value.title, (title) => {
+ *   document.title = title || '默认标题'
+ * })
+ * </script>
+ * ```
  */
 export function useMeta(): ComputedRef<RouteMeta> {
   const route = useRoute()
@@ -298,6 +459,37 @@ export function useMeta(): ComputedRef<RouteMeta> {
 
 /**
  * 获取匹配的路由记录
+ * 
+ * 返回当前路由匹配的所有路由记录（包括父路由）的响应式引用。
+ * 用于嵌套路由的面包屑导航等场景。
+ * 
+ * @returns 匹配路由记录数组的 ComputedRef
+ * 
+ * @example
+ * ```vue
+ * <script setup>
+ * import { useMatched } from '@ldesign/router'
+ * 
+ * const matched = useMatched()
+ * 
+ * // 生成面包屑
+ * const breadcrumbs = computed(() => {
+ *   return matched.value.map(record => ({
+ *     name: record.meta.title || record.name,
+ *     path: record.path
+ *   }))
+ * })
+ * </script>
+ * 
+ * <template>
+ *   <nav class="breadcrumbs">
+ *     <span v-for="(item, index) in breadcrumbs" :key="index">
+ *       <RouterLink :to="item.path">{{ item.name }}</RouterLink>
+ *       <span v-if="index < breadcrumbs.length - 1"> / </span>
+ *     </span>
+ *   </nav>
+ * </template>
+ * ```
  */
 export function useMatched(): ComputedRef<RouteRecordNormalized[]> {
   const route = useRoute()
@@ -308,6 +500,28 @@ export function useMatched(): ComputedRef<RouteRecordNormalized[]> {
 
 /**
  * 导航控制钩子
+ * 
+ * 提供完整的导航控制功能，包括状态追踪和方向判断。
+ * 
+ * @returns 导航控制对象
+ * 
+ * @example
+ * ```vue
+ * <script setup>
+ * import { useNavigation } from '@ldesign/router'
+ * 
+ * const navigation = useNavigation()
+ * 
+ * // 导航方法
+ * navigation.push('/about')
+ * navigation.back()
+ * navigation.forward()
+ * 
+ * // 导航状态
+ * console.log('正在导航:', navigation.isNavigating.value)
+ * console.log('导航方向:', navigation.direction.value)
+ * </script>
+ * ```
  */
 export function useNavigation() {
   const router = useRouter()
@@ -356,6 +570,33 @@ export function useNavigation() {
 
 /**
  * 组件内路由更新守卫
+ * 
+ * 在当前路由更新但组件被复用时调用。
+ * 
+ * **使用场景**：
+ * - 路由参数变化时重新获取数据
+ * - 同一组件不同参数的处理
+ * - 表单状态重置
+ * 
+ * @param guard - 守卫函数
+ * 
+ * @example
+ * ```vue
+ * <script setup>
+ * import { onBeforeRouteUpdate } from '@ldesign/router'
+ * 
+ * // 路由参数变化时重新加载数据
+ * onBeforeRouteUpdate((to, from, next) => {
+ *   if (to.params.id !== from.params.id) {
+ *     loadUserData(to.params.id).then(() => {
+ *       next()
+ *     })
+ *   } else {
+ *     next()
+ *   }
+ * })
+ * </script>
+ * ```
  */
 export function onBeforeRouteUpdate(guard: NavigationGuard): void {
   const router = useRouter()
@@ -400,6 +641,40 @@ export function onBeforeRouteUpdate(guard: NavigationGuard): void {
 
 /**
  * 组件内路由离开守卫
+ * 
+ * 在离开当前路由时调用，可以阻止导航或确认离开。
+ * 
+ * **使用场景**：
+ * - 表单未保存提醒
+ * - 确认离开对话框
+ * - 清理定时器/监听器
+ * - 保存草稿
+ * 
+ * @param guard - 守卫函数
+ * 
+ * @example
+ * ```vue
+ * <script setup>
+ * import { onBeforeRouteLeave } from '@ldesign/router'
+ * import { ref } from 'vue'
+ * 
+ * const hasUnsavedChanges = ref(false)
+ * 
+ * // 未保存时提醒用户
+ * onBeforeRouteLeave((to, from, next) => {
+ *   if (hasUnsavedChanges.value) {
+ *     const answer = window.confirm('有未保存的更改，确定要离开吗？')
+ *     if (answer) {
+ *       next()
+ *     } else {
+ *       next(false)  // 取消导航
+ *     }
+ *   } else {
+ *     next()
+ *   }
+ * })
+ * </script>
+ * ```
  */
 export function onBeforeRouteLeave(guard: NavigationGuard): void {
   const router = useRouter()
@@ -447,26 +722,68 @@ export function onBeforeRouteLeave(guard: NavigationGuard): void {
 // ==================== 链接相关 API ====================
 
 /**
- * 链接属性和方法
+ * 链接选项配置
  */
 export interface UseLinkOptions {
+  /** 目标路由位置 */
   to: ComputedRef<RouteLocationRaw> | RouteLocationRaw
+  /** 是否使用 replace 模式 */
   replace?: boolean
 }
 
 /**
- * 链接返回值
+ * 链接功能返回值
  */
 export interface UseLinkReturn {
+  /** 链接的 href 属性 */
   href: ComputedRef<string>
+  /** 解析后的路由对象 */
   route: ComputedRef<RouteLocationNormalized>
+  /** 是否激活（部分匹配） */
   isActive: ComputedRef<boolean>
+  /** 是否精确激活 */
   isExactActive: ComputedRef<boolean>
+  /** 执行导航 */
   navigate: (e?: Event) => Promise<void>
 }
 
 /**
  * 链接功能钩子
+ * 
+ * 提供编程式创建路由链接的功能，适合自定义链接组件。
+ * 
+ * @param options - 链接配置
+ * @returns 链接功能对象
+ * 
+ * @example
+ * ```vue
+ * <script setup>
+ * import { useLink } from '@ldesign/router'
+ * import { computed } from 'vue'
+ * 
+ * const props = defineProps<{ to: string }>()
+ * 
+ * const link = useLink({
+ *   to: computed(() => props.to),
+ *   replace: false
+ * })
+ * 
+ * // 使用链接功能
+ * const handleClick = (e: Event) => {
+ *   link.navigate(e)
+ * }
+ * </script>
+ * 
+ * <template>
+ *   <a 
+ *     :href="link.href.value"
+ *     :class="{ active: link.isActive.value }"
+ *     @click="handleClick"
+ *   >
+ *     <slot />
+ *   </a>
+ * </template>
+ * ```
  */
 export function useLink(options: UseLinkOptions): UseLinkReturn {
   const router = useRouter()

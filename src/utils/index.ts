@@ -1,7 +1,23 @@
 /**
- * @ldesign/router 工具函数
+ * @ldesign/router 工具函数集
  *
- * 提供路由相关的实用工具函数
+ * 提供路由系统相关的实用工具函数，包括路径处理、查询参数处理、URL处理等。
+ * 
+ * **功能分类**：
+ * - 路径处理：normalizePath, joinPaths, buildPath
+ * - 查询参数：parseQuery, stringifyQuery, mergeQuery
+ * - URL 处理：parseURL, stringifyURL
+ * - 路由匹配：matchPath, extractParams
+ * - 导航失败：createNavigationFailure, isNavigationFailure
+ * - 工具函数：cloneRouteLocation, getRouteDepth, isChildRoute
+ * 
+ * **性能优化**：
+ * - 避免不必要的字符串操作
+ * - 使用原生 API 提升性能
+ * - 智能缓存减少重复计算
+ * 
+ * @module utils
+ * @author ldesign
  */
 
 import type { NavigationFailureType } from '../core/constants'
@@ -17,6 +33,25 @@ import type {
 
 /**
  * 标准化路径（增强版）
+ * 
+ * 将路径规范化为标准格式：
+ * - 确保以 / 开头
+ * - 移除多余的斜杠
+ * - 移除末尾斜杠（根路径除外）
+ * - 处理相对路径符号（. 和 ..）
+ * 
+ * @param path - 要规范化的路径
+ * @returns 规范化后的路径
+ * @throws {TypeError} 如果路径不是字符串
+ * 
+ * @example
+ * ```ts
+ * normalizePath('about')           // => '/about'
+ * normalizePath('/about/')         // => '/about'
+ * normalizePath('//about//page')   // => '/about/page'
+ * normalizePath('/a/b/../c')       // => '/a/c'
+ * normalizePath('/a/./b')          // => '/a/b'
+ * ```
  */
 export function normalizePath(path: string): string {
   // 输入验证
@@ -63,7 +98,19 @@ export function normalizePath(path: string): string {
 }
 
 /**
- * 连接路径
+ * 连接多个路径段
+ * 
+ * 将多个路径段连接为一个规范化的完整路径。
+ * 
+ * @param paths - 路径段数组
+ * @returns 连接后的路径
+ * 
+ * @example
+ * ```ts
+ * joinPaths('/api', 'users', '123')  // => '/api/users/123'
+ * joinPaths('/app/', '/admin/')      // => '/app/admin'
+ * joinPaths('', 'about', '')         // => '/about'
+ * ```
  */
 export function joinPaths(...paths: string[]): string {
   return normalizePath(paths.filter(Boolean).join('/'))
@@ -71,6 +118,21 @@ export function joinPaths(...paths: string[]): string {
 
 /**
  * 解析路径参数
+ * 
+ * 从实际路径中提取参数值，基于路径模式。
+ * 
+ * @param pattern - 路径模式（如 '/user/:id'）
+ * @param path - 实际路径（如 '/user/123'）
+ * @returns 参数对象（如 { id: '123' }）
+ * 
+ * @example
+ * ```ts
+ * parsePathParams('/user/:id', '/user/123')
+ * // => { id: '123' }
+ * 
+ * parsePathParams('/post/:category/:id', '/post/tech/456')
+ * // => { category: 'tech', id: '456' }
+ * ```
  */
 export function parsePathParams(pattern: string, path: string): RouteParams {
   const params: RouteParams = {}
@@ -94,6 +156,25 @@ export function parsePathParams(pattern: string, path: string): RouteParams {
 
 /**
  * 构建路径
+ * 
+ * 根据路径模式和参数对象构建实际路径。
+ * 
+ * @param pattern - 路径模式（如 '/user/:id'）
+ * @param params - 参数对象（如 { id: '123' }）
+ * @returns 构建的路径（如 '/user/123'）
+ * @throws {Error} 如果缺少必需参数
+ * 
+ * @example
+ * ```ts
+ * buildPath('/user/:id', { id: '123' })
+ * // => '/user/123'
+ * 
+ * buildPath('/post/:category/:id', { category: 'tech', id: '456' })
+ * // => '/post/tech/456'
+ * 
+ * buildPath('/user/:id?', {})  // 可选参数
+ * // => '/user/'
+ * ```
  */
 export function buildPath(pattern: string, params: RouteParams = {}): string {
   return pattern.replace(/:([^/?]+)(\?)?/g, (_match, paramName, optional) => {
@@ -531,7 +612,7 @@ export {
 } from './error-manager'
 
 // 日志系统
-export { 
+export {
   analyticsLogger,
   debugLogger,
   logger,

@@ -1,7 +1,16 @@
 /**
  * @ldesign/router 路由器核心类
  *
- * 路由器的主要实现，负责路由管理、导航控制和生命周期管理
+ * 路由器的主要实现，负责路由管理、导航控制和生命周期管理。
+ * 
+ * 核心功能：
+ * - 路由注册与管理
+ * - 导航控制与历史管理
+ * - 全局守卫与生命周期钩子
+ * - 内存管理与性能优化
+ * 
+ * @module core/router
+ * @author ldesign
  */
 
 import type { App, Ref } from 'vue'
@@ -32,9 +41,18 @@ import {
 import { RouteMatcher } from './matcher'
 
 /**
- * 导航重定向错误
+ * 导航重定向错误类
+ * 
+ * 用于在导航守卫中抛出重定向异常，触发路由重定向逻辑。
+ * 这是一个内部使用的错误类型，不会暴露给用户。
+ * 
+ * @internal
  */
 class NavigationRedirectError extends Error {
+  /**
+   * 创建导航重定向错误
+   * @param to - 重定向的目标路由位置
+   */
   constructor(public to: RouteLocationNormalized) {
     super('Navigation redirected')
     this.name = 'NavigationRedirectError'
@@ -44,81 +62,165 @@ class NavigationRedirectError extends Error {
 // ==================== 路由器实现 ====================
 
 /**
- * 路由器类（增强版）
+ * 路由器实现类（增强版）
+ * 
+ * 这是 Router 接口的主要实现，提供了完整的路由功能：
+ * 
+ * **核心功能**：
+ * - 路由注册与动态管理
+ * - 导航控制（push/replace/go）
+ * - 全局守卫系统
+ * - 历史记录管理
+ * - 内存自动管理
+ * 
+ * **性能优化**：
+ * - LRU缓存路由匹配结果
+ * - 守卫执行结果缓存
+ * - 统一内存管理器
+ * - 自动垃圾回收
+ * 
+ * @implements {Router}
+ * @class
  */
 export class RouterImpl implements Router {
+  /** 路由匹配器，负责路径匹配和路由解析 */
   private matcher: RouteMatcher
-  private beforeGuards: NavigationGuard[] = []
-  private beforeResolveGuards: NavigationGuard[] = []
-  private afterHooks: NavigationHookAfter[] = []
-  private errorHandlers: Array<(error: Error) => void> = []
-  private isReadyPromise?: Promise<void>
-  private isReadyResolve?: () => void
-  // 待处理的路由位置，用于导航状态管理
-  // private _pendingLocation?: RouteLocationNormalized
 
-  // 内存管理
+  /** 全局前置守卫列表 */
+  private beforeGuards: NavigationGuard[] = []
+
+  /** 全局解析守卫列表 */
+  private beforeResolveGuards: NavigationGuard[] = []
+
+  /** 全局后置钩子列表 */
+  private afterHooks: NavigationHookAfter[] = []
+
+  /** 错误处理器列表 */
+  private errorHandlers: Array<(error: Error) => void> = []
+
+  /** 路由准备就绪的Promise */
+  private isReadyPromise?: Promise<void>
+
+  /** 路由准备就绪的resolve函数 */
+  private isReadyResolve?: () => void
+
+  /** 统一内存管理器，自动管理路由相关的内存占用 */
   private memoryManager: UnifiedMemoryManager
+
+  /** 守卫清理函数列表，用于组件卸载时清理 */
   private guardCleanupFunctions: Array<() => void> = []
 
-  // 优化：守卫执行缓存
+  /** 守卫执行结果缓存，避免重复执行无状态守卫 */
   private guardResultCache = new Map<string, NavigationGuardReturn>()
+
+  /** 守卫缓存最大容量 */
   private readonly MAX_GUARD_CACHE_SIZE = 100
 
+  /** 当前路由的响应式引用 */
   public readonly currentRoute: Ref<RouteLocationNormalized>
+
+  /** 路由器配置选项 */
   public readonly options: RouterOptions
 
+  /**
+   * 创建路由器实例
+   * 
+   * @param options - 路由器配置选项
+   * @param options.history - 历史模式实例（hash/html5/memory）
+   * @param options.routes - 初始路由配置列表
+   * @param options.scrollBehavior - 滚动行为函数
+   * @param options.linkActiveClass - 激活链接的CSS类名
+   * @param options.linkExactActiveClass - 精确激活链接的CSS类名
+   */
   constructor(options: RouterOptions) {
     this.options = options
     this.matcher = new RouteMatcher()
     this.currentRoute = ref(START_LOCATION)
 
-    // 初始化内存管理器（优化：更积极的内存管理）
+    // 初始化统一内存管理器（采用积极的内存管理策略）
     this.memoryManager = new UnifiedMemoryManager({
       monitoring: {
         enabled: true,
-        interval: 60000, // 每分钟检查
-        warningThreshold: 20 * 1024 * 1024, // 20MB
-        criticalThreshold: 40 * 1024 * 1024, // 40MB
+        interval: 60000, // 每分钟检查一次内存使用情况
+        warningThreshold: 20 * 1024 * 1024, // 警告阈值：20MB
+        criticalThreshold: 40 * 1024 * 1024, // 临界阈值：40MB
       },
       tieredCache: {
         enabled: true,
-        l1Capacity: 15,
-        l2Capacity: 30,
-        l3Capacity: 60,
-        promotionThreshold: 2,
-        demotionThreshold: 30000, // 30秒
+        l1Capacity: 15,  // L1缓存容量：15个热门路由
+        l2Capacity: 30,  // L2缓存容量：30个常用路由
+        l3Capacity: 60,  // L3缓存容量：60个冷门路由
+        promotionThreshold: 2,    // 访问2次后提升到上一层
+        demotionThreshold: 30000, // 30秒未访问降级到下一层
       },
       cleanup: {
-        strategy: 'aggressive',
-        autoCleanup: true,
-        cleanupInterval: 120000, // 2分钟
+        strategy: 'aggressive', // 积极的清理策略
+        autoCleanup: true,      // 自动清理过期数据
+        cleanupInterval: 120000, // 每2分钟执行一次清理
       },
     })
 
-    // 创建 isReady Promise
+    // 创建路由准备就绪的Promise，用于等待初始导航完成
     this.isReadyPromise = new Promise((resolve) => {
       this.isReadyResolve = resolve
     })
 
-    // 添加初始路由
+    // 注册所有初始路由到路由表
     for (const route of options.routes) {
       this.addRoute(route)
     }
 
-    // 设置历史监听
+    // 设置浏览器历史记录监听器
     this.setupHistoryListener()
 
-    // 初始化当前路由
+    // 初始化当前路由（处理首次加载）
     this.initializeCurrentRoute()
-
-    // 内存管理器自动启动
   }
 
   // ==================== 路由管理 ====================
 
+  /**
+   * 添加路由记录（支持动态路由）
+   * 
+   * 支持两种调用方式：
+   * 1. addRoute(route) - 添加顶层路由
+   * 2. addRoute(parentName, route) - 添加子路由
+   * 
+   * @param route - 路由配置对象
+   * @returns 返回一个函数，调用后可移除该路由
+   * 
+   * @example
+   * ```ts
+   * // 添加顶层路由
+   * const removeRoute = router.addRoute({
+   *   path: '/about',
+   *   component: About
+   * })
+   * 
+   * // 移除路由
+   * removeRoute()
+   * ```
+   */
   addRoute(route: RouteRecordRaw): () => void
+
+  /**
+   * 添加子路由到指定父路由
+   * 
+   * @param parentName - 父路由的名称
+   * @param route - 子路由配置对象
+   * @returns 返回一个函数，调用后可移除该路由
+   * 
+   * @example
+   * ```ts
+   * // 添加子路由
+   * router.addRoute('parent', {
+   *   path: 'child',
+   *   component: Child
+   * })
+   * ```
+   */
   addRoute(parentName: string | symbol, route: RouteRecordRaw): () => void
+
   addRoute(
     parentNameOrRoute: string | symbol | RouteRecordRaw,
     route?: RouteRecordRaw,
@@ -126,18 +228,19 @@ export class RouterImpl implements Router {
     let normalizedRecord: RouteRecordNormalized
 
     if (typeof parentNameOrRoute === 'object') {
-      // addRoute(route)
+      // 添加顶层路由
       normalizedRecord = this.matcher.addRoute(parentNameOrRoute)
     }
     else {
-      // addRoute(parentName, route)
+      // 添加子路由到指定父路由
       const parent = this.matcher.matchByName(parentNameOrRoute)
       if (!parent) {
-        throw new Error(`Parent route "${String(parentNameOrRoute)}" not found`)
+        throw new Error(`父路由 "${String(parentNameOrRoute)}" 不存在`)
       }
       normalizedRecord = this.matcher.addRoute(route!, parent)
     }
 
+    // 返回移除函数
     return () => {
       if (normalizedRecord.name) {
         this.removeRoute(normalizedRecord.name)
@@ -145,18 +248,69 @@ export class RouterImpl implements Router {
     }
   }
 
+  /**
+   * 移除指定名称的路由
+   * 
+   * @param name - 要移除的路由名称
+   * 
+   * @example
+   * ```ts
+   * router.removeRoute('about')
+   * ```
+   */
   removeRoute(name: string | symbol): void {
     this.matcher.removeRoute(name)
   }
 
+  /**
+   * 获取所有已注册的路由记录
+   * 
+   * @returns 所有路由记录的数组
+   * 
+   * @example
+   * ```ts
+   * const routes = router.getRoutes()
+   * console.log(routes.map(r => r.path))
+   * ```
+   */
   getRoutes(): RouteRecordNormalized[] {
     return this.matcher.getRoutes()
   }
 
+  /**
+   * 检查指定名称的路由是否存在
+   * 
+   * @param name - 路由名称
+   * @returns 如果路由存在返回true，否则返回false
+   * 
+   * @example
+   * ```ts
+   * if (router.hasRoute('about')) {
+   *   console.log('about路由存在')
+   * }
+   * ```
+   */
   hasRoute(name: string | symbol): boolean {
     return this.matcher.hasRoute(name)
   }
 
+  /**
+   * 解析路由位置
+   * 
+   * 将路由位置原始值（字符串或对象）解析为标准化的路由位置对象。
+   * 
+   * @param to - 目标路由位置
+   * @param currentLocation - 当前路由位置（可选）
+   * @returns 标准化的路由位置对象
+   * 
+   * @example
+   * ```ts
+   * const route = router.resolve('/about')
+   * console.log(route.path, route.name, route.params)
+   * 
+   * const route2 = router.resolve({ name: 'user', params: { id: '123' } })
+   * ```
+   */
   resolve(
     to: RouteLocationRaw,
     currentLocation?: RouteLocationNormalized,
@@ -166,49 +320,155 @@ export class RouterImpl implements Router {
 
   // ==================== 导航控制 ====================
 
+  /**
+   * 导航到指定路由（添加历史记录）
+   * 
+   * 这是最常用的导航方法，会在浏览器历史记录中添加一条新记录。
+   * 
+   * @param to - 目标路由位置（字符串路径或路由对象）
+   * @returns Promise，导航成功时resolve，失败时返回NavigationFailure
+   * 
+   * @example
+   * ```ts
+   * // 字符串路径
+   * await router.push('/about')
+   * 
+   * // 路由对象
+   * await router.push({ name: 'user', params: { id: '123' } })
+   * 
+   * // 带查询参数
+   * await router.push({ path: '/search', query: { q: 'vue' } })
+   * ```
+   */
   async push(
     to: RouteLocationRaw,
   ): Promise<NavigationFailure | void | undefined> {
     return this.pushWithRedirect(to, false)
   }
 
+  /**
+   * 替换当前路由（不添加历史记录）
+   * 
+   * 与push类似，但会替换当前历史记录而不是添加新记录。
+   * 用户点击浏览器后退按钮时，不会返回到被替换的路由。
+   * 
+   * @param to - 目标路由位置
+   * @returns Promise，导航成功时resolve，失败时返回NavigationFailure
+   * 
+   * @example
+   * ```ts
+   * // 登录后替换登录页，避免用户后退到登录页
+   * await router.replace('/dashboard')
+   * ```
+   */
   async replace(
     to: RouteLocationRaw,
   ): Promise<NavigationFailure | void | undefined> {
     return this.pushWithRedirect(to, true)
   }
 
+  /**
+   * 在历史记录中前进或后退指定步数
+   * 
+   * @param delta - 前进或后退的步数（正数前进，负数后退）
+   * 
+   * @example
+   * ```ts
+   * router.go(-1)  // 后退一步
+   * router.go(1)   // 前进一步
+   * router.go(-2)  // 后退两步
+   * ```
+   */
   go(delta: number): void {
     this.options.history.go(delta)
   }
 
+  /**
+   * 后退一步（等同于 go(-1)）
+   * 
+   * @example
+   * ```ts
+   * router.back()
+   * ```
+   */
   back(): void {
     this.go(-1)
   }
 
+  /**
+   * 前进一步（等同于 go(1)）
+   * 
+   * @example
+   * ```ts
+   * router.forward()
+   * ```
+   */
   forward(): void {
     this.go(1)
   }
 
   // ==================== 导航守卫 ====================
 
+  /**
+   * 注册全局前置守卫
+   * 
+   * 在每次导航前执行，可以用于：
+   * - 权限验证
+   * - 登录检查
+   * - 数据预加载
+   * - 路由拦截
+   * 
+   * @param guard - 守卫函数
+   * @returns 返回一个函数，调用后可移除该守卫
+   * 
+   * @example
+   * ```ts
+   * // 添加权限检查守卫
+   * const removeGuard = router.beforeEach((to, from, next) => {
+   *   if (to.meta.requiresAuth && !isLoggedIn()) {
+   *     next('/login')  // 重定向到登录页
+   *   } else {
+   *     next()  // 继续导航
+   *   }
+   * })
+   * 
+   * // 移除守卫
+   * removeGuard()
+   * ```
+   */
   beforeEach(guard: NavigationGuard): () => void {
     this.beforeGuards.push(guard)
 
-    // 内存监控已在UnifiedMemoryManager内部处理
-
+    // 创建清理函数
     const cleanup = () => {
       const index = this.beforeGuards.indexOf(guard)
       if (index >= 0) {
         this.beforeGuards.splice(index, 1)
       }
-      // 清理已在UnifiedMemoryManager内部处理
     }
 
     this.guardCleanupFunctions.push(cleanup)
     return cleanup
   }
 
+  /**
+   * 注册全局解析守卫
+   * 
+   * 在导航被确认之前、所有组件内守卫和异步路由组件被解析之后调用。
+   * 适合做一些最后的检查或处理。
+   * 
+   * @param guard - 守卫函数
+   * @returns 返回一个函数，调用后可移除该守卫
+   * 
+   * @example
+   * ```ts
+   * router.beforeResolve((to, from, next) => {
+   *   // 在这里可以访问所有已解析的组件
+   *   console.log('即将完成导航到:', to.path)
+   *   next()
+   * })
+   * ```
+   */
   beforeResolve(guard: NavigationGuard): () => void {
     this.beforeResolveGuards.push(guard)
     return () => {
@@ -219,6 +479,29 @@ export class RouterImpl implements Router {
     }
   }
 
+  /**
+   * 注册全局后置钩子
+   * 
+   * 在导航完成后执行，不能更改导航。
+   * 适合用于：
+   * - 页面标题更新
+   * - 统计分析
+   * - 页面追踪
+   * 
+   * @param hook - 后置钩子函数
+   * @returns 返回一个函数，调用后可移除该钩子
+   * 
+   * @example
+   * ```ts
+   * router.afterEach((to, from) => {
+   *   // 更新页面标题
+   *   document.title = to.meta.title || 'Default Title'
+   *   
+   *   // 发送统计信息
+   *   analytics.track('page_view', { path: to.path })
+   * })
+   * ```
+   */
   afterEach(hook: NavigationHookAfter): () => void {
     this.afterHooks.push(hook)
     return () => {
@@ -229,6 +512,29 @@ export class RouterImpl implements Router {
     }
   }
 
+  /**
+   * 注册全局错误处理器
+   * 
+   * 捕获路由过程中发生的错误，包括：
+   * - 守卫中抛出的错误
+   * - 组件加载失败
+   * - 异步操作失败
+   * 
+   * @param handler - 错误处理函数
+   * @returns 返回一个函数，调用后可移除该处理器
+   * 
+   * @example
+   * ```ts
+   * router.onError((error) => {
+   *   console.error('路由错误:', error)
+   *   
+   *   // 显示错误提示
+   *   if (error.message.includes('Loading chunk')) {
+   *     alert('页面加载失败，请刷新重试')
+   *   }
+   * })
+   * ```
+   */
   onError(handler: (error: Error) => void): () => void {
     this.errorHandlers.push(handler)
     return () => {
@@ -241,55 +547,116 @@ export class RouterImpl implements Router {
 
   // ==================== 生命周期 ====================
 
+  /**
+   * 等待路由器准备就绪
+   * 
+   * 返回一个Promise，在初始导航完成后resolve。
+   * 适合在服务端渲染(SSR)或需要等待首次导航完成的场景。
+   * 
+   * @returns Promise，路由器准备就绪时resolve
+   * 
+   * @example
+   * ```ts
+   * // 等待路由器准备就绪后再挂载应用
+   * await router.isReady()
+   * app.mount('#app')
+   * ```
+   */
   async isReady(): Promise<void> {
     return this.isReadyPromise!
   }
 
+  /**
+   * 安装路由器到Vue应用
+   * 
+   * 这个方法会：
+   * 1. 注入路由器实例和当前路由
+   * 2. 添加全局属性 $router 和 $route
+   * 3. 注册全局组件 RouterLink 和 RouterView
+   * 
+   * 通常通过 app.use(router) 自动调用。
+   * 
+   * @param app - Vue应用实例
+   * 
+   * @example
+   * ```ts
+   * const app = createApp(App)
+   * app.use(router)  // 内部调用 router.install(app)
+   * ```
+   */
   install(app: App): void {
+    // 注入路由器实例和当前路由，供子组件通过 inject 使用
     app.provide(ROUTER_INJECTION_SYMBOL, this)
     app.provide(ROUTE_INJECTION_SYMBOL, this.currentRoute)
 
-    // 全局属性
+    // 添加全局属性，支持选项式API访问
     app.config.globalProperties.$router = this
     app.config.globalProperties.$route = this.currentRoute
 
     // 注册全局组件
     app.component('RouterLink', RouterLink)
     app.component('RouterView', RouterView)
-
-    // 注册全局组件
-    // 这里会在组件实现后添加
   }
 
   /**
    * 销毁路由器，清理所有资源
+   * 
+   * 执行完整的清理操作：
+   * - 停止内存管理器
+   * - 移除所有守卫和钩子
+   * - 清空缓存
+   * - 清理历史监听器
+   * 
+   * 适合在应用卸载或路由器不再需要时调用。
+   * 
+   * @example
+   * ```ts
+   * // 应用卸载时清理路由器
+   * router.destroy()
+   * ```
    */
   destroy(): void {
-    // 销毁内存管理
+    // 销毁统一内存管理器
     this.memoryManager.destroy()
 
-    // 清理所有守卫
+    // 清理所有守卫的清理函数
     this.guardCleanupFunctions.forEach(cleanup => cleanup())
     this.guardCleanupFunctions = []
 
-    // 清理数组
+    // 清空所有守卫和钩子数组
     this.beforeGuards.length = 0
     this.beforeResolveGuards.length = 0
     this.afterHooks.length = 0
     this.errorHandlers.length = 0
 
-    // 清理守卫缓存
+    // 清空守卫执行结果缓存
     this.guardResultCache.clear()
 
-    // 清理匹配器缓存
+    // 清空路由匹配器缓存
     this.matcher.clearCache()
 
-    // 清理历史监听器
+    // 清理历史记录监听器
     this.options.history.destroy()
   }
 
   /**
    * 获取内存统计信息
+   * 
+   * 返回详细的内存使用情况，包括：
+   * - 内存管理器统计
+   * - 路由匹配器统计
+   * - 守卫数量统计
+   * 
+   * 用于性能监控和调试。
+   * 
+   * @returns 内存统计对象
+   * 
+   * @example
+   * ```ts
+   * const stats = router.getMemoryStats()
+   * console.log('守卫数量:', stats.guards.beforeGuards)
+   * console.log('缓存命中率:', stats.matcher.cacheHitRate)
+   * ```
    */
   getMemoryStats() {
     return {
@@ -306,11 +673,17 @@ export class RouterImpl implements Router {
 
   // ==================== 私有方法 ====================
 
-  // 重定向跟踪，防止无限重定向
+  /** 重定向计数器，用于防止无限重定向 */
   private redirectCount = 0
+
+  /** 最大重定向次数限制 */
   private readonly MAX_REDIRECTS = 10
+
+  /** 重定向开始时间戳 */
   private redirectStartTime = 0
-  private readonly REDIRECT_TIMEOUT = 5000 // 5秒超时
+
+  /** 重定向超时时间（毫秒） */
+  private readonly REDIRECT_TIMEOUT = 5000
 
   private async pushWithRedirect(
     to: RouteLocationRaw,

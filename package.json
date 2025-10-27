@@ -199,9 +199,7 @@
       "types": "./es/utils/*.d.ts",
       "import": "./es/utils/*.js",
       "require": "./lib/utils/*.cjs"
-    },
-    "./es/examples/MultiStepForm.vue.css": "./es/examples/MultiStepForm.vue.css",
-    "./lib/examples/MultiStepForm.vue.css": "./lib/examples/MultiStepForm.vue.css"
+    }
   },
   "main": "./lib/index.cjs",
   "module": "./es/index.js",
@@ -213,8 +211,7 @@
     "LICENSE",
     "package.json",
     "es",
-    "lib",
-    "dist"
+    "lib"
   ],
   "scripts": {
     "build": "ldesign-builder build",

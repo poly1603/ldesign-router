@@ -36,6 +36,35 @@ export type {
   UserBehaviorEvent,
 } from './analytics/route-analytics'
 
+// ==================== 高级路由分析导出 ====================
+
+export {
+  AdvancedRouteAnalyzer,
+  createAdvancedAnalyzer,
+} from './analytics/advanced-analytics'
+
+export type {
+  RouteAccessStats,
+  UserPath,
+  ConversionFunnel,
+  HeatmapData,
+} from './analytics/advanced-analytics'
+
+// ==================== 路由过渡动画增强导出 ====================
+
+export {
+  TRANSITION_PRESETS,
+  getTransitionClasses,
+  injectTransitionStyles,
+} from './features/route-transition'
+
+export type {
+  TransitionType,
+  EasingFunction,
+  TransitionConfig,
+  SharedElementConfig,
+} from './features/route-transition'
+
 // Vue 组件
 export {
   DeviceUnsupported,
@@ -375,6 +404,16 @@ export async function createFullRouter(options: {
 
 // ==================== 开发工具导出 ====================
 
+export {
+  PerformancePanel,
+  createPerformancePanel,
+} from './debug/performance-panel'
+
+export type {
+  PerformanceDataPoint,
+  PerformancePanelConfig,
+} from './debug/performance-panel'
+
 // ==================== 路由性能分析器导出 ====================
 export {
   generatePerformanceReport,
@@ -514,6 +553,59 @@ export {
 } from './middleware'
 
 // 懒加载功能已集成到其他模块中
+
+// ==================== SEO优化工具导出 ====================
+
+export {
+  SEOManager,
+  createSEOManager,
+  createSEOPlugin,
+  createSEOVuePlugin,
+  useSEO,
+  useRouteSEO,
+  usePageMeta,
+  useStructuredData,
+} from './features/seo'
+
+export type {
+  SEOConfig,
+  SEOMeta,
+  OpenGraphMeta,
+  TwitterCardMeta,
+  StructuredData,
+  SEOPluginOptions,
+} from './features/seo'
+
+// ==================== 智能预加载导出 ====================
+
+export {
+  SmartPreloadPlugin,
+  createSmartPreloadPlugin,
+} from './plugins/smart-preload'
+
+export type {
+  SmartPreloadConfig,
+} from './plugins/smart-preload'
+
+// ==================== SSR支持导出 ====================
+
+export {
+  SSRManager,
+  createSSRManager,
+  createSSRRouter,
+  isSSR,
+  isClient,
+  waitForAsyncComponents,
+  useSSRData,
+  useAsyncData,
+  useSSRContext,
+} from './ssr'
+
+export type {
+  SSRContext,
+  SSRCacheConfig,
+  DataFetcher,
+} from './ssr'
 
 // ==================== 性能监控导出 ====================
 
@@ -700,6 +792,20 @@ export type {
   MemoryStats,
   UnifiedMemoryConfig,
 } from './utils/unified-memory-manager'
+
+// ==================== 内存泄漏检测导出 ====================
+export {
+  MemoryLeakDetector,
+  createMemoryLeakDetector,
+  estimateObjectSize,
+  hasCircularReference,
+  LeakType,
+} from './utils/memory-leak-detector'
+
+export type {
+  MemoryLeakReport,
+  LeakDetectorConfig,
+} from './utils/memory-leak-detector'
 
 // ==================== 默认导出 ====================
 

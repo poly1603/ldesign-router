@@ -1,7 +1,31 @@
 /**
- * 统一的错误管理系统
+ * @ldesign/router 统一错误管理系统
+ *
+ * 提供集中化的错误处理、追踪、恢复和报告机制。
  * 
- * 提供集中化的错误处理、追踪和恢复机制
+ * **核心功能**：
+ * - 错误分类和严重程度评估
+ * - 错误历史记录和统计
+ * - 自动错误恢复策略
+ * - 错误监听和通知
+ * - 全局错误捕获
+ * 
+ * **错误类型**：
+ * - NAVIGATION - 导航错误
+ * - GUARD - 守卫执行错误
+ * - MIDDLEWARE - 中间件错误
+ * - COMPONENT - 组件加载错误
+ * - NETWORK - 网络请求错误
+ * - PERMISSION - 权限验证错误
+ * 
+ * **恢复策略**：
+ * - 自动重试（带退避算法）
+ * - 降级处理
+ * - 回退到安全路由
+ * - 用户提示
+ * 
+ * @module utils/error-manager
+ * @author ldesign
  */
 
 import { logger } from './logger'
@@ -84,7 +108,7 @@ export class ErrorManager {
       enableErrorReporting: false,
       ...config
     }
-    
+
     this.recoveryStrategies = config?.recoveryStrategies || this.getDefaultRecoveryStrategies()
     this.setupGlobalErrorHandlers()
   }
@@ -205,18 +229,18 @@ export class ErrorManager {
 
     // 记录错误
     this.logError(error)
-    
+
     // 保存到历史记录
     this.addToHistory(error)
-    
+
     // 通知监听器
     this.notifyListeners(error)
-    
+
     // 尝试自动恢复
     if (this.config.enableAutoRecovery && !this.isRecovering) {
       this.attemptRecovery(error)
     }
-    
+
     // 上报错误
     if (this.config.enableErrorReporting) {
       this.reportError(error)
@@ -228,7 +252,7 @@ export class ErrorManager {
    */
   private logError(error: ErrorDetails): void {
     const logMessage = `[${error.type}] ${error.message}`
-    
+
     switch (error.severity) {
       case ErrorSeverity.CRITICAL:
       case ErrorSeverity.HIGH:
@@ -248,7 +272,7 @@ export class ErrorManager {
    */
   private addToHistory(error: ErrorDetails): void {
     this.errorHistory.push(error)
-    
+
     // 限制历史记录大小
     if (this.errorHistory.length > this.config.maxErrorHistory) {
       this.errorHistory.shift()
@@ -273,19 +297,19 @@ export class ErrorManager {
    */
   private async attemptRecovery(error: ErrorDetails): Promise<void> {
     if (!error.recoverable) return
-    
+
     const strategy = this.recoveryStrategies.get(error.type)
     if (!strategy) return
-    
+
     if (!strategy.shouldRecover(error)) {
       if (strategy.fallback) {
         strategy.fallback()
       }
       return
     }
-    
+
     this.isRecovering = true
-    
+
     try {
       await strategy.recover(error)
       logger.info('Successfully recovered from error', error)
@@ -306,7 +330,7 @@ export class ErrorManager {
    */
   private async reportError(error: ErrorDetails): Promise<void> {
     if (!this.config.reportingEndpoint) return
-    
+
     try {
       await fetch(this.config.reportingEndpoint, {
         method: 'POST',
@@ -351,7 +375,7 @@ export class ErrorManager {
    */
   getErrorHistory(filter?: { type?: ErrorType; severity?: ErrorSeverity }): ErrorDetails[] {
     if (!filter) return [...this.errorHistory]
-    
+
     return this.errorHistory.filter(error => {
       if (filter.type && error.type !== filter.type) return false
       if (filter.severity && error.severity !== filter.severity) return false
@@ -381,15 +405,15 @@ export class ErrorManager {
       bySeverity: {} as Record<ErrorSeverity, number>,
       recentErrors: this.errorHistory.slice(-10)
     }
-    
+
     this.errorHistory.forEach(error => {
       // 按类型统计
       stats.byType[error.type] = (stats.byType[error.type] || 0) + 1
-      
+
       // 按严重程度统计
       stats.bySeverity[error.severity] = (stats.bySeverity[error.severity] || 0) + 1
     })
-    
+
     return stats
   }
 
@@ -402,11 +426,11 @@ export class ErrorManager {
     options?: Partial<ErrorDetails>
   ): Error {
     const error = new Error(message)
-    ;(error as any).__errorDetails = {
-      type,
-      message,
-      ...options
-    }
+      ; (error as any).__errorDetails = {
+        type,
+        message,
+        ...options
+      }
     return error
   }
 
@@ -450,7 +474,7 @@ export class ErrorManager {
   static errorHandler(errorType: ErrorType = ErrorType.UNKNOWN) {
     return (target: any, propertyKey: string, descriptor: PropertyDescriptor) => {
       const originalMethod = descriptor.value
-      
+
       descriptor.value = function (...args: any[]) {
         try {
           const result = originalMethod.apply(this, args)
@@ -484,7 +508,7 @@ export class ErrorManager {
           throw error
         }
       }
-      
+
       return descriptor
     }
   }
