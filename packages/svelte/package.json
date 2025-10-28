@@ -1,0 +1,98 @@
+{
+  "name": "@ldesign/router-svelte",
+  "version": "1.0.0",
+  "description": "Svelte router library with enhanced features, built on svelte-navigator",
+  "keywords": [
+    "svelte",
+    "router",
+    "navigation",
+    "spa",
+    "typescript",
+    "svelte-navigator"
+  ],
+  "author": "ldesign",
+  "license": "MIT",
+  "homepage": "https://github.com/ldesign/ldesign/tree/main/packages/router/packages/svelte#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ldesign/ldesign.git",
+    "directory": "packages/router/packages/svelte"
+  },
+  "bugs": {
+    "url": "https://github.com/ldesign/ldesign/issues"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./es/index.d.ts",
+      "import": "./es/index.js",
+      "require": "./lib/index.cjs",
+      "svelte": "./es/index.js"
+    },
+    "./components": {
+      "types": "./es/components/index.d.ts",
+      "import": "./es/components/index.js",
+      "require": "./lib/components/index.cjs",
+      "svelte": "./es/components/index.js"
+    },
+    "./stores": {
+      "types": "./es/stores/index.d.ts",
+      "import": "./es/stores/index.js",
+      "require": "./lib/stores/index.cjs"
+    },
+    "./plugins": {
+      "types": "./es/plugins/index.d.ts",
+      "import": "./es/plugins/index.js",
+      "require": "./lib/plugins/index.cjs"
+    }
+  },
+  "main": "./lib/index.cjs",
+  "module": "./es/index.js",
+  "types": "./es/index.d.ts",
+  "svelte": "./es/index.js",
+  "files": [
+    "README.md",
+    "LICENSE",
+    "package.json",
+    "es",
+    "lib"
+  ],
+  "scripts": {
+    "build": "ldesign-builder build",
+    "build:watch": "ldesign-builder build --watch",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "clean": "rimraf es lib dist",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "pnpm run clean && pnpm run build"
+  },
+  "dependencies": {
+    "@ldesign/router-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "svelte": "^4.0.0 || ^5.0.0"
+  },
+  "devDependencies": {
+    "@ldesign/builder": "workspace:../../../../tools/builder",
+    "@sveltejs/vite-plugin-svelte": "^3.0.0",
+    "@types/node": "^22.0.0",
+    "eslint": "^9.18.0",
+    "svelte": "^4.2.8",
+    "svelte-check": "^3.6.2",
+    "typescript": "^5.7.3",
+    "vite": "^5.0.12",
+    "vitest": "^3.2.4"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}
+
+

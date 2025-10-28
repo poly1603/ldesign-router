@@ -1,16 +1,20 @@
 {
   "name": "@ldesign/router",
   "version": "1.0.0",
-  "description": "A modern, high-performance Vue router library with TypeScript support, independent of vue-router",
+  "private": true,
+  "description": "Multi-framework router library workspace for ldesign",
   "keywords": [
-    "vue",
     "router",
     "navigation",
     "spa",
     "typescript",
     "performance",
-    "modern",
-    "independent"
+    "vue",
+    "react",
+    "svelte",
+    "solid",
+    "angular",
+    "multi-framework"
   ],
   "author": "ldesign",
   "license": "MIT",
@@ -24,6 +28,9 @@
     "url": "https://github.com/ldesign/ldesign/issues"
   },
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "exports": {
     ".": {
       "types": "./es/index.d.ts",
@@ -214,41 +221,24 @@
     "lib"
   ],
   "scripts": {
-    "build": "ldesign-builder build",
-    "build:watch": "ldesign-builder build --watch",
-    "type-check": "tsc --noEmit",
+    "build": "pnpm -r --filter=@ldesign/router-* run build",
+    "build:core": "pnpm --filter=@ldesign/router-core run build",
+    "build:vue": "pnpm --filter=@ldesign/router-vue run build",
+    "build:react": "pnpm --filter=@ldesign/router-react run build",
+    "build:svelte": "pnpm --filter=@ldesign/router-svelte run build",
+    "build:solid": "pnpm --filter=@ldesign/router-solid run build",
+    "build:angular": "pnpm --filter=@ldesign/router-angular run build",
+    "build:watch": "pnpm -r --filter=@ldesign/router-* run build:watch",
+    "type-check": "pnpm -r run type-check",
     "lint": "eslint . --fix",
     "lint:check": "eslint .",
-    "benchmark": "node scripts/performance-benchmark.js",
-    "benchmark:regression": "node scripts/performance-regression.js",
-    "benchmark:comparison": "node scripts/performance-comparison.js",
-    "clean": "rimraf es lib dist",
-    "prepublishOnly": "pnpm run clean && pnpm run build",
-    "build:check": "pnpm run build && node ../../tools/scripts/build/bundle-validator.js",
-    "build:analyze": "pnpm run build && node ../../tools/scripts/build/bundle-analyzer.js",
-    "build:validate": "pnpm run build && node ../../tools/scripts/build/validate-build.js",
-    "build:browser-test": "pnpm run build && node ../../tools/scripts/build/browser-tester.js",
-    "validate": "pnpm run type-check && pnpm run test:run && pnpm run build",
-    "validate:quick": "pnpm run type-check",
-    "commit": "git-cz",
-    "precommit": "lint-staged",
-    "commit-msg": "commitlint --edit",
-    "commit:interactive": "node scripts/commit.js",
-    "validate:full": "node scripts/validate.js",
-    "validate:e2e": "node scripts/validate.js --e2e",
-    "build:dev": "node scripts/build.js --dev",
-    "lint:fix": "eslint . --fix"
+    "clean": "pnpm -r run clean && rimraf es lib dist",
+    "test": "pnpm -r run test",
+    "dev": "pnpm -r --parallel run dev",
+    "prepublishOnly": "pnpm run clean && pnpm run build"
   },
-  "dependencies": {
-    "@ldesign/device": "workspace:*",
-    "mitt": "^3.0.1",
-    "nanoid": "^5.0.9"
-  },
-  "peerDependencies": {
-    "@ldesign/device": "^1.0.0",
-    "@ldesign/engine": "^1.0.0",
-    "vue": "^3.3.0"
-  },
+  "dependencies": {},
+  "peerDependencies": {},
   "devDependencies": {
     "@ldesign/builder": "workspace:*",
     "@ldesign/engine": "workspace:*",
@@ -304,15 +294,5 @@
       "limit": "40 KB"
     }
   ],
-  "peerDependenciesMeta": {
-    "@ldesign/device": {
-      "optional": false
-    },
-    "@ldesign/engine": {
-      "optional": true
-    },
-    "vue": {
-      "optional": true
-    }
-  }
+  "peerDependenciesMeta": {}
 }
