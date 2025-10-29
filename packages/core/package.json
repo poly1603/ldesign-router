@@ -27,25 +27,52 @@
       "import": "./es/index.js",
       "require": "./lib/index.cjs"
     },
+    "./features": {
+      "types": "./es/features/index.d.ts",
+      "import": "./es/features/index.js",
+      "require": "./lib/features/index.cjs"
+    },
+    "./features/*": {
+      "types": "./es/features/*.d.ts",
+      "import": "./es/features/*.js",
+      "require": "./lib/features/*.cjs"
+    },
+    "./history": {
+      "types": "./es/history/index.d.ts",
+      "import": "./es/history/index.js",
+      "require": "./lib/history/index.cjs"
+    },
+    "./history/*": {
+      "types": "./es/history/*.d.ts",
+      "import": "./es/history/*.js",
+      "require": "./lib/history/*.cjs"
+    },
     "./types": {
       "types": "./es/types/index.d.ts",
       "import": "./es/types/index.js",
       "require": "./lib/types/index.cjs"
+    },
+    "./types/*": {
+      "types": "./es/types/*.d.ts",
+      "import": "./es/types/*.js",
+      "require": "./lib/types/*.cjs"
     },
     "./utils": {
       "types": "./es/utils/index.d.ts",
       "import": "./es/utils/index.js",
       "require": "./lib/utils/index.cjs"
     },
-    "./history": {
-      "types": "./es/history/index.d.ts",
-      "import": "./es/history/index.js",
-      "require": "./lib/history/index.cjs"
+    "./utils/*": {
+      "types": "./es/utils/*.d.ts",
+      "import": "./es/utils/*.js",
+      "require": "./lib/utils/*.cjs"
     }
   },
   "main": "./lib/index.cjs",
   "module": "./es/index.js",
   "types": "./es/index.d.ts",
+  "unpkg": "./dist/index.min.js",
+  "jsdelivr": "./dist/index.min.js",
   "files": [
     "README.md",
     "LICENSE",
@@ -69,7 +96,7 @@
     "nanoid": "^5.0.9"
   },
   "devDependencies": {
-    "@ldesign/builder": "workspace:../../../../tools/builder",
+    "@ldesign/builder": "workspace:*",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "typescript": "^5.7.3",
@@ -84,4 +111,3 @@
     "registry": "https://registry.npmjs.org/"
   }
 }
-

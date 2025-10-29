@@ -1,23 +1,21 @@
 {
-  "name": "@ldesign/router-vue",
+  "name": "@ldesign/router-sveltekit",
   "version": "1.0.0",
-  "description": "Vue 3 router library with enhanced features, built on vue-router",
+  "description": "SvelteKit router library with enhanced features, built on $app/navigation",
   "keywords": [
-    "vue",
-    "vue3",
+    "sveltekit",
+    "svelte",
     "router",
     "navigation",
-    "spa",
-    "typescript",
-    "vue-router"
+    "typescript"
   ],
   "author": "ldesign",
   "license": "MIT",
-  "homepage": "https://github.com/ldesign/ldesign/tree/main/packages/router/packages/vue#readme",
+  "homepage": "https://github.com/ldesign/ldesign/tree/main/packages/router/packages/sveltekit#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/ldesign/ldesign.git",
-    "directory": "packages/router/packages/vue"
+    "directory": "packages/router/packages/sveltekit"
   },
   "bugs": {
     "url": "https://github.com/ldesign/ldesign/issues"
@@ -28,26 +26,13 @@
       "types": "./es/index.d.ts",
       "import": "./es/index.js",
       "require": "./lib/index.cjs"
-    },
-    "./components": {
-      "types": "./es/components/index.d.ts",
-      "import": "./es/components/index.js",
-      "require": "./lib/components/index.cjs"
-    },
-    "./composables": {
-      "types": "./es/composables/index.d.ts",
-      "import": "./es/composables/index.js",
-      "require": "./lib/composables/index.cjs"
-    },
-    "./plugins": {
-      "types": "./es/plugins/index.d.ts",
-      "import": "./es/plugins/index.js",
-      "require": "./lib/plugins/index.cjs"
     }
   },
   "main": "./lib/index.cjs",
   "module": "./es/index.js",
   "types": "./es/index.d.ts",
+  "unpkg": "./dist/index.min.js",
+  "jsdelivr": "./dist/index.min.js",
   "files": [
     "README.md",
     "LICENSE",
@@ -58,7 +43,7 @@
   "scripts": {
     "build": "ldesign-builder build",
     "build:watch": "ldesign-builder build --watch",
-    "type-check": "vue-tsc --noEmit",
+    "type-check": "tsc --noEmit",
     "lint": "eslint . --fix",
     "lint:check": "eslint .",
     "clean": "rimraf es lib dist",
@@ -67,31 +52,25 @@
     "prepublishOnly": "pnpm run clean && pnpm run build"
   },
   "dependencies": {
-    "@ldesign/router-core": "workspace:*",
-    "@ldesign/device": "workspace:*",
-    "@ldesign/engine": "workspace:*",
-    "vue-router": "^4.2.5"
+    "@ldesign/router-core": "workspace:*"
   },
   "peerDependencies": {
-    "vue": "^3.3.0",
-    "vue-router": "^4.2.0"
+    "@sveltejs/kit": "^2.0.0",
+    "svelte": "^4.0.0 || ^5.0.0"
   },
   "devDependencies": {
     "@ldesign/builder": "workspace:*",
-    "@ldesign/engine": "workspace:*",
+    "@sveltejs/kit": "^2.0.0",
+    "@sveltejs/vite-plugin-svelte": "^3.0.0",
     "@types/node": "^22.0.0",
-    "@vitejs/plugin-vue": "^5.0.3",
-    "@vue/test-utils": "^2.4.4",
     "eslint": "^9.18.0",
-    "jsdom": "^24.0.0",
+    "svelte": "^4.2.0",
     "typescript": "^5.7.3",
     "vite": "^5.0.12",
-    "vitest": "^3.2.4",
-    "vue": "^3.4.15",
-    "vue-tsc": "^3.0.5"
+    "vitest": "^3.2.4"
   },
   "engines": {
-    "node": ">=16.0.0",
+    "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
   },
   "publishConfig": {
@@ -99,4 +78,3 @@
     "registry": "https://registry.npmjs.org/"
   }
 }
-

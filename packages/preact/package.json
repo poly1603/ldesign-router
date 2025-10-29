@@ -1,22 +1,21 @@
 {
-  "name": "@ldesign/router-react",
+  "name": "@ldesign/router-preact",
   "version": "1.0.0",
-  "description": "React router library with enhanced features, built on react-router-dom",
+  "description": "Preact router library with enhanced features, built on preact-router",
   "keywords": [
-    "react",
+    "preact",
     "router",
     "navigation",
     "spa",
-    "typescript",
-    "react-router"
+    "typescript"
   ],
   "author": "ldesign",
   "license": "MIT",
-  "homepage": "https://github.com/ldesign/ldesign/tree/main/packages/router/packages/react#readme",
+  "homepage": "https://github.com/ldesign/ldesign/tree/main/packages/router/packages/preact#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/ldesign/ldesign.git",
-    "directory": "packages/router/packages/react"
+    "directory": "packages/router/packages/preact"
   },
   "bugs": {
     "url": "https://github.com/ldesign/ldesign/issues"
@@ -37,11 +36,6 @@
       "types": "./es/hooks/index.d.ts",
       "import": "./es/hooks/index.js",
       "require": "./lib/hooks/index.cjs"
-    },
-    "./plugins": {
-      "types": "./es/plugins/index.d.ts",
-      "import": "./es/plugins/index.js",
-      "require": "./lib/plugins/index.cjs"
     }
   },
   "main": "./lib/index.cjs",
@@ -67,31 +61,21 @@
   },
   "dependencies": {
     "@ldesign/router-core": "workspace:*",
-    "@ldesign/device": "workspace:*",
-    "@ldesign/engine": "workspace:*",
-    "react-router-dom": "^6.20.0"
+    "preact-router": "^4.1.0"
   },
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-router-dom": "^6.20.0"
+    "preact": "^10.0.0"
   },
   "devDependencies": {
     "@ldesign/builder": "workspace:*",
-    "@ldesign/device": "workspace:*",
-    "@ldesign/engine": "workspace:*",
     "@types/node": "^22.0.0",
-    "@types/react": "^18.2.43",
-    "@types/react-dom": "^18.2.17",
-    "@testing-library/react": "^14.1.2",
-    "@testing-library/react-hooks": "^8.0.1",
     "eslint": "^9.18.0",
     "jsdom": "^24.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
+    "preact": "^10.19.0",
     "typescript": "^5.7.3",
     "vite": "^5.0.12",
-    "vitest": "^3.2.4"
+    "vitest": "^3.2.4",
+    "@preact/preset-vite": "^2.5.0"
   },
   "engines": {
     "node": ">=16.0.0",
@@ -102,4 +86,3 @@
     "registry": "https://registry.npmjs.org/"
   }
 }
-

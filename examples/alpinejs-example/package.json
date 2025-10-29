@@ -1,0 +1,19 @@
+{
+  "name": "alpinejs-router-example",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Alpine.js router example using @ldesign/router-alpinejs",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ldesign/router-alpinejs": "workspace:*",
+    "alpinejs": "^3.13.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.12"
+  }
+}

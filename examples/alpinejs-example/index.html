@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alpine.js Router Example</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: #f5f5f5;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    
+    header {
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    h1 {
+      color: #2c3e50;
+      margin-bottom: 20px;
+    }
+    
+    nav {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+    
+    nav a {
+      padding: 10px 20px;
+      background: #3498db;
+      color: white;
+      text-decoration: none;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+    
+    nav a:hover {
+      background: #2980b9;
+    }
+    
+    nav a.active {
+      background: #27ae60;
+    }
+    
+    main {
+      background: #fff;
+      padding: 30px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      min-height: 400px;
+    }
+    
+    .route-info {
+      background: #ecf0f1;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 20px;
+      font-family: monospace;
+    }
+    
+    .actions {
+      margin-top: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    
+    button {
+      padding: 10px 20px;
+      background: #9b59b6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    
+    button:hover {
+      background: #8e44ad;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>🎉 Alpine.js Router Example</h1>
+      <p>使用 @ldesign/router-alpinejs 的简单示例</p>
+    </header>
+
+    <nav>
+      <a href="#/" data-link>首页</a>
+      <a href="#/about" data-link>关于</a>
+      <a href="#/contact" data-link>联系</a>
+      <a href="#/user/123" data-link>用户详情</a>
+    </nav>
+
+    <main id="app">
+      <div id="content">
+        <h2>正在加载...</h2>
+      </div>
+      
+      <div class="route-info">
+        <div><strong>当前路由:</strong> <span id="current-path">/</span></div>
+        <div><strong>路由参数:</strong> <span id="route-params">{}</span></div>
+      </div>
+
+      <div class="actions">
+        <button id="back-btn">← 后退</button>
+        <button id="forward-btn">前进 →</button>
+        <button id="home-btn">回到首页</button>
+      </div>
+    </main>
+  </div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>

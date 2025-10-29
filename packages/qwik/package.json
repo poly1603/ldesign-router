@@ -1,22 +1,22 @@
 {
-  "name": "@ldesign/router-react",
+  "name": "@ldesign/router-qwik",
   "version": "1.0.0",
-  "description": "React router library with enhanced features, built on react-router-dom",
+  "description": "Qwik router library with enhanced features, built on @builder.io/qwik-city",
   "keywords": [
-    "react",
+    "qwik",
     "router",
     "navigation",
     "spa",
     "typescript",
-    "react-router"
+    "qwik-city"
   ],
   "author": "ldesign",
   "license": "MIT",
-  "homepage": "https://github.com/ldesign/ldesign/tree/main/packages/router/packages/react#readme",
+  "homepage": "https://github.com/ldesign/ldesign/tree/main/packages/router/packages/qwik#readme",
   "repository": {
     "type": "git",
     "url": "https://github.com/ldesign/ldesign.git",
-    "directory": "packages/router/packages/react"
+    "directory": "packages/router/packages/qwik"
   },
   "bugs": {
     "url": "https://github.com/ldesign/ldesign/issues"
@@ -32,16 +32,6 @@
       "types": "./es/components/index.d.ts",
       "import": "./es/components/index.js",
       "require": "./lib/components/index.cjs"
-    },
-    "./hooks": {
-      "types": "./es/hooks/index.d.ts",
-      "import": "./es/hooks/index.js",
-      "require": "./lib/hooks/index.cjs"
-    },
-    "./plugins": {
-      "types": "./es/plugins/index.d.ts",
-      "import": "./es/plugins/index.js",
-      "require": "./lib/plugins/index.cjs"
     }
   },
   "main": "./lib/index.cjs",
@@ -66,29 +56,18 @@
     "prepublishOnly": "pnpm run clean && pnpm run build"
   },
   "dependencies": {
-    "@ldesign/router-core": "workspace:*",
-    "@ldesign/device": "workspace:*",
-    "@ldesign/engine": "workspace:*",
-    "react-router-dom": "^6.20.0"
+    "@ldesign/router-core": "workspace:*"
   },
   "peerDependencies": {
-    "react": "^18.0.0",
-    "react-dom": "^18.0.0",
-    "react-router-dom": "^6.20.0"
+    "@builder.io/qwik": "^1.0.0",
+    "@builder.io/qwik-city": "^1.0.0"
   },
   "devDependencies": {
+    "@builder.io/qwik": "^1.3.0",
+    "@builder.io/qwik-city": "^1.3.0",
     "@ldesign/builder": "workspace:*",
-    "@ldesign/device": "workspace:*",
-    "@ldesign/engine": "workspace:*",
     "@types/node": "^22.0.0",
-    "@types/react": "^18.2.43",
-    "@types/react-dom": "^18.2.17",
-    "@testing-library/react": "^14.1.2",
-    "@testing-library/react-hooks": "^8.0.1",
     "eslint": "^9.18.0",
-    "jsdom": "^24.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
     "typescript": "^5.7.3",
     "vite": "^5.0.12",
     "vitest": "^3.2.4"
@@ -102,4 +81,3 @@
     "registry": "https://registry.npmjs.org/"
   }
 }
-
