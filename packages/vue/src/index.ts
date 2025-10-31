@@ -72,7 +72,6 @@ export type {
 
 // ==================== Composables 导出 ====================
 export {
-  useRoute as useCurrentRoute,
   useParams,
   useQuery,
   useHash,

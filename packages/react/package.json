@@ -28,25 +28,42 @@
       "import": "./es/index.js",
       "require": "./lib/index.cjs"
     },
-    "./components": {
-      "types": "./es/components/index.d.ts",
-      "import": "./es/components/index.js",
-      "require": "./lib/components/index.cjs"
+    "./components/*": {
+      "types": "./es/components/*.d.ts",
+      "import": "./es/components/*.js",
+      "require": "./lib/components/*.cjs"
     },
     "./hooks": {
       "types": "./es/hooks/index.d.ts",
       "import": "./es/hooks/index.js",
       "require": "./lib/hooks/index.cjs"
     },
-    "./plugins": {
-      "types": "./es/plugins/index.d.ts",
-      "import": "./es/plugins/index.js",
-      "require": "./lib/plugins/index.cjs"
+    "./hooks/*": {
+      "types": "./es/hooks/*.d.ts",
+      "import": "./es/hooks/*.js",
+      "require": "./lib/hooks/*.cjs"
+    },
+    "./router": {
+      "types": "./es/router/index.d.ts",
+      "import": "./es/router/index.js",
+      "require": "./lib/router/index.cjs"
+    },
+    "./router/*": {
+      "types": "./es/router/*.d.ts",
+      "import": "./es/router/*.js",
+      "require": "./lib/router/*.cjs"
+    },
+    "./__tests__/*": {
+      "types": "./es/__tests__/*.d.ts",
+      "import": "./es/__tests__/*.js",
+      "require": "./lib/__tests__/*.cjs"
     }
   },
   "main": "./lib/index.cjs",
   "module": "./es/index.js",
   "types": "./es/index.d.ts",
+  "unpkg": "./dist/index.min.js",
+  "jsdelivr": "./dist/index.min.js",
   "files": [
     "README.md",
     "LICENSE",
@@ -102,4 +119,3 @@
     "registry": "https://registry.npmjs.org/"
   }
 }
-

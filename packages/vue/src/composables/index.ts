@@ -22,7 +22,7 @@ export type UseRouterReturn = any // 从 router/index.ts 导入
  * @returns 路由参数的响应式引用
  */
 export function useParams(): ComputedRef<RouteParams> {
-  const route = useRoute()
+  const route = vueUseRoute()
   return computed(() => route.params as RouteParams)
 }
 
@@ -81,7 +81,7 @@ export function onBeforeRouteUpdate(guard: NavigationGuard): void {
  * @returns 是否匹配
  */
 export function useRouteMatch(path: string): ComputedRef<boolean> {
-  const route = useRoute()
+  const route = vueUseRoute()
   return computed(() => route.path === path || route.path.startsWith(path))
 }
 
@@ -91,7 +91,7 @@ export function useRouteMatch(path: string): ComputedRef<boolean> {
  * @returns 完整路径的响应式引用
  */
 export function useFullPath(): ComputedRef<string> {
-  const route = useRoute()
+  const route = vueUseRoute()
   return computed(() => route.fullPath)
 }
 
@@ -101,7 +101,7 @@ export function useFullPath(): ComputedRef<string> {
  * @returns 路由名称的响应式引用
  */
 export function useRouteName(): ComputedRef<string | symbol | undefined> {
-  const route = useRoute()
+  const route = vueUseRoute()
   return computed(() => route.name)
 }
 

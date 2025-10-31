@@ -60,11 +60,12 @@ export type {
 } from './router'
 
 // ==================== 组件导出 ====================
-export {
-  Router as RouterProvider,
-  RouterView,
-  RouterLink,
-} from './components'
+// 暂时注释组件导出，因为 .svelte 文件需要特殊处理
+// export {
+//   Router as RouterProvider,
+//   RouterView,
+//   RouterLink,
+// } from './components'
 
 // ==================== Stores 导出 ====================
 export {

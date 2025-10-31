@@ -7,11 +7,9 @@ export default defineConfig({
     format: ['esm', 'cjs'],
     esm: {
       dir: 'es',
-      preserveStructure: true,
     },
     cjs: {
       dir: 'lib',
-      preserveStructure: true,
     },
   },
 
@@ -23,6 +21,7 @@ export default defineConfig({
   external: [
     'svelte',
     'svelte/store',
+    'svelte/internal',
     '@ldesign/router-core',
   ],
 })

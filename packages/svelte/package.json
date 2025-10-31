@@ -26,30 +26,54 @@
     ".": {
       "types": "./es/index.d.ts",
       "import": "./es/index.js",
-      "require": "./lib/index.cjs",
-      "svelte": "./es/index.js"
+      "require": "./lib/index.cjs"
     },
     "./components": {
       "types": "./es/components/index.d.ts",
       "import": "./es/components/index.js",
-      "require": "./lib/components/index.cjs",
-      "svelte": "./es/components/index.js"
+      "require": "./lib/components/index.cjs"
+    },
+    "./components/*": {
+      "types": "./es/components/*.d.ts",
+      "import": "./es/components/*.js",
+      "require": "./lib/components/*.cjs"
+    },
+    "./plugins": {
+      "types": "./es/plugins/index.d.ts",
+      "import": "./es/plugins/index.js",
+      "require": "./lib/plugins/index.cjs"
+    },
+    "./plugins/*": {
+      "types": "./es/plugins/*.d.ts",
+      "import": "./es/plugins/*.js",
+      "require": "./lib/plugins/*.cjs"
+    },
+    "./router": {
+      "types": "./es/router/index.d.ts",
+      "import": "./es/router/index.js",
+      "require": "./lib/router/index.cjs"
+    },
+    "./router/*": {
+      "types": "./es/router/*.d.ts",
+      "import": "./es/router/*.js",
+      "require": "./lib/router/*.cjs"
     },
     "./stores": {
       "types": "./es/stores/index.d.ts",
       "import": "./es/stores/index.js",
       "require": "./lib/stores/index.cjs"
     },
-    "./plugins": {
-      "types": "./es/plugins/index.d.ts",
-      "import": "./es/plugins/index.js",
-      "require": "./lib/plugins/index.cjs"
+    "./stores/*": {
+      "types": "./es/stores/*.d.ts",
+      "import": "./es/stores/*.js",
+      "require": "./lib/stores/*.cjs"
     }
   },
   "main": "./lib/index.cjs",
   "module": "./es/index.js",
   "types": "./es/index.d.ts",
-  "svelte": "./es/index.js",
+  "unpkg": "./dist/index.min.js",
+  "jsdelivr": "./dist/index.min.js",
   "files": [
     "README.md",
     "LICENSE",
@@ -75,7 +99,7 @@
     "svelte": "^4.0.0 || ^5.0.0"
   },
   "devDependencies": {
-    "@ldesign/builder": "workspace:../../../../tools/builder",
+    "@ldesign/builder": "workspace:*",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
@@ -92,7 +116,6 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  }
+  },
+  "svelte": "./es/index.js"
 }
-
-
