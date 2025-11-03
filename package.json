@@ -221,7 +221,7 @@
     "lib"
   ],
   "scripts": {
-    "build": "pnpm -r --filter=@ldesign/router-* run build",
+    "build": "ldesign-builder build -f esm,cjs,dts",
     "build:core": "pnpm --filter=@ldesign/router-core run build",
     "build:vue": "pnpm --filter=@ldesign/router-vue run build",
     "build:react": "pnpm --filter=@ldesign/router-react run build",
@@ -234,7 +234,7 @@
     "lint:check": "eslint .",
     "clean": "pnpm -r run clean && rimraf es lib dist",
     "test": "pnpm -r run test",
-    "dev": "pnpm -r --parallel run dev",
+    "dev": "ldesign-builder build -f esm,cjs,dts --watch",
     "prepublishOnly": "pnpm run clean && pnpm run build"
   },
   "dependencies": {},
