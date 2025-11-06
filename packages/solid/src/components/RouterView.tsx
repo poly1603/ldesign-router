@@ -1,7 +1,6 @@
 /**
  * RouterView 组件 - 渲染当前路由匹配的组件
  */
-import { Outlet } from '@solidjs/router'
 import type { Component, JSX } from 'solid-js'
 
 export interface RouterViewProps {
@@ -11,16 +10,16 @@ export interface RouterViewProps {
 
 /**
  * RouterView 组件
- * 
- * 基于 @solidjs/router 的 Outlet
- * 
+ *
+ * Solid Router 使用 children 来渲染嵌套路由
+ *
  * @example
  * ```tsx
  * <RouterView />
  * ```
  */
 export const RouterView: Component<RouterViewProps> = (props) => {
-  return <Outlet />
+  return <>{props.children}</>
 }
 
 

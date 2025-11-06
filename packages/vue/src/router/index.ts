@@ -11,7 +11,6 @@ import type {
   RouteLocationNormalized,
   RouteLocationRaw,
   RouteRecordRaw,
-  RouterHistory,
   NavigationGuard,
   NavigationHookAfter,
   ScrollBehavior,
@@ -25,9 +24,17 @@ import type {
   Router as VueRouter,
   RouteRecordRaw as VueRouteRecordRaw,
   RouterOptions as VueRouterOptions,
+  RouterHistory,
 } from 'vue-router'
 
 // ==================== 类型定义 ====================
+
+/**
+ * 事件发射器接口
+ */
+export interface EventEmitter {
+  emit(event: string, data?: any): void
+}
 
 /**
  * 路由器配置选项
@@ -38,6 +45,9 @@ export interface RouterOptions {
 
   /** 历史管理器 */
   history: RouterHistory
+
+  /** 事件发射器（可选） */
+  eventEmitter?: EventEmitter
 
   /** 滚动行为 */
   scrollBehavior?: ScrollBehavior
@@ -56,11 +66,21 @@ export interface RouterOptions {
 }
 
 /**
+ * 当前路由对象
+ */
+export interface CurrentRoute {
+  value?: RouteLocationNormalized
+}
+
+/**
  * 增强的路由器接口
  */
 export interface Router {
   /** 当前路由 */
   currentRoute: Ref<RouteLocationNormalized>
+
+  /** 获取当前路由（兼容性方法） */
+  getCurrentRoute(): CurrentRoute
 
   /** 添加路由 */
   addRoute(route: RouteRecordRaw): () => void
@@ -184,7 +204,7 @@ function convertHistory(history: RouterHistory): any {
 export function createRouter(options: RouterOptions): Router {
   // 转换配置为 vue-router 格式
   const vueRouterOptions: VueRouterOptions = {
-    history: convertHistory(options.history) as any,
+    history: options.history as any,
     routes: options.routes.map(convertRouteRecord),
   }
 
@@ -211,9 +231,18 @@ export function createRouter(options: RouterOptions): Router {
   // 创建 vue-router 实例
   const vueRouter = createVueRouter(vueRouterOptions)
 
+  // 获取事件发射器
+  const eventEmitter = options.eventEmitter
+
   // 创建增强的路由器包装器
   const router: Router = {
     currentRoute: vueRouter.currentRoute as any,
+
+    getCurrentRoute: () => {
+      return {
+        value: vueRouter.currentRoute.value as any
+      }
+    },
 
     addRoute: (parentOrRoute: string | RouteRecordRaw, route?: RouteRecordRaw) => {
       if (typeof parentOrRoute === 'string') {
@@ -238,24 +267,62 @@ export function createRouter(options: RouterOptions): Router {
       return vueRouter.resolve(to as any) as any
     },
 
-    push: (to: RouteLocationRaw) => {
-      return vueRouter.push(to as any) as any
+    push: async (to: RouteLocationRaw) => {
+      const result = await vueRouter.push(to as any)
+      // 触发路由导航事件
+      if (eventEmitter) {
+        eventEmitter.emit('router:navigated', {
+          to: vueRouter.currentRoute.value
+        })
+      }
+      return result as any
     },
 
-    replace: (to: RouteLocationRaw) => {
-      return vueRouter.replace(to as any) as any
+    replace: async (to: RouteLocationRaw) => {
+      const result = await vueRouter.replace(to as any)
+      // 触发路由导航事件
+      if (eventEmitter) {
+        eventEmitter.emit('router:navigated', {
+          to: vueRouter.currentRoute.value
+        })
+      }
+      return result as any
     },
 
     go: (delta: number) => {
       vueRouter.go(delta)
+      // 触发路由导航事件
+      if (eventEmitter) {
+        setTimeout(() => {
+          eventEmitter.emit('router:navigated', {
+            to: vueRouter.currentRoute.value
+          })
+        }, 0)
+      }
     },
 
     back: () => {
       vueRouter.back()
+      // 触发路由导航事件
+      if (eventEmitter) {
+        setTimeout(() => {
+          eventEmitter.emit('router:navigated', {
+            to: vueRouter.currentRoute.value
+          })
+        }, 0)
+      }
     },
 
     forward: () => {
       vueRouter.forward()
+      // 触发路由导航事件
+      if (eventEmitter) {
+        setTimeout(() => {
+          eventEmitter.emit('router:navigated', {
+            to: vueRouter.currentRoute.value
+          })
+        }, 0)
+      }
     },
 
     beforeEach: (guard: NavigationGuard) => {

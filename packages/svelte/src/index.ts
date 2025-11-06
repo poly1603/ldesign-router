@@ -1,6 +1,5 @@
 /**
- * @ldesign/router-svelte 主入口文件
- * 
+ * @ldesign/router-svelte 主入口文�? * 
  * Svelte 路由库，基于 @ldesign/router-core
  * 
  * @module @ldesign/router-svelte
@@ -47,7 +46,7 @@ export {
   createMemoryHistory,
 } from '@ldesign/router-core'
 
-// ==================== 路由器导出 ====================
+// ==================== 路由器导�?====================
 export {
   createRouter,
   ROUTER_KEY,
@@ -57,11 +56,24 @@ export type {
   Router,
   RouterOptions,
   CurrentRoute,
+  EventEmitter,
 } from './router'
 
+// ==================== Engine 插件导出 ====================
+export {
+  createRouterEnginePlugin,
+  createDefaultRouterEnginePlugin,
+  routerPlugin,
+} from './engine-plugin'
+
+export type {
+  RouterEnginePluginOptions,
+  RouterMode,
+  RouterPreset,
+} from './engine-plugin'
+
 // ==================== 组件导出 ====================
-// 暂时注释组件导出，因为 .svelte 文件需要特殊处理
-// export {
+// 暂时注释组件导出，因�?.svelte 文件需要特殊处�?// export {
 //   Router as RouterProvider,
 //   RouterView,
 //   RouterLink,

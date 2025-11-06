@@ -6,10 +6,11 @@
  * @module services/router
  */
 
-import { Injectable } from '@angular/core'
+import { Injectable, Optional } from '@angular/core'
 import { Router, NavigationExtras, UrlTree } from '@angular/router'
 import type {
   RouteLocationRaw,
+  RouteLocationNormalized,
   RouteParams,
   RouteQuery,
   RouteMeta,
@@ -19,15 +20,61 @@ import { Observable } from 'rxjs'
 import { map } from 'rxjs/operators'
 
 /**
+ * 事件发射器接口
+ */
+export interface EventEmitter {
+  emit(event: string, data?: any): void
+}
+
+/**
+ * 当前路由信息
+ */
+export interface CurrentRoute {
+  value?: RouteLocationNormalized
+}
+
+/**
  * LDesign 路由服务
- * 
+ *
  * 提供与其他框架一致的路由 API
  */
 @Injectable({
   providedIn: 'root',
 })
 export class LdRouterService {
+  private eventEmitter?: EventEmitter
+
   constructor(private router: Router) { }
+
+  /**
+   * 设置事件发射器
+   */
+  setEventEmitter(emitter: EventEmitter): void {
+    this.eventEmitter = emitter
+  }
+
+  /**
+   * 获取当前路由（与其他框架适配器保持一致）
+   */
+  getCurrentRoute(): CurrentRoute {
+    let route = this.router.routerState.root
+    while (route.firstChild) {
+      route = route.firstChild
+    }
+
+    const snapshot = route.snapshot
+    return {
+      value: {
+        path: snapshot.url.map(segment => segment.path).join('/') || '/',
+        fullPath: this.router.url,
+        params: snapshot.params as RouteParams,
+        query: snapshot.queryParams as RouteQuery,
+        hash: snapshot.fragment || '',
+        meta: snapshot.data as RouteMeta,
+        matched: snapshot.routeConfig ? [snapshot.routeConfig as any] : [],
+      }
+    }
+  }
 
   /**
    * 获取当前路由参数（Observable）
@@ -70,57 +117,81 @@ export class LdRouterService {
 
   /**
    * 导航到新位置
-   * 
+   *
    * @param to - 目标路由
    * @returns Promise
    */
   async push(to: RouteLocationRaw): Promise<boolean> {
+    let result: boolean
     if (typeof to === 'string') {
-      return this.router.navigateByUrl(to)
+      result = await this.router.navigateByUrl(to)
+    } else {
+      const commands = [to.path || '/']
+      const extras: NavigationExtras = {}
+
+      if (to.query) {
+        extras.queryParams = to.query
+      }
+
+      if (to.hash) {
+        extras.fragment = to.hash
+      }
+
+      result = await this.router.navigate(commands, extras)
     }
 
-    const commands = [to.path || '/']
-    const extras: NavigationExtras = {}
-
-    if (to.query) {
-      extras.queryParams = to.query
+    // 触发路由导航事件
+    if (this.eventEmitter && result) {
+      setTimeout(() => {
+        this.eventEmitter?.emit('router:navigated', {
+          to: this.getCurrentRoute().value
+        })
+      }, 0)
     }
 
-    if (to.hash) {
-      extras.fragment = to.hash
-    }
-
-    return this.router.navigate(commands, extras)
+    return result
   }
 
   /**
    * 替换当前位置
-   * 
+   *
    * @param to - 目标路由
    * @returns Promise
    */
   async replace(to: RouteLocationRaw): Promise<boolean> {
+    let result: boolean
     if (typeof to === 'string') {
-      return this.router.navigateByUrl(to, { replaceUrl: true })
+      result = await this.router.navigateByUrl(to, { replaceUrl: true })
+    } else {
+      const commands = [to.path || '/']
+      const extras: NavigationExtras = { replaceUrl: true }
+
+      if (to.query) {
+        extras.queryParams = to.query
+      }
+
+      if (to.hash) {
+        extras.fragment = to.hash
+      }
+
+      result = await this.router.navigate(commands, extras)
     }
 
-    const commands = [to.path || '/']
-    const extras: NavigationExtras = { replaceUrl: true }
-
-    if (to.query) {
-      extras.queryParams = to.query
+    // 触发路由导航事件
+    if (this.eventEmitter && result) {
+      setTimeout(() => {
+        this.eventEmitter?.emit('router:navigated', {
+          to: this.getCurrentRoute().value
+        })
+      }, 0)
     }
 
-    if (to.hash) {
-      extras.fragment = to.hash
-    }
-
-    return this.router.navigate(commands, extras)
+    return result
   }
 
   /**
    * 前进或后退
-   * 
+   *
    * @param delta - 步数
    */
   go(delta: number): void {
@@ -136,6 +207,15 @@ export class LdRouterService {
       for (let i = 0; i < Math.abs(delta); i++) {
         location.back()
       }
+    }
+
+    // 触发路由导航事件
+    if (this.eventEmitter) {
+      setTimeout(() => {
+        this.eventEmitter?.emit('router:navigated', {
+          to: this.getCurrentRoute().value
+        })
+      }, 0)
     }
   }
 

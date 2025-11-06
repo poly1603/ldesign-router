@@ -1,7 +1,7 @@
 /**
- * @ldesign/router-qwik 主入口文�?
+ * @ldesign/router-qwik 主入口文件
  *
- * qwik 路由库，基于 @ldesign/router-core
+ * Qwik 路由库，基于 @ldesign/router-core
  *
  * @module @ldesign/router-qwik
  */
@@ -47,7 +47,7 @@ export {
   createMemoryHistory,
 } from '@ldesign/router-core'
 
-// ==================== 路由器导�?====================
+// ==================== 路由器导出 ====================
 export {
   createRouter,
 } from './router'
@@ -55,4 +55,19 @@ export {
 export type {
   Router,
   RouterOptions,
+  CurrentRoute,
+  EventEmitter,
 } from './router'
+
+// ==================== Engine 插件导出 ====================
+export {
+  createRouterEnginePlugin,
+  createDefaultRouterEnginePlugin,
+  routerPlugin,
+} from './engine-plugin'
+
+export type {
+  RouterEnginePluginOptions,
+  RouterMode,
+  RouterPreset,
+} from './engine-plugin'

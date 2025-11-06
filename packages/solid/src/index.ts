@@ -1,7 +1,6 @@
 /**
- * @ldesign/router-solid 主入口文件
- * 
- * Solid.js 路由库,基于 @solidjs/router 和 @ldesign/router-core
+ * @ldesign/router-solid 主入口文�? * 
+ * Solid.js 路由�?基于 @solidjs/router �?@ldesign/router-core
  * 
  * @module @ldesign/router-solid
  */
@@ -47,7 +46,7 @@ export {
   createMemoryHistory,
 } from '@ldesign/router-core'
 
-// ==================== 路由器导出 ====================
+// ==================== 路由器导�?====================
 export {
   createRouter,
   RouterProvider,
@@ -95,5 +94,18 @@ export type {
 export type {
   RouterPlugin,
 } from './plugins'
+
+// ==================== Engine 插件导出 ====================
+export {
+  createRouterEnginePlugin,
+  createDefaultRouterEnginePlugin,
+  routerPlugin,
+} from './engine-plugin'
+
+export type {
+  RouterEnginePluginOptions,
+  RouterMode,
+  RouterPreset,
+} from './engine-plugin'
 
 

@@ -67,7 +67,9 @@
       "types": "./es/stores/*.d.ts",
       "import": "./es/stores/*.js",
       "require": "./lib/stores/*.cjs"
-    }
+    },
+    "./es/components/index.css": "./es/components/index.css",
+    "./lib/components/index.css": "./lib/components/index.css"
   },
   "main": "./lib/index.cjs",
   "module": "./es/index.js",

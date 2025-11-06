@@ -1,7 +1,6 @@
 /**
- * @ldesign/router-angular 主入口文件
- * 
- * Angular 路由库，基于 @angular/router 和 @ldesign/router-core
+ * @ldesign/router-angular 主入口文�? * 
+ * Angular 路由库，基于 @angular/router �?@ldesign/router-core
  * 
  * @module @ldesign/router-angular
  */
@@ -52,6 +51,11 @@ export {
   LdRouterService,
 } from './services'
 
+export type {
+  EventEmitter,
+  CurrentRoute,
+} from './services/router.service'
+
 // ==================== 守卫导出 ====================
 export {
   authGuard,
@@ -63,6 +67,19 @@ export {
 export {
   LdRouterLinkDirective,
 } from './directives'
+
+// ==================== Engine 插件导出 ====================
+export {
+  createRouterEnginePlugin,
+  createDefaultRouterEnginePlugin,
+  routerPlugin,
+} from './engine-plugin'
+
+export type {
+  RouterEnginePluginOptions,
+  RouterMode,
+  RouterPreset,
+} from './engine-plugin'
 
 // ==================== Angular Router 重新导出 ====================
 // 方便使用

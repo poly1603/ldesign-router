@@ -28,6 +28,13 @@ import type { Router as ReactRouter, RouteObject } from 'react-router-dom'
 // ==================== 类型定义 ====================
 
 /**
+ * 事件发射器接口
+ */
+export interface EventEmitter {
+  emit(event: string, data?: any): void
+}
+
+/**
  * 路由器配置选项
  */
 export interface RouterOptions {
@@ -42,6 +49,16 @@ export interface RouterOptions {
 
   /** 滚动行为 */
   scrollBehavior?: ScrollBehavior
+
+  /** 事件发射器（用于触发路由事件） */
+  eventEmitter?: EventEmitter
+}
+
+/**
+ * 当前路由信息
+ */
+export interface CurrentRoute {
+  value?: RouteLocationNormalized
 }
 
 /**
@@ -62,6 +79,9 @@ export interface Router {
 
   /** 前进 */
   forward(): void
+
+  /** 获取当前路由 */
+  getCurrentRoute(): CurrentRoute
 
   /** 底层的 react-router 实例 */
   reactRouter: ReactRouter
@@ -92,7 +112,7 @@ function convertRouteRecord(route: RouteRecordRaw): RouteObject {
 
 /**
  * 创建增强的路由器
- * 
+ *
  * @param options - 路由器配置选项
  * @returns 路由器实例
  */
@@ -105,28 +125,82 @@ export function createRouter(options: RouterOptions): Router {
     basename: options.basename,
   })
 
+  // 当前路由状态（用于getCurrentRoute）
+  let currentRouteValue: RouteLocationNormalized | undefined
+
+  // 事件发射器
+  const eventEmitter = options.eventEmitter
+
+  // 触发路由导航事件
+  const emitNavigated = () => {
+    if (eventEmitter) {
+      const route = router.getCurrentRoute()
+      eventEmitter.emit('router:navigated', {
+        to: route.value,
+        from: currentRouteValue,
+      })
+    }
+  }
+
   // 创建增强的路由器包装器
   const router: Router = {
     push: async (to: RouteLocationRaw) => {
       const path = typeof to === 'string' ? to : to.path || '/'
       reactRouter.navigate(path)
+      // 延迟触发事件，等待导航完成
+      setTimeout(emitNavigated, 0)
     },
 
     replace: async (to: RouteLocationRaw) => {
       const path = typeof to === 'string' ? to : to.path || '/'
       reactRouter.navigate(path, { replace: true })
+      // 延迟触发事件，等待导航完成
+      setTimeout(emitNavigated, 0)
     },
 
     go: (delta: number) => {
       reactRouter.navigate(delta)
+      setTimeout(emitNavigated, 0)
     },
 
     back: () => {
       reactRouter.navigate(-1)
+      setTimeout(emitNavigated, 0)
     },
 
     forward: () => {
       reactRouter.navigate(1)
+      setTimeout(emitNavigated, 0)
+    },
+
+    getCurrentRoute: () => {
+      // 尝试从reactRouter获取当前状态
+      if (reactRouter.state) {
+        const location = reactRouter.state.location
+        if (location) {
+          currentRouteValue = {
+            path: location.pathname,
+            fullPath: location.pathname + location.search + location.hash,
+            params: {},
+            query: {},
+            hash: location.hash.slice(1),
+            meta: {},
+            matched: [],
+          }
+        }
+      }
+
+      return {
+        value: currentRouteValue || {
+          path: '/',
+          fullPath: '/',
+          params: {},
+          query: {},
+          hash: '',
+          meta: {},
+          matched: [],
+        }
+      }
     },
 
     reactRouter,

@@ -1,9 +1,9 @@
 /**
- * @ldesign/router-lit 主入口文件
+ * @ldesign/router-vue2 主入口文件
  *
- * Lit 路由库，基于 @ldesign/router-core
+ * Vue 2 路由库，基于 vue-router v3 和 @ldesign/router-core
  *
- * @module @ldesign/router-lit
+ * @module @ldesign/router-vue2
  */
 
 // ==================== Core 类型重新导出 ====================
@@ -12,10 +12,6 @@ export type {
   RouteParams,
   RouteQuery,
   RouteMeta,
-  // 历史管理类型
-  HistoryLocation,
-  HistoryState,
-  RouterHistory,
   // 导航相关类型
   RouteLocationNormalized,
   RouteLocationRaw,
@@ -29,24 +25,6 @@ export {
   NavigationFailureType,
 } from '@ldesign/router-core'
 
-// ==================== Core 工具函数重新导出 ====================
-export {
-  normalizePath,
-  joinPaths,
-  buildPath,
-  parseQuery,
-  stringifyQuery,
-  parseURL,
-  stringifyURL,
-} from '@ldesign/router-core'
-
-// ==================== 历史管理重新导出 ====================
-export {
-  createWebHistory,
-  createWebHashHistory,
-  createMemoryHistory,
-} from '@ldesign/router-core'
-
 // ==================== 路由器导出 ====================
 export {
   createRouter,
@@ -57,6 +35,9 @@ export type {
   RouterOptions,
   CurrentRoute,
   EventEmitter,
+  VueRouter,
+  Route,
+  RouteConfig,
 } from './router'
 
 // ==================== Engine 插件导出 ====================
@@ -71,3 +52,7 @@ export type {
   RouterMode,
   RouterPreset,
 } from './engine-plugin'
+
+// ==================== Vue Router 原生导出（向后兼容） ====================
+export { default as VueRouter } from 'vue-router'
+

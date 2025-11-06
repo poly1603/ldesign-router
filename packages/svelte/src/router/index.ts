@@ -30,6 +30,13 @@ import {
 // ==================== 类型定义 ====================
 
 /**
+ * 事件发射器接口
+ */
+export interface EventEmitter {
+  emit(event: string, data?: any): void
+}
+
+/**
  * 路由器配置选项
  */
 export interface RouterOptions {
@@ -47,6 +54,9 @@ export interface RouterOptions {
 
   /** 大小写敏感匹配 */
   sensitive?: boolean
+
+  /** 事件发射器（用于触发路由事件） */
+  eventEmitter?: EventEmitter
 }
 
 /**
@@ -81,6 +91,9 @@ export interface Router {
 
   /** 元信息 store */
   meta: Readable<RouteMeta>
+
+  /** 获取当前路由（与其他框架适配器保持一致） */
+  getCurrentRoute(): { value?: RouteLocationNormalized }
 
   /** 添加路由 */
   addRoute(route: RouteRecordRaw): () => void
@@ -212,6 +225,9 @@ export function createRouter(options: RouterOptions): Router {
   const afterHooks: NavigationHookAfter[] = []
   const errorHandlers: Array<(error: Error) => void> = []
 
+  // 事件发射器
+  const eventEmitter = options.eventEmitter
+
   // 创建当前路由 store
   const currentRouteStore: Writable<CurrentRoute> = writable({
     path: '/',
@@ -309,6 +325,16 @@ export function createRouter(options: RouterOptions): Router {
         hook(targetRoute as any, from as any)
       }
 
+      // 触发路由导航事件
+      if (eventEmitter) {
+        setTimeout(() => {
+          eventEmitter.emit('router:navigated', {
+            to: targetRoute,
+            from,
+          })
+        }, 0)
+      }
+
       // 处理滚动行为
       if (options.scrollBehavior) {
         const scrollPosition = await options.scrollBehavior(
@@ -356,6 +382,21 @@ export function createRouter(options: RouterOptions): Router {
     query: queryStore,
     hash: hashStore,
     meta: metaStore,
+
+    getCurrentRoute() {
+      const current = get(currentRouteStore)
+      return {
+        value: {
+          path: current.path,
+          fullPath: current.fullPath,
+          params: current.params,
+          query: current.query,
+          hash: current.hash,
+          meta: current.meta,
+          matched: current.matched as any,
+        }
+      }
+    },
 
     addRoute(parentOrRoute: string | RouteRecordRaw, route?: RouteRecordRaw) {
       if (typeof parentOrRoute === 'string') {

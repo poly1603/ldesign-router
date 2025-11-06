@@ -6,7 +6,7 @@
  * @module router
  */
 
-import { createContext, useContext, JSX } from 'solid-js'
+import { createContext, useContext, JSX, createEffect } from 'solid-js'
 import type { Component } from 'solid-js'
 import { Router as SolidRouter, Route } from '@solidjs/router'
 import type {
@@ -21,6 +21,13 @@ import type {
 // ==================== 类型定义 ====================
 
 /**
+ * 事件发射器接口
+ */
+export interface EventEmitter {
+  emit(event: string, data?: any): void
+}
+
+/**
  * 路由器配置选项
  */
 export interface RouterOptions {
@@ -33,6 +40,9 @@ export interface RouterOptions {
   /** 基础路径 */
   base?: string
 
+  /** 路由模式 */
+  mode?: 'hash' | 'history'
+
   /** 滚动行为 */
   scrollBehavior?: ScrollBehavior
 
@@ -41,12 +51,33 @@ export interface RouterOptions {
 
   /** 大小写敏感匹配 */
   sensitive?: boolean
+
+  /** 事件发射器（用于触发路由事件） */
+  eventEmitter?: EventEmitter
+}
+
+/**
+ * 当前路由对象
+ */
+export interface CurrentRoute {
+  value?: {
+    path: string
+    fullPath?: string
+    params?: Record<string, any>
+    query?: Record<string, any>
+    hash?: string
+    meta?: Record<string, any>
+    component?: Component
+  }
 }
 
 /**
  * 路由器接口
  */
 export interface Router {
+  /** 获取当前路由 */
+  getCurrentRoute(): CurrentRoute
+
   /** 导航到新位置 */
   push(to: RouteLocationRaw): Promise<void>
 
@@ -113,21 +144,104 @@ export function createRouter(options: RouterOptions): Router {
   // 导航函数（将在 RouterProvider 中通过 useNavigate 获取）
   let navigateFn: ((to: string | number, options?: any) => void) | null = null
 
-  const router: Router = {
+  // 事件触发器（用于触发 router:navigated 事件）
+  const eventEmitter = options.eventEmitter || null
+
+  const router: Router & { _setNavigateFn?: (fn: any) => void; _setEventEmitter?: (emitter: any) => void } = {
     routes: options.routes,
     history: options.history,
 
-    async push(to: RouteLocationRaw) {
-      if (!navigateFn) {
-        console.warn('Router not initialized yet')
-        return
+    getCurrentRoute(): CurrentRoute {
+      // 根据模式获取路径信息
+      const mode = options.mode || 'hash'
+      let path: string
+      let hash: string
+      let search: string
+
+      if (mode === 'hash') {
+        // Hash 模式：从 hash 中提取路径
+        const hashValue = window.location.hash.slice(1) // 移除 #
+        const hashParts = hashValue.split('?')
+        path = hashParts[0] || '/'
+        search = hashParts[1] ? '?' + hashParts[1] : ''
+        hash = ''
+      } else {
+        // History 模式：使用 pathname
+        path = window.location.pathname
+        hash = window.location.hash
+        search = window.location.search
       }
 
+      // 解析查询参数
+      const query: Record<string, any> = {}
+      if (search) {
+        const params = new URLSearchParams(search.slice(1))
+        params.forEach((value, key) => {
+          query[key] = value
+        })
+      }
+
+      // 查找匹配的路由
+      let matchedRoute: RouteRecordRaw | undefined
+      let params: Record<string, any> = {}
+
+      for (const route of options.routes) {
+        if (route.path === path) {
+          matchedRoute = route
+          break
+        }
+        // 简单的参数匹配（例如 /user/:id）
+        const pathPattern = route.path.replace(/:\w+/g, '([^/]+)')
+        const regex = new RegExp(`^${pathPattern}$`)
+        const match = path.match(regex)
+        if (match) {
+          matchedRoute = route
+          // 提取参数
+          const paramNames = route.path.match(/:\w+/g) || []
+          paramNames.forEach((paramName, index) => {
+            params[paramName.slice(1)] = match[index + 1]
+          })
+          break
+        }
+      }
+
+      return {
+        value: {
+          path,
+          fullPath: path + search + hash,
+          params,
+          query,
+          hash: hash.slice(1),
+          meta: matchedRoute?.meta,
+          component: matchedRoute?.component as Component,
+        }
+      }
+    },
+
+    async push(to: RouteLocationRaw) {
       const path = typeof to === 'string' ? to : to.path || '/'
 
       try {
         // TODO: 执行导航守卫
-        navigateFn(path)
+
+        // 如果有 navigateFn，使用它
+        if (navigateFn) {
+          navigateFn(path)
+        } else {
+          // 否则直接使用 window.location.hash
+          window.location.hash = path
+        }
+
+        // 触发导航事件
+        if (eventEmitter && typeof eventEmitter.emit === 'function') {
+          // 延迟触发，等待 hash 变化完成
+          setTimeout(() => {
+            if (eventEmitter && typeof eventEmitter.emit === 'function') {
+              const currentRoute = router.getCurrentRoute()
+              eventEmitter.emit('router:navigated', { to: currentRoute })
+            }
+          }, 0)
+        }
       } catch (error) {
         for (const handler of errorHandlers) {
           handler(error as Error)
@@ -137,16 +251,18 @@ export function createRouter(options: RouterOptions): Router {
     },
 
     async replace(to: RouteLocationRaw) {
-      if (!navigateFn) {
-        console.warn('Router not initialized yet')
-        return
-      }
-
       const path = typeof to === 'string' ? to : to.path || '/'
 
       try {
         // TODO: 执行导航守卫
-        navigateFn(path, { replace: true })
+
+        // 如果有 navigateFn，使用它
+        if (navigateFn) {
+          navigateFn(path, { replace: true })
+        } else {
+          // 否则直接使用 window.location.replace
+          window.location.replace('#' + path)
+        }
       } catch (error) {
         for (const handler of errorHandlers) {
           handler(error as Error)
@@ -202,10 +318,10 @@ export function createRouter(options: RouterOptions): Router {
     },
   }
 
-    // 存储 navigate 函数的引用
-    ; (router as any)._setNavigate = (fn: any) => {
-      navigateFn = fn
-    }
+  // 存储 navigate 函数的引用
+  ; (router as any)._setNavigate = (fn: any) => {
+    navigateFn = fn
+  }
 
   return router
 }
@@ -218,8 +334,31 @@ export interface RouterProviderProps {
 }
 
 /**
+ * 内部组件，用于在 SolidRouter 内部获取 navigate 函数
+ */
+const RouterSetup: Component<{ router: Router; children: JSX.Element }> = (props) => {
+  createEffect(() => {
+    const navigate = (to: any, options?: any) => {
+      if (typeof to === 'string') {
+        window.location.hash = to
+      } else if (typeof to === 'number') {
+        window.history.go(to)
+      }
+    }
+
+    // 设置 navigate 函数到 router
+    if ((props.router as any)._setNavigate) {
+      (props.router as any)._setNavigate(navigate)
+      console.log('Navigate function set to router')
+    }
+  })
+
+  return <>{props.children}</>
+}
+
+/**
  * RouterProvider 组件
- * 
+ *
  * 提供路由器上下文并设置路由
  */
 export const RouterProvider: Component<RouterProviderProps> = (props) => {
@@ -247,7 +386,9 @@ export const RouterProvider: Component<RouterProviderProps> = (props) => {
   return (
     <RouterContext.Provider value={props.router}>
       <SolidRouter base={props.router.history?.base}>
-        {renderRoutes(props.router.routes)}
+        <RouterSetup router={props.router}>
+          {renderRoutes(props.router.routes)}
+        </RouterSetup>
       </SolidRouter>
     </RouterContext.Provider>
   )
