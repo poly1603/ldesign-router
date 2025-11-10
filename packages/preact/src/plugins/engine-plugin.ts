@@ -1,12 +1,12 @@
 /**
- * Lit Router Engine 插件
+ * Preact Router Engine 插件
  *
- * 将 Lit Router 功能集成到 LDesign Engine 中
+ * 将 Preact Router 功能集成到 LDesign Engine 中
  */
 
 import type { Plugin } from '@ldesign/engine-core/types'
 import type { RouteRecordRaw } from '@ldesign/router-core'
-import { createRouter, type RouterOptions } from './router'
+import { createRouter, type RouterOptions } from '../router'
 
 /**
  * 路由模式
@@ -62,14 +62,14 @@ interface EngineLike {
 }
 
 /**
- * 创建 Lit Router Engine 插件
+ * 创建 Preact Router Engine 插件
  *
  * @param options - 插件配置选项
  * @returns Engine 插件实例
  *
  * @example
  * ```typescript
- * import { createRouterEnginePlugin } from '@ldesign/router-lit'
+ * import { createRouterEnginePlugin } from '@ldesign/router-preact'
  *
  * const routerPlugin = createRouterEnginePlugin({
  *   routes: [
@@ -97,7 +97,7 @@ export function createRouterEnginePlugin(
   } = options
 
   if (debug) {
-    console.log('[Lit Router Plugin] createRouterEnginePlugin called with options:', options)
+    console.log('[Preact Router Plugin] createRouterEnginePlugin called with options:', options)
   }
 
   return {
@@ -108,7 +108,7 @@ export function createRouterEnginePlugin(
     async install(context: any) {
       try {
         if (debug) {
-          console.log('[Lit Router Plugin] install method called')
+          console.log('[Preact Router Plugin] install method called')
         }
 
         // 从上下文中获取引擎实例
@@ -119,7 +119,7 @@ export function createRouterEnginePlugin(
         }
 
         // 记录安装信息
-        engine.logger?.info?.('Installing Lit router plugin...', {
+        engine.logger?.info?.('Installing Preact router plugin...', {
           version,
           mode,
           base,
@@ -158,10 +158,10 @@ export function createRouterEnginePlugin(
         // 发射路由器安装完成事件
         engine.events?.emit?.('router:installed', { router, mode, base })
 
-        engine.logger?.info?.('Lit router plugin installed successfully')
+        engine.logger?.info?.('Preact router plugin installed successfully')
       } catch (error) {
         const engine: EngineLike = context?.engine || context
-        engine?.logger?.error?.('Failed to install Lit router plugin:', error)
+        engine?.logger?.error?.('Failed to install Preact router plugin:', error)
         throw error
       }
     },
@@ -174,7 +174,7 @@ export function createRouterEnginePlugin(
           return
         }
 
-        engine.logger?.info?.('Uninstalling Lit router plugin...')
+        engine.logger?.info?.('Uninstalling Preact router plugin...')
 
         // 清理状态
         engine.state?.delete?.('router:mode')
@@ -191,17 +191,17 @@ export function createRouterEnginePlugin(
         // 发射路由器卸载事件
         engine.events?.emit?.('router:uninstalled')
 
-        engine.logger?.info?.('Lit router plugin uninstalled successfully')
+        engine.logger?.info?.('Preact router plugin uninstalled successfully')
       } catch (error) {
         const engine: EngineLike = context?.engine || context
-        engine?.logger?.error?.('Failed to uninstall Lit router plugin:', error)
+        engine?.logger?.error?.('Failed to uninstall Preact router plugin:', error)
       }
     },
   }
 }
 
 /**
- * 创建默认 Lit Router Engine 插件
+ * 创建默认 Preact Router Engine 插件
  *
  * @param routes - 路由配置
  * @returns Engine 插件实例

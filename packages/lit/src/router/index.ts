@@ -1,7 +1,7 @@
 ﻿/**
- * @ldesign/router-qwik 路由器实现
+ * @ldesign/router-lit 路由器实现
  *
- * 基于 Qwik 的增强路由器
+ * 基于 Lit 的增强路由器
  *
  * @module router
  */
@@ -202,6 +202,7 @@ export function createRouter(options: RouterOptions): Router {
           hash: hash.slice(1),
           meta: matchedRoute?.meta,
           matched: matchedRoute ? [matchedRoute] : [],
+          component: matchedRoute?.component,
         }
       }
     },

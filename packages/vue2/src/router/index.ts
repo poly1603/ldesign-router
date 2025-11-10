@@ -1,13 +1,20 @@
 /**
  * @ldesign/router-vue2 路由器实现
- * 
+ *
  * 基于 vue-router v3 的增强路由器
- * 
+ *
  * @module router
  */
 
+import Vue from 'vue'
 import VueRouter from 'vue-router'
 import type { RouterOptions as VueRouterOptions, Route, RouteConfig } from 'vue-router'
+
+// Ensure vue-router is installed into Vue (idempotent)
+// Vue.use will ignore if already installed
+// @ts-ignore
+Vue.use(VueRouter)
+
 import type {
   RouteLocationNormalized,
   RouteLocationRaw,
@@ -128,7 +135,7 @@ function convertRouteRecord(route: RouteRecordRaw): RouteConfig {
 
 /**
  * 创建增强的路由器
- * 
+ *
  * @param options - 路由器配置选项
  * @returns 路由器实例
  */

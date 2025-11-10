@@ -1,7 +1,7 @@
 ﻿/**
- * @ldesign/router-lit 路由器实现
+ * @ldesign/router-qwik 路由器实现
  *
- * 基于 Lit 的增强路由器
+ * 基于 Qwik 的增强路由器
  *
  * @module router
  */
@@ -58,7 +58,7 @@ export interface RouterOptions {
  * 当前路由信息
  */
 export interface CurrentRoute {
-  value?: RouteLocationNormalized
+  value?: (RouteLocationNormalized & { component?: any })
 }
 
 /**
@@ -134,6 +134,13 @@ export function createRouter(options: RouterOptions): Router {
     }
   }
 
+  // 监听 hashchange 事件(仅在 hash 模式下)
+  if (typeof window !== 'undefined' && options.mode === 'hash') {
+    window.addEventListener('hashchange', () => {
+      emitNavigated()
+    })
+  }
+
   // 创建路由器实例
   const router: Router = {
     routes: options.routes,
@@ -202,6 +209,7 @@ export function createRouter(options: RouterOptions): Router {
           hash: hash.slice(1),
           meta: matchedRoute?.meta,
           matched: matchedRoute ? [matchedRoute] : [],
+          component: matchedRoute?.component,
         }
       }
     },

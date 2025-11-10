@@ -1,5 +1,5 @@
 /**
- * @ldesign/router-preact 主入口文件
+ * @ldesign/router-preact 主入口文�?
  *
  * Preact 路由库，基于 @ldesign/router-core
  *
@@ -47,7 +47,7 @@ export {
   createMemoryHistory,
 } from '@ldesign/router-core'
 
-// ==================== 路由器导出 ====================
+// ==================== 路由器导�?====================
 export {
   createRouter,
 } from './router'
@@ -64,10 +64,10 @@ export {
   createRouterEnginePlugin,
   createDefaultRouterEnginePlugin,
   routerPlugin,
-} from './engine-plugin'
+} from './plugins/engine-plugin'
 
 export type {
   RouterEnginePluginOptions,
   RouterMode,
   RouterPreset,
-} from './engine-plugin'
+} from './plugins/engine-plugin'

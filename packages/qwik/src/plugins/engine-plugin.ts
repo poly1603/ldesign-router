@@ -6,7 +6,7 @@
 
 import type { Plugin } from '@ldesign/engine-core/types'
 import type { RouteRecordRaw } from '@ldesign/router-core'
-import { createRouter, type RouterOptions } from './router'
+import { createRouter, type RouterOptions } from '../router'
 
 /**
  * 路由模式

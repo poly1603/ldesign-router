@@ -1,7 +1,6 @@
 /**
- * @ldesign/router-vue2 主入口文件
- *
- * Vue 2 路由库，基于 vue-router v3 和 @ldesign/router-core
+ * @ldesign/router-vue2 主入口文�? *
+ * Vue 2 路由库，基于 vue-router v3 �?@ldesign/router-core
  *
  * @module @ldesign/router-vue2
  */
@@ -25,7 +24,7 @@ export {
   NavigationFailureType,
 } from '@ldesign/router-core'
 
-// ==================== 路由器导出 ====================
+// ==================== 路由器导�?====================
 export {
   createRouter,
 } from './router'
@@ -45,13 +44,13 @@ export {
   createRouterEnginePlugin,
   createDefaultRouterEnginePlugin,
   routerPlugin,
-} from './engine-plugin'
+} from './plugins/engine-plugin'
 
 export type {
   RouterEnginePluginOptions,
   RouterMode,
   RouterPreset,
-} from './engine-plugin'
+} from './plugins/engine-plugin'
 
 // ==================== Vue Router 原生导出（向后兼容） ====================
 export { default as VueRouter } from 'vue-router'

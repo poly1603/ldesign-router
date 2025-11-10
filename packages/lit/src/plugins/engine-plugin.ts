@@ -1,17 +1,17 @@
 /**
- * Vue2 Router Engine 插件
- * 
- * 将 Vue2 Router 功能集成到 LDesign Engine 中
+ * Lit Router Engine 插件
+ *
+ * 将 Lit Router 功能集成到 LDesign Engine 中
  */
 
 import type { Plugin } from '@ldesign/engine-core/types'
 import type { RouteRecordRaw } from '@ldesign/router-core'
-import { createRouter, type RouterOptions } from './router'
+import { createRouter, type RouterOptions } from '../router'
 
 /**
  * 路由模式
  */
-export type RouterMode = 'history' | 'hash' | 'abstract'
+export type RouterMode = 'history' | 'hash' | 'memory'
 
 /**
  * 路由预设
@@ -62,15 +62,15 @@ interface EngineLike {
 }
 
 /**
- * 创建 Vue2 Router Engine 插件
- * 
+ * 创建 Lit Router Engine 插件
+ *
  * @param options - 插件配置选项
  * @returns Engine 插件实例
- * 
+ *
  * @example
  * ```typescript
- * import { createRouterEnginePlugin } from '@ldesign/router-vue2'
- * 
+ * import { createRouterEnginePlugin } from '@ldesign/router-lit'
+ *
  * const routerPlugin = createRouterEnginePlugin({
  *   routes: [
  *     { path: '/', component: Home },
@@ -79,7 +79,7 @@ interface EngineLike {
  *   mode: 'history',
  *   base: '/'
  * })
- * 
+ *
  * await engine.use(routerPlugin)
  * ```
  */
@@ -90,14 +90,14 @@ export function createRouterEnginePlugin(
     name = 'router',
     version = '1.0.0',
     routes,
-    mode = 'hash',
+    mode = 'history',
     base = '/',
     preset,
     debug = false,
   } = options
 
   if (debug) {
-    console.log('[Vue2 Router Plugin] createRouterEnginePlugin called with options:', options)
+    console.log('[Lit Router Plugin] createRouterEnginePlugin called with options:', options)
   }
 
   return {
@@ -108,7 +108,7 @@ export function createRouterEnginePlugin(
     async install(context: any) {
       try {
         if (debug) {
-          console.log('[Vue2 Router Plugin] install method called')
+          console.log('[Lit Router Plugin] install method called')
         }
 
         // 从上下文中获取引擎实例
@@ -119,7 +119,7 @@ export function createRouterEnginePlugin(
         }
 
         // 记录安装信息
-        engine.logger?.info?.('Installing Vue2 router plugin...', {
+        engine.logger?.info?.('Installing Lit router plugin...', {
           version,
           mode,
           base,
@@ -158,10 +158,10 @@ export function createRouterEnginePlugin(
         // 发射路由器安装完成事件
         engine.events?.emit?.('router:installed', { router, mode, base })
 
-        engine.logger?.info?.('Vue2 router plugin installed successfully')
+        engine.logger?.info?.('Lit router plugin installed successfully')
       } catch (error) {
         const engine: EngineLike = context?.engine || context
-        engine?.logger?.error?.('Failed to install Vue2 router plugin:', error)
+        engine?.logger?.error?.('Failed to install Lit router plugin:', error)
         throw error
       }
     },
@@ -174,7 +174,7 @@ export function createRouterEnginePlugin(
           return
         }
 
-        engine.logger?.info?.('Uninstalling Vue2 router plugin...')
+        engine.logger?.info?.('Uninstalling Lit router plugin...')
 
         // 清理状态
         engine.state?.delete?.('router:mode')
@@ -191,18 +191,18 @@ export function createRouterEnginePlugin(
         // 发射路由器卸载事件
         engine.events?.emit?.('router:uninstalled')
 
-        engine.logger?.info?.('Vue2 router plugin uninstalled successfully')
+        engine.logger?.info?.('Lit router plugin uninstalled successfully')
       } catch (error) {
         const engine: EngineLike = context?.engine || context
-        engine?.logger?.error?.('Failed to uninstall Vue2 router plugin:', error)
+        engine?.logger?.error?.('Failed to uninstall Lit router plugin:', error)
       }
     },
   }
 }
 
 /**
- * 创建默认 Vue2 Router Engine 插件
- * 
+ * 创建默认 Lit Router Engine 插件
+ *
  * @param routes - 路由配置
  * @returns Engine 插件实例
  */
@@ -211,7 +211,7 @@ export function createDefaultRouterEnginePlugin(
 ): Plugin {
   return createRouterEnginePlugin({
     routes,
-    mode: 'hash',
+    mode: 'history',
     base: '/',
   })
 }

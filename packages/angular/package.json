@@ -86,17 +86,17 @@
     "@ldesign/router-core": "workspace:*"
   },
   "peerDependencies": {
-    "@angular/common": "^17.0.0 || ^18.0.0",
-    "@angular/core": "^17.0.0 || ^18.0.0",
-    "@angular/router": "^17.0.0 || ^18.0.0",
+    "@angular/common": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@angular/router": "^19.0.0",
     "rxjs": "^7.8.0",
     "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@ldesign/builder": "workspace:*",
-    "@angular/common": "^18.0.0",
-    "@angular/core": "^18.0.0",
-    "@angular/router": "^18.0.0",
+    "@angular/common": "^19.0.0",
+    "@angular/core": "^19.0.0",
+    "@angular/router": "^19.0.0",
     "@types/node": "^22.0.0",
     "eslint": "^9.18.0",
     "rxjs": "^7.8.0",

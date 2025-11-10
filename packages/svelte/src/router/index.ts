@@ -71,6 +71,7 @@ export interface CurrentRoute {
   meta: RouteMeta
   fullPath: string
   matched: RouteRecordRaw[]
+  component?: any
 }
 
 /**
@@ -254,7 +255,7 @@ export function createRouter(options: RouterOptions): Router {
     if (typeof location === 'string') {
       const parsed = parseURL(location)
       path = parsed.path
-      query = parseQuery(parsed.query)
+      query = parsed.query  // parseURL 已经返回解析后的 query 对象
       hash = parsed.hash
     } else {
       path = location.path || '/'
@@ -278,6 +279,7 @@ export function createRouter(options: RouterOptions): Router {
       meta: route?.meta || {},
       fullPath,
       matched: route ? [route] : [],
+      component: route?.component,
     }
   }
 
@@ -394,6 +396,7 @@ export function createRouter(options: RouterOptions): Router {
           hash: current.hash,
           meta: current.meta,
           matched: current.matched as any,
+          component: current.component,
         }
       }
     },

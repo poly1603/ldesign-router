@@ -1,6 +1,6 @@
 /**
  * Vue 3 Router Engine 插件
- * 
+ *
  * 将 Vue Router 功能集成到 LDesign Engine 中
  */
 
@@ -65,7 +65,7 @@ interface EngineLike {
 
 /**
  * 创建 Vue 3 Router Engine 插件
- * 
+ *
  * @param options - 插件配置选项
  * @returns Engine 插件实例
  */
@@ -141,6 +141,23 @@ export function createRouterEnginePlugin(
             emit: (event: string, data?: any) => engine.events?.emit?.(event, data)
           } : undefined,
         })
+
+        // 初始同步与 hash 监听：确保刷新后保持当前哈希路由
+        try {
+          if (typeof window !== 'undefined') {
+            const initialPath = (mode === 'hash')
+              ? (window.location.hash.slice(1) || '/')
+              : (window.location.pathname + window.location.search + window.location.hash)
+            try { await (router as any).vueRouter.replace(initialPath) } catch {}
+            if (mode === 'hash') {
+              window.addEventListener('hashchange', () => {
+                const to = (router as any).vueRouter?.currentRoute?.value
+                engine.events?.emit?.('router:navigated', { to })
+              })
+            }
+          }
+        } catch {}
+
 
         // 安装到 Vue 应用（使用底层的 vueRouter）
         const app = engine.getApp?.()

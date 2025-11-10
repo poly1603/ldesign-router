@@ -136,27 +136,124 @@ export function createRouterEnginePlugin(
         // Angular 使用服务模式，将路由配置保存到状态中
         engine.state?.set?.('router:routes', routes)
 
-        // 创建路由配置对象，包含事件发射器
-        const routerConfig = {
+        // 创建简易路由器实例（支持 hash/history），提供 getCurrentRoute/push/replace 等方法
+        const eventEmitter = engine.events ? { emit: (event: string, data?: any) => engine.events?.emit?.(event, data) } : undefined
+
+        function parseLocation() {
+          const isHash = (mode || 'hash') === 'hash'
+          if (typeof window === 'undefined') {
+            return { path: '/', search: '', hash: '', fullPath: '/' }
+          }
+          if (isHash) {
+            const hashValue = window.location.hash.slice(1)
+            const [pathWithQuery, hashFragment] = hashValue.split('#')
+            const [path, queryString] = (pathWithQuery || '/').split('?')
+            const search = queryString ? `?${queryString}` : ''
+            const hash = hashFragment ? `#${hashFragment}` : ''
+            return { path: path || '/', search, hash, fullPath: (path || '/') + search + hash }
+          } else {
+            const path = window.location.pathname
+            const search = window.location.search
+            const hash = window.location.hash
+            return { path, search, hash, fullPath: path + search + hash }
+          }
+        }
+
+        function matchRoute(currentPath: string) {
+          let matched: any | undefined
+          let params: Record<string, any> = {}
+          for (const r of routes) {
+            if (r.path === currentPath) { matched = r; break }
+            const pattern = r.path.replace(/:\\w+/g, '([^/]+)')
+            const regex = new RegExp(`^${pattern}$`)
+            const m = currentPath.match(regex)
+            if (m) {
+              matched = r
+              const names = r.path.match(/:\\w+/g) || []
+              names.forEach((n: string, i: number) => { params[n.slice(1)] = m[i + 1] })
+              break
+            }
+          }
+          return { matched, params }
+        }
+
+        const router = {
           routes,
-          mode,
-          base,
-          preset,
-          // 传入事件发射器，使router能够触发事件
-          eventEmitter: engine.events ? {
-            emit: (event: string, data?: any) => engine.events?.emit?.(event, data)
-          } : undefined,
+          getCurrentRoute() {
+            const { path, search, hash, fullPath } = parseLocation()
+            const { matched, params } = matchRoute(path)
+            return {
+              value: {
+                path,
+                fullPath,
+                params,
+                query: Object.fromEntries(new URLSearchParams(search.replace(/^\?/, ''))),
+                hash: hash.replace(/^#/, ''),
+                meta: matched?.meta,
+                matched: matched ? [matched] : [],
+                component: matched?.component,
+              }
+            }
+          },
+          async push(to: any) {
+            const isHash = (mode || 'hash') === 'hash'
+            const target = typeof to === 'string' ? to : (to?.path || '/')
+            if (typeof window !== 'undefined') {
+              if (isHash) {
+                window.location.hash = target
+              } else {
+                history.pushState(null, '', target)
+              }
+              setTimeout(() => eventEmitter?.emit?.('router:navigated', { to: this.getCurrentRoute().value }), 0)
+            }
+          },
+          async replace(to: any) {
+            const isHash = (mode || 'hash') === 'hash'
+            const target = typeof to === 'string' ? to : (to?.path || '/')
+            if (typeof window !== 'undefined') {
+              if (isHash) {
+                const newHash = '#' + target.replace(/^#/, '')
+                if (window.location.hash !== newHash) {
+                  window.location.replace(window.location.pathname + window.location.search + newHash)
+                }
+              } else {
+                history.replaceState(null, '', target)
+              }
+              setTimeout(() => eventEmitter?.emit?.('router:navigated', { to: this.getCurrentRoute().value }), 0)
+            }
+          },
+          go(delta: number) {
+            if (typeof window !== 'undefined') {
+              window.history.go(delta)
+            }
+          },
+          back() { if (typeof window !== 'undefined') window.history.back() },
+          forward() { if (typeof window !== 'undefined') window.history.forward() },
+        }
+
+        // 初始同步：根据 URL 设置当前路由并发射一次事件
+        if (typeof window !== 'undefined') {
+          if ((mode || 'hash') === 'hash') {
+            // 确保初始 hash 有路径
+            if (!window.location.hash) {
+              window.location.hash = '/'
+            }
+          }
+          // 监听 hash 变化，触发事件
+          window.addEventListener('hashchange', () => {
+            eventEmitter?.emit?.('router:navigated', { to: router.getCurrentRoute().value })
+          })
         }
 
         // 注册路由器到 engine
         if (engine.setRouter) {
-          engine.setRouter(routerConfig)
+          engine.setRouter(router)
         } else {
-          (engine as any).router = routerConfig
+          (engine as any).router = router
         }
 
         // 发射路由器安装完成事件
-        engine.events?.emit?.('router:installed', { router: routerConfig, mode, base })
+        engine.events?.emit?.('router:installed', { router, mode, base })
 
         engine.logger?.info?.('Angular router plugin installed successfully')
       } catch (error) {
