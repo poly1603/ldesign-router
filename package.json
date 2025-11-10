@@ -66,8 +66,7 @@
     "lint:check": "eslint .",
     "clean": "pnpm -r run clean && rimraf es lib dist",
     "test": "pnpm -r run test",
-    "dev": "ldesign-builder build -f esm,cjs,dts --watch",
-    "prepublishOnly": "pnpm run clean && pnpm run build"
+    "dev": "ldesign-builder build -f esm,cjs,dts --watch"
   },
   "dependencies": {},
   "peerDependencies": {},

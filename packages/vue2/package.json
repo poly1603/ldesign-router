@@ -39,8 +39,7 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint . --fix",
     "lint:check": "eslint .",
-    "clean": "rimraf es lib dist",
-    "prepublishOnly": "pnpm run clean && pnpm run build"
+    "clean": "rimraf es lib dist"
   },
   "dependencies": {
     "@ldesign/router-core": "workspace:*"

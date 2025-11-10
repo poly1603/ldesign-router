@@ -63,8 +63,7 @@
     "lint:check": "eslint .",
     "clean": "rimraf es lib dist",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "prepublishOnly": "pnpm run clean && pnpm run build"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@ldesign/router-core": "workspace:*",
