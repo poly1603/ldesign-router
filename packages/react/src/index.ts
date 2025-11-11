@@ -63,12 +63,20 @@ export {
   RouterView,
   RouterLink,
   Routes,
+  // 内置 Demo 页面（仅供 example 使用）
+  DemoHome,
+  DemoAbout,
+  DemoUser,
+  DemoDashboard,
+  DemoNotFound,
 } from './components'
 
 export type {
   RouterViewProps,
   RouterLinkProps,
   RoutesProps,
+  // 动画配置类型（可供使用方可选引用）
+  TransitionConfig,
 } from './components'
 
 // ==================== Hooks 导出 ====================

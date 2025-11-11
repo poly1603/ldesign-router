@@ -41,11 +41,12 @@ export {
 } from '@ldesign/router-core'
 
 // ==================== 历史管理重新导出 ====================
+// 注意：Vue 适配层需要使用 vue-router 的 History 实现
 export {
   createWebHistory,
   createWebHashHistory,
   createMemoryHistory,
-} from '@ldesign/router-core'
+} from 'vue-router'
 
 // ==================== 路由器导出 ====================
 export {
@@ -63,6 +64,12 @@ export type {
 export {
   RouterView,
   RouterLink,
+  // 内置 Demo 页面（仅供 example 使用）
+  DemoHome,
+  DemoAbout,
+  DemoUser,
+  DemoDashboard,
+  DemoNotFound,
 } from './components'
 
 export type {

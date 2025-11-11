@@ -1,40 +1,35 @@
-import { createRouter } from '@ldesign/router-react'
-import Home from './pages/Home'
-import About from './pages/About'
-import User from './pages/User'
-import Dashboard from './pages/Dashboard'
-import NotFound from './pages/NotFound'
+import { createRouter, DemoHome, DemoAbout, DemoUser, DemoDashboard, DemoNotFound } from '@ldesign/router-react'
 
 export const router = createRouter({
   routes: [
     {
       path: '/',
       name: 'home',
-      component: Home,
+      component: DemoHome,
       meta: { title: '首页' },
     },
     {
       path: '/about',
       name: 'about',
-      component: About,
+      component: DemoAbout,
       meta: { title: '关于' },
     },
     {
       path: '/user/:id',
       name: 'user',
-      component: User,
+      component: DemoUser,
       meta: { title: '用户详情' },
     },
     {
       path: '/dashboard',
       name: 'dashboard',
-      component: Dashboard,
+      component: DemoDashboard,
       meta: { title: '仪表盘', requiresAuth: true },
     },
     {
       path: '*',
       name: 'not-found',
-      component: NotFound,
+      component: DemoNotFound,
       meta: { title: '404' },
     },
   ],

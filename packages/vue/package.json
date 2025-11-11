@@ -73,7 +73,17 @@
       "types": "./es/__tests__/*.d.ts",
       "import": "./es/__tests__/*.js",
       "require": "./lib/__tests__/*.cjs"
-    }
+    },
+    "./es/demo/Home.vue.css": "./es/demo/Home.vue.css",
+    "./es/demo/pages/About.vue.css": "./es/demo/pages/About.vue.css",
+    "./es/demo/pages/Home.vue.css": "./es/demo/pages/Home.vue.css",
+    "./es/index.css": "./es/index.css",
+    "./lib/demo/Home.vue.css": "./lib/demo/Home.vue.css",
+    "./lib/demo/pages/About.vue.css": "./lib/demo/pages/About.vue.css",
+    "./lib/demo/pages/Home.vue.css": "./lib/demo/pages/Home.vue.css",
+    "./lib/index.css": "./lib/index.css",
+    "./dist/index.css": "./dist/index.css",
+    "./dist/index.min.css": "./dist/index.min.css"
   },
   "main": "./lib/index.cjs",
   "module": "./es/index.js",

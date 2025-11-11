@@ -6,12 +6,13 @@
 
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
-import { useRoute, onBeforeRouteLeave as vueOnBeforeRouteLeave, onBeforeRouteUpdate as vueOnBeforeRouteUpdate } from 'vue-router'
+import { useRoute as vueUseRoute, onBeforeRouteLeave as vueOnBeforeRouteLeave, onBeforeRouteUpdate as vueOnBeforeRouteUpdate } from 'vue-router'
+import type { RouteRecordName } from 'vue-router'
 import type { RouteParams, RouteQuery, RouteMeta, NavigationGuard } from '@ldesign/router-core'
 
 // ==================== 类型定义 ====================
 
-export type UseRouteReturn = ReturnType<typeof useRoute>
+export type UseRouteReturn = ReturnType<typeof vueUseRoute>
 export type UseRouterReturn = any // 从 router/index.ts 导入
 
 // ==================== Composables ====================
@@ -32,7 +33,7 @@ export function useParams(): ComputedRef<RouteParams> {
  * @returns 查询参数的响应式引用
  */
 export function useQuery(): ComputedRef<RouteQuery> {
-  const route = useRoute()
+  const route = vueUseRoute()
   return computed(() => route.query as RouteQuery)
 }
 
@@ -42,7 +43,7 @@ export function useQuery(): ComputedRef<RouteQuery> {
  * @returns 哈希值的响应式引用
  */
 export function useHash(): ComputedRef<string> {
-  const route = useRoute()
+  const route = vueUseRoute()
   return computed(() => route.hash)
 }
 
@@ -52,7 +53,7 @@ export function useHash(): ComputedRef<string> {
  * @returns 路由元信息的响应式引用
  */
 export function useMeta(): ComputedRef<RouteMeta> {
-  const route = useRoute()
+  const route = vueUseRoute()
   return computed(() => route.meta as RouteMeta)
 }
 
@@ -100,8 +101,8 @@ export function useFullPath(): ComputedRef<string> {
  * 
  * @returns 路由名称的响应式引用
  */
-export function useRouteName(): ComputedRef<string | symbol | undefined> {
+export function useRouteName(): ComputedRef<RouteRecordName | undefined> {
   const route = vueUseRoute()
-  return computed(() => route.name)
+  return computed(() => (route.name ?? undefined) as RouteRecordName | undefined)
 }
 

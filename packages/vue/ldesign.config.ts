@@ -2,7 +2,7 @@ import { defineConfig } from '@ldesign/builder'
 
 export default defineConfig({
   input: 'src/index.ts',
-  
+
   output: {
     format: ['esm', 'cjs', 'umd'],
     esm: {
@@ -16,7 +16,7 @@ export default defineConfig({
     umd: {
       dir: 'dist',
       name: 'LDesignRouterVue',
-      input: 'src/index.ts',
+      entry: 'src/index.ts',
     },
   },
 

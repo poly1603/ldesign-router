@@ -25,6 +25,7 @@ import type {
   RouteRecordRaw as VueRouteRecordRaw,
   RouterOptions as VueRouterOptions,
   RouterHistory,
+  NavigationFailure,
 } from 'vue-router'
 
 // ==================== 类型定义 ====================
@@ -144,8 +145,9 @@ function convertRouteRecord(route: RouteRecordRaw): VueRouteRecordRaw {
   const vueRoute: VueRouteRecordRaw = {
     path: route.path,
     name: route.name,
-    component: route.component,
-    meta: route.meta,
+    component: route.component as any,
+    meta: route.meta as any,
+    ...(route.children ? { children: route.children.map(convertRouteRecord) as any } : {}),
   }
 
   if (route.redirect) {
@@ -156,9 +158,6 @@ function convertRouteRecord(route: RouteRecordRaw): VueRouteRecordRaw {
     vueRoute.alias = route.alias
   }
 
-  if (route.children) {
-    vueRoute.children = route.children.map(convertRouteRecord)
-  }
 
   if (route.beforeEnter) {
     vueRoute.beforeEnter = route.beforeEnter as any
@@ -167,33 +166,6 @@ function convertRouteRecord(route: RouteRecordRaw): VueRouteRecordRaw {
   return vueRoute
 }
 
-/**
- * 转换历史管理器为 vue-router 格式
- */
-function convertHistory(history: RouterHistory): any {
-  // vue-router 的 history 接口与我们的 RouterHistory 基本兼容
-  // 只需要做一些适配
-  return {
-    base: history.base,
-    location: history.location.path,
-    state: history.state,
-    push: (to: string) => {
-      const location = typeof to === 'string'
-        ? { fullPath: to, path: to, query: '', hash: '' }
-        : to
-      history.push(location)
-    },
-    replace: (to: string) => {
-      const location = typeof to === 'string'
-        ? { fullPath: to, path: to, query: '', hash: '' }
-        : to
-      history.replace(location)
-    },
-    go: (delta: number) => history.go(delta),
-    listen: history.listen.bind(history),
-    destroy: history.destroy.bind(history),
-  }
-}
 
 /**
  * 创建增强的路由器
@@ -366,6 +338,9 @@ export function useRouter(): Router {
   // 返回与 createRouter 相同的接口
   return {
     currentRoute: vueRouter.currentRoute as any,
+    getCurrentRoute: () => ({
+      value: vueRouter.currentRoute.value as any
+    }),
     addRoute: vueRouter.addRoute.bind(vueRouter) as any,
     removeRoute: vueRouter.removeRoute.bind(vueRouter),
     hasRoute: vueRouter.hasRoute.bind(vueRouter),

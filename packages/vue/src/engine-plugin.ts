@@ -6,7 +6,7 @@
 
 import type { Plugin } from '@ldesign/engine-core/types'
 import type { RouteRecordRaw } from '@ldesign/router-core'
-import { createRouter, type RouterOptions } from './router'
+import { createRouter } from './router'
 import { createWebHistory, createWebHashHistory, createMemoryHistory } from 'vue-router'
 
 /**
@@ -37,6 +37,14 @@ export interface RouterEnginePluginOptions {
   preset?: RouterPreset
   /** 是否启用调试模式 */
   debug?: boolean
+  /** 路由动画配置 */
+  animation?: boolean | {
+    type?: 'fade' | 'slide' | 'zoom' | 'none'
+    duration?: number
+    mode?: 'out-in' | 'in-out' | 'default'
+    easing?: string
+    enabled?: boolean
+  }
 }
 
 /**
@@ -148,7 +156,7 @@ export function createRouterEnginePlugin(
             const initialPath = (mode === 'hash')
               ? (window.location.hash.slice(1) || '/')
               : (window.location.pathname + window.location.search + window.location.hash)
-            try { await (router as any).vueRouter.replace(initialPath) } catch {}
+            try { await (router as any).vueRouter.replace(initialPath) } catch { }
             if (mode === 'hash') {
               window.addEventListener('hashchange', () => {
                 const to = (router as any).vueRouter?.currentRoute?.value
@@ -156,14 +164,28 @@ export function createRouterEnginePlugin(
               })
             }
           }
-        } catch {}
+        } catch { }
 
 
         // 安装到 Vue 应用（使用底层的 vueRouter）
         const app = engine.getApp?.()
+
+        const provideAnimation = (appInstance: any) => {
+          // 规范化动画配置并 provide 给 RouterView 使用
+          const normalize = (val: any) => {
+            if (val === undefined || val === null) return null
+            if (typeof val === 'boolean') return val ? { type: 'fade' } : { type: 'none' }
+            if (typeof val === 'object') return val
+            return null
+          }
+          const anim = normalize((options as any).animation)
+          if (anim) appInstance.provide('routerAnimationConfig', anim)
+        }
+
         if (app) {
           app.use((router as any).vueRouter)
           app.provide('router', router)
+          provideAnimation(app)
         } else {
           // 如果应用还未创建，等待应用创建事件
           engine.events?.once?.('app:created', () => {
@@ -171,6 +193,7 @@ export function createRouterEnginePlugin(
             if (app) {
               app.use((router as any).vueRouter)
               app.provide('router', router)
+              provideAnimation(app)
             }
           })
         }

@@ -27,7 +27,7 @@ function App() {
         </nav>
 
         <main className="content">
-          <RouterView />
+          <RouterView animation={{ type: 'fade', duration: 250, easing: 'ease-in-out' }} />
         </main>
 
         <footer className="footer">
