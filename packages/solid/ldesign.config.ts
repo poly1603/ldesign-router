@@ -1,10 +1,11 @@
 import { defineConfig } from '@ldesign/builder'
 
 export default defineConfig({
+  libraryType: 'solid',
   input: 'src/index.ts',
 
   output: {
-    format: ['esm', 'cjs'],
+    format: ['esm', 'cjs', 'umd'],
     esm: {
       dir: 'es',
       preserveStructure: true,
@@ -12,6 +13,11 @@ export default defineConfig({
     cjs: {
       dir: 'lib',
       preserveStructure: true,
+    },
+    umd: {
+      dir: 'dist',
+      name: 'LDesignRouterSolid',
+      entry: 'src/index.ts',
     },
   },
 

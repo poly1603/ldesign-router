@@ -57,6 +57,11 @@
       "types": "./es/services/*.d.ts",
       "import": "./es/services/*.js",
       "require": "./lib/services/*.cjs"
+    },
+    "./engine-plugin": {
+      "types": "./es/engine-plugin.d.ts",
+      "import": "./es/engine-plugin.js",
+      "require": "./lib/engine-plugin.cjs"
     }
   },
   "main": "./lib/index.cjs",
@@ -69,7 +74,8 @@
     "LICENSE",
     "package.json",
     "es",
-    "lib"
+    "lib",
+    "dist"
   ],
   "scripts": {
     "build": "ldesign-builder build",

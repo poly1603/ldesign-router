@@ -70,7 +70,8 @@
     "LICENSE",
     "package.json",
     "es",
-    "lib"
+    "lib",
+    "dist"
   ],
   "scripts": {
     "build": "ldesign-builder build",
@@ -91,7 +92,9 @@
   },
   "devDependencies": {
     "@ldesign/builder": "workspace:*",
+    "@rollup/plugin-babel": "^6.0.4",
     "@types/node": "^22.0.0",
+    "babel-preset-solid": "^1.8.0",
     "eslint": "^9.18.0",
     "solid-js": "^1.8.11",
     "typescript": "^5.7.3",

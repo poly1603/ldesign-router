@@ -4,7 +4,7 @@ export default defineConfig({
   input: 'src/index.ts',
 
   output: {
-    format: ['esm', 'cjs'],
+    format: ['esm', 'cjs', 'umd'],
     esm: {
       dir: 'es',
       preserveStructure: true,
@@ -12,6 +12,11 @@ export default defineConfig({
     cjs: {
       dir: 'lib',
       preserveStructure: true,
+    },
+    umd: {
+      dir: 'dist',
+      name: 'LDesignRouterCore',
+      entry: 'src/index.ts',
     },
   },
 

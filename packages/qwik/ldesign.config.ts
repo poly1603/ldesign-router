@@ -2,8 +2,23 @@ import { defineConfig } from '@ldesign/builder'
 
 export default defineConfig({
   input: 'src/index.ts',
-  output: 'dist',
-  format: ['esm', 'cjs'],
+
+  output: {
+    format: ['esm', 'cjs', 'umd'],
+    esm: {
+      dir: 'es',
+      preserveStructure: true,
+    },
+    cjs: {
+      dir: 'lib',
+      preserveStructure: true,
+    },
+    umd: {
+      dir: 'dist',
+      name: 'LDesignRouterQwik',
+      entry: 'src/index.ts',
+    },
+  },
 
   dts: true,
   sourcemap: true,
