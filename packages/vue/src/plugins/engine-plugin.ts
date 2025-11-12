@@ -49,6 +49,7 @@ export interface RouterEnginePluginOptions {
 
 /**
  * Engine 接口（简化版）
+ * @deprecated 使用增强的 PluginContext 代替
  */
 interface EngineLike {
   logger?: {
@@ -69,6 +70,13 @@ interface EngineLike {
   }
   router?: any
   setRouter?: (router: any) => void
+}
+
+/**
+ * 获取 Engine 实例（兼容多种上下文结构）
+ */
+function getEngine(context: any): EngineLike {
+  return context?.engine || context || {}
 }
 
 /**
@@ -105,7 +113,7 @@ export function createRouterEnginePlugin(
           console.log('[Vue Router Plugin] install method called')
         }
 
-        const engine: EngineLike = context?.engine || context
+        const engine = getEngine(context)
 
         if (!engine) {
           throw new Error('Engine instance not found in context')
@@ -136,11 +144,6 @@ export function createRouterEnginePlugin(
           history = createMemoryHistory(base)
         }
 
-        // 调试：检查 history 对象
-        console.log('[Router Plugin] History object:', history)
-        console.log('[Router Plugin] History has createHref:', typeof history.createHref)
-        console.log('[Router Plugin] History keys:', Object.keys(history))
-
         // 创建路由器
         const router = createRouter({
           history,
@@ -166,12 +169,8 @@ export function createRouterEnginePlugin(
           }
         } catch { }
 
-
-        // 安装到 Vue 应用（使用底层的 vueRouter）
-        const app = engine.getApp?.()
-
+        // 动画配置处理
         const provideAnimation = (appInstance: any) => {
-          // 规范化动画配置并 provide 给 RouterView 使用
           const normalize = (val: any) => {
             if (val === undefined || val === null) return null
             if (typeof val === 'boolean') return val ? { type: 'fade' } : { type: 'none' }
@@ -182,18 +181,24 @@ export function createRouterEnginePlugin(
           if (anim) appInstance.provide('routerAnimationConfig', anim)
         }
 
-        if (app) {
+        // 安装到 Vue 应用
+        const installToVue = (app: any) => {
           app.use((router as any).vueRouter)
           app.provide('router', router)
           provideAnimation(app)
+        }
+
+        // 优先使用增强上下文的 framework.app
+        const app = context?.framework?.app || engine.getApp?.()
+
+        if (app) {
+          installToVue(app)
         } else {
           // 如果应用还未创建，等待应用创建事件
           engine.events?.once?.('app:created', () => {
-            const app = engine.getApp?.()
+            const app = context?.framework?.app || engine.getApp?.()
             if (app) {
-              app.use((router as any).vueRouter)
-              app.provide('router', router)
-              provideAnimation(app)
+              installToVue(app)
             }
           })
         }
@@ -205,8 +210,8 @@ export function createRouterEnginePlugin(
           (engine as any).router = router
         }
 
-        // 注册路由服务到容器（用于 engine-vue3 的 installVue）
-        const container = (context as any).container || (engine as any).container
+        // 注册路由服务到容器（使用增强上下文）
+        const container = context?.container || (engine as any).container
         if (container && container.singleton) {
           container.singleton('router', router)
           if (debug) {
@@ -219,7 +224,7 @@ export function createRouterEnginePlugin(
 
         engine.logger?.info?.('Vue router plugin installed successfully')
       } catch (error) {
-        const engine: EngineLike = context?.engine || context
+        const engine = getEngine(context)
         engine?.logger?.error?.('Failed to install Vue router plugin:', error)
         throw error
       }
@@ -227,7 +232,7 @@ export function createRouterEnginePlugin(
 
     async uninstall(context: any) {
       try {
-        const engine: EngineLike = context?.engine || context
+        const engine = getEngine(context)
 
         if (!engine) {
           return
@@ -252,7 +257,7 @@ export function createRouterEnginePlugin(
 
         engine.logger?.info?.('Vue router plugin uninstalled successfully')
       } catch (error) {
-        const engine: EngineLike = context?.engine || context
+        const engine = getEngine(context)
         engine?.logger?.error?.('Failed to uninstall Vue router plugin:', error)
       }
     },
