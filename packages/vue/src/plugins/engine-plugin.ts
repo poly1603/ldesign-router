@@ -205,6 +205,15 @@ export function createRouterEnginePlugin(
           (engine as any).router = router
         }
 
+        // 注册路由服务到容器（用于 engine-vue3 的 installVue）
+        const container = (context as any).container || (engine as any).container
+        if (container && container.singleton) {
+          container.singleton('router', router)
+          if (debug) {
+            console.log('[Vue Router Plugin] Router service registered to container')
+          }
+        }
+
         // 发射路由器安装完成事件
         engine.events?.emit?.('router:installed', { router, mode, base })
 
