@@ -6,15 +6,16 @@
  * @module router
  */
 
-import type { App, Ref } from 'vue'
+import type { App } from 'vue'
 import type {
   RouteLocationNormalized,
   RouteLocationRaw,
   RouteRecordRaw,
   NavigationGuard,
   NavigationHookAfter,
-  ScrollBehavior,
-} from '@ldesign/router-core'
+  Router,
+  RouterOptions,
+} from '../types'
 import {
   createRouter as createVueRouter,
   useRouter as useVueRouter,
@@ -24,117 +25,9 @@ import type {
   Router as VueRouter,
   RouteRecordRaw as VueRouteRecordRaw,
   RouterOptions as VueRouterOptions,
-  RouterHistory,
-  NavigationFailure,
 } from 'vue-router'
 
-// ==================== 类型定义 ====================
-
-/**
- * 事件发射器接口
- */
-export interface EventEmitter {
-  emit(event: string, data?: any): void
-}
-
-/**
- * 路由器配置选项
- */
-export interface RouterOptions {
-  /** 路由记录数组 */
-  routes: RouteRecordRaw[]
-
-  /** 历史管理器 */
-  history: RouterHistory
-
-  /** 事件发射器（可选） */
-  eventEmitter?: EventEmitter
-
-  /** 滚动行为 */
-  scrollBehavior?: ScrollBehavior
-
-  /** 活跃链接类名 */
-  linkActiveClass?: string
-
-  /** 精确活跃链接类名 */
-  linkExactActiveClass?: string
-
-  /** 严格尾部斜杠匹配 */
-  strict?: boolean
-
-  /** 大小写敏感匹配 */
-  sensitive?: boolean
-}
-
-/**
- * 当前路由对象
- */
-export interface CurrentRoute {
-  value?: RouteLocationNormalized
-}
-
-/**
- * 增强的路由器接口
- */
-export interface Router {
-  /** 当前路由 */
-  currentRoute: Ref<RouteLocationNormalized>
-
-  /** 获取当前路由（兼容性方法） */
-  getCurrentRoute(): CurrentRoute
-
-  /** 添加路由 */
-  addRoute(route: RouteRecordRaw): () => void
-  addRoute(parentName: string, route: RouteRecordRaw): () => void
-
-  /** 移除路由 */
-  removeRoute(name: string): void
-
-  /** 检查路由是否存在 */
-  hasRoute(name: string): boolean
-
-  /** 获取所有路由 */
-  getRoutes(): RouteRecordRaw[]
-
-  /** 解析路由位置 */
-  resolve(to: RouteLocationRaw): RouteLocationNormalized
-
-  /** 导航到新位置 */
-  push(to: RouteLocationRaw): Promise<void | NavigationFailure>
-
-  /** 替换当前位置 */
-  replace(to: RouteLocationRaw): Promise<void | NavigationFailure>
-
-  /** 前进或后退 */
-  go(delta: number): void
-
-  /** 后退 */
-  back(): void
-
-  /** 前进 */
-  forward(): void
-
-  /** 全局前置守卫 */
-  beforeEach(guard: NavigationGuard): () => void
-
-  /** 全局解析守卫 */
-  beforeResolve(guard: NavigationGuard): () => void
-
-  /** 全局后置钩子 */
-  afterEach(hook: NavigationHookAfter): () => void
-
-  /** 错误处理器 */
-  onError(handler: (error: Error) => void): () => void
-
-  /** 判断路由是否就绪 */
-  isReady(): Promise<void>
-
-  /** 安装到 Vue 应用 */
-  install(app: App): void
-
-  /** 底层的 vue-router 实例 */
-  vueRouter: VueRouter
-}
+export type { Router, RouterOptions } from '../types'
 
 // ==================== 路由器实现 ====================
 

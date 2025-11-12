@@ -29,6 +29,16 @@
       "import": "./es/index.js",
       "require": "./lib/index.cjs"
     },
+    "./adapter": {
+      "types": "./es/adapter/index.d.ts",
+      "import": "./es/adapter/index.js",
+      "require": "./lib/adapter/index.cjs"
+    },
+    "./adapter/*": {
+      "types": "./es/adapter/*.d.ts",
+      "import": "./es/adapter/*.js",
+      "require": "./lib/adapter/*.cjs"
+    },
     "./components": {
       "types": "./es/components/index.d.ts",
       "import": "./es/components/index.js",
@@ -69,15 +79,33 @@
       "import": "./es/router/*.js",
       "require": "./lib/router/*.cjs"
     },
+    "./types": {
+      "types": "./es/types/index.d.ts",
+      "import": "./es/types/index.js",
+      "require": "./lib/types/index.cjs"
+    },
+    "./types/*": {
+      "types": "./es/types/*.d.ts",
+      "import": "./es/types/*.js",
+      "require": "./lib/types/*.cjs"
+    },
     "./__tests__/*": {
       "types": "./es/__tests__/*.d.ts",
       "import": "./es/__tests__/*.js",
       "require": "./lib/__tests__/*.cjs"
     },
+    "./es/components/RouterBreadcrumb.vue.css": "./es/components/RouterBreadcrumb.vue.css",
+    "./es/components/RouterLink.vue.css": "./es/components/RouterLink.vue.css",
+    "./es/components/RouterTabs.vue.css": "./es/components/RouterTabs.vue.css",
+    "./es/components/RouterView.vue.css": "./es/components/RouterView.vue.css",
     "./es/demo/Home.vue.css": "./es/demo/Home.vue.css",
     "./es/demo/pages/About.vue.css": "./es/demo/pages/About.vue.css",
     "./es/demo/pages/Home.vue.css": "./es/demo/pages/Home.vue.css",
     "./es/index.css": "./es/index.css",
+    "./lib/components/RouterBreadcrumb.vue.css": "./lib/components/RouterBreadcrumb.vue.css",
+    "./lib/components/RouterLink.vue.css": "./lib/components/RouterLink.vue.css",
+    "./lib/components/RouterTabs.vue.css": "./lib/components/RouterTabs.vue.css",
+    "./lib/components/RouterView.vue.css": "./lib/components/RouterView.vue.css",
     "./lib/demo/Home.vue.css": "./lib/demo/Home.vue.css",
     "./lib/demo/pages/About.vue.css": "./lib/demo/pages/About.vue.css",
     "./lib/demo/pages/Home.vue.css": "./lib/demo/pages/Home.vue.css",

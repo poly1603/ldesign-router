@@ -52,3 +52,33 @@ export {
   NavigationFailureType,
 } from './navigation'
 
+// 类型安全系统
+export type {
+  ExtractRouteParamsFromPath,
+  TypedRouteRecordRaw,
+  TypedRouteLocation,
+  ExtendedRouteMeta,
+  RouteConfigBuilder,
+  NamedRoutes,
+  TypedNavigationGuard,
+  RouteGroup,
+  RouteModule,
+  MergeRouteTypes,
+  RouteParamsType,
+  RouteQueryType,
+  RouteMetaType,
+  OptionalParamRoute,
+  RequiredParamRoute,
+} from './typed'
+
+export {
+  isTypedRoute,
+  isNamedRoute,
+  isPathRoute,
+  createTypedRoute,
+  defineRoute,
+  defineRouteGroup,
+  defineRouteModule,
+  mergeRouteMeta,
+} from './typed'
+

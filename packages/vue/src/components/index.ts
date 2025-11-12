@@ -4,39 +4,33 @@
  * @module components
  */
 
+// 核心组件
 export { default as RouterView } from './RouterView.vue'
 export { default as RouterLink } from './RouterLink.vue'
+export { default as RouterTabs } from './RouterTabs.vue'
+export { default as RouterBreadcrumb } from './RouterBreadcrumb.vue'
 
-export type { RouterLinkProps } from './RouterLink.vue'
+// 类型导出
+export type { 
+  RouterViewProps, 
+  RouterViewEmits,
+  TransitionConfig,
+  CacheConfig
+} from './RouterView.vue'
 
-/**
- * 路由过渡动画配置
- */
-export interface TransitionConfig {
-  /** 动画类型 */
-  type?: 'fade' | 'slide' | 'zoom' | 'none'
-  /** 动画持续时间（毫秒） */
-  duration?: number
-  /** 动画模式 */
-  mode?: 'out-in' | 'in-out' | 'default'
-  /** 缓动函数 */
-  easing?: string
-}
+export type { 
+  RouterLinkProps,
+  RouterLinkEmits
+} from './RouterLink.vue'
 
-export interface RouterViewProps {
-  /** 视图名称 */
-  name?: string
-  /** 路由 */
-  route?: any
-  /** 路由切换动画 */
-  transition?: boolean | TransitionConfig
-}
+export type { 
+  RouterTab, 
+  RouterTabsProps, 
+  RouterTabsEmits 
+} from './RouterTabs.vue'
 
-// Demo Pages（仅供 example 使用）
-import { defineComponent, h } from 'vue'
-
-export const DemoHome = defineComponent({ name: 'DemoHome', setup: () => () => h('section', { class: 'page' }, [h('h2', '首页'), h('p', '来自 @ldesign/router-vue 的内置示例页 Home。')]) })
-export const DemoAbout = defineComponent({ name: 'DemoAbout', setup: () => () => h('section', { class: 'page' }, [h('h2', '关于'), h('p', '来自 @ldesign/router-vue 的内置示例页 About。')]) })
-export const DemoUser = defineComponent({ name: 'DemoUser', setup: () => () => h('section', { class: 'page' }, [h('h2', '用户'), h('p', '来自 @ldesign/router-vue 的内置示例页 User。')]) })
-export const DemoDashboard = defineComponent({ name: 'DemoDashboard', setup: () => () => h('section', { class: 'page' }, [h('h2', '仪表盘'), h('p', '来自 @ldesign/router-vue 的内置示例页 Dashboard。')]) })
-export const DemoNotFound = defineComponent({ name: 'DemoNotFound', setup: () => () => h('section', { class: 'page' }, [h('h2', '404'), h('p', '未找到页面。')]) })
+export type { 
+  BreadcrumbItem, 
+  RouterBreadcrumbProps, 
+  RouterBreadcrumbEmits 
+} from './RouterBreadcrumb.vue'

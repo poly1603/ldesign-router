@@ -6,28 +6,64 @@
  * @module @ldesign/router-vue
  */
 
-// ==================== Core 类型重新导出 ====================
+// ==================== 类型导出 ====================
+
+// 重新导出所有类型（包括Core和Vue特定类型）
 export type {
-  // 基础类型
+  // Core基础类型
   RouteParams,
   RouteQuery,
   RouteMeta,
-  // 历史管理类型
-  HistoryLocation,
-  HistoryState,
-  RouterHistory,
-  // 导航相关类型
   RouteLocationNormalized,
   RouteLocationRaw,
+  RouteLocationBase,
   RouteRecordRaw,
+  RouteRecordNormalized,
+  RouteRecordBase,
   NavigationGuard,
+  NavigationGuardNext,
   NavigationFailure,
+  NavigationHookAfter,
+  RouterHistory,
+  HistoryLocation,
+  HistoryState,
   ScrollBehavior,
-} from '@ldesign/router-core'
+  ScrollPosition,
+  // Vue特定类型
+  Router,
+  RouterOptions,
+  CurrentRoute,
+  UseRouteReturn,
+  UseRouterReturn,
+  EventEmitter,
+  TypedRoute,
+  ExtractParams,
+} from './types'
+
+// 重新导出组件类型
+export type {
+  // RouterView
+  RouterViewProps,
+  RouterViewEmits,
+  TransitionConfig,
+  CacheConfig,
+  // RouterLink
+  RouterLinkProps,
+  RouterLinkEmits,
+  // RouterTabs
+  RouterTab,
+  RouterTabsProps,
+  RouterTabsEmits,
+  // RouterBreadcrumb
+  BreadcrumbItem,
+  RouterBreadcrumbProps,
+  RouterBreadcrumbEmits,
+} from './components'
 
 export {
   NavigationFailureType,
-} from '@ldesign/router-core'
+  NavigationType,
+} from './types'
 
 // ==================== Core 工具函数重新导出 ====================
 export {
@@ -55,26 +91,12 @@ export {
   useRoute,
 } from './router'
 
-export type {
-  Router,
-  RouterOptions,
-} from './router'
-
 // ==================== 组件导出 ====================
 export {
   RouterView,
   RouterLink,
-  // 内置 Demo 页面（仅供 example 使用）
-  DemoHome,
-  DemoAbout,
-  DemoUser,
-  DemoDashboard,
-  DemoNotFound,
-} from './components'
-
-export type {
-  RouterViewProps,
-  RouterLinkProps,
+  RouterTabs,
+  RouterBreadcrumb,
 } from './components'
 
 // ==================== Composables 导出 ====================
@@ -83,34 +105,64 @@ export {
   useQuery,
   useHash,
   useMeta,
+  useRouteMatch,
+  useFullPath,
+  useRouteName,
+  useTypedParams,
+  useTypedQuery,
+  useTypedMeta,
   onBeforeRouteLeave,
   onBeforeRouteUpdate,
-} from './composables'
-
-export type {
-  UseRouteReturn,
-  UseRouterReturn,
+  // 增强 Composables
+  useNavigationState,
+  useBreadcrumb,
+  useRouteActive,
+  usePathActive,
+  useHasQueryParam,
+  useQueryParam,
+  useParam,
 } from './composables'
 
 // ==================== 插件导出 ====================
+// Vue Plugin - 用于标准 Vue 应用
 export {
   createRouterPlugin,
+  useRouterPlugin,
 } from './plugins'
 
 export type {
   RouterPluginOptions,
 } from './plugins'
 
-// ==================== Engine 插件导出 ====================
+// Engine Plugin - 用于 LDesign Engine
 export {
   createRouterEnginePlugin,
   createDefaultRouterEnginePlugin,
   routerPlugin,
-} from './engine-plugin'
+} from './plugins'
 
 export type {
   RouterEnginePluginOptions,
   RouterMode,
   RouterPreset,
-} from './engine-plugin'
+} from './plugins'
+
+// ==================== 框架适配器导出 ====================
+export {
+  vueAdapter,
+  VueComponentLoader,
+  VueViewRenderer,
+  VueSSRRenderer,
+  VueErrorBoundary,
+} from './adapter'
+
+export type {
+  FrameworkAdapter,
+  ComponentLoader,
+  ViewRenderer,
+  SSRRenderer,
+  SSRContext,
+  ErrorBoundary,
+  ComponentLifecycleHooks,
+} from '@ldesign/router-core'
 

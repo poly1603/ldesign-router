@@ -56,3 +56,127 @@ export type {
   PermissionOptions,
 } from './permissions'
 
+// ==================== 路由分析 ====================
+export {
+  AnalyticsManager,
+  createAnalyticsManager,
+} from './analytics'
+
+export type {
+  RouteVisit,
+  NavigationPerformance,
+  RouteError,
+  AnalyticsStats,
+  AnalyticsOptions,
+  ReportFunction,
+} from './analytics'
+
+// ==================== 路由缓存 ====================
+export {
+  RouteCacheManager,
+  createRouteCacheManager,
+} from './cache'
+
+export type {
+  CacheStrategy,
+  CacheOptions,
+  CacheItem,
+  CacheStats,
+} from './cache'
+
+// ==================== 路由过渡动画 ====================
+export {
+  TransitionManager,
+  createTransitionManager,
+} from './transition'
+
+export type {
+  TransitionType,
+  TransitionDirection,
+  TransitionMode,
+  TransitionConfig,
+  TransitionManagerOptions,
+  NavigationDirection,
+} from './transition'
+
+// ==================== 路由状态持久化 ====================
+export {
+  PersistenceManager,
+  createPersistenceManager,
+} from './persistence'
+
+export type {
+  StorageType,
+  PersistedState,
+  PersistenceOptions,
+} from './persistence'
+
+// ==================== 导航守卫 ====================
+export {
+  GuardManager,
+  createGuardManager,
+  composeGuards,
+  conditionalGuard,
+  pathGuard,
+  nameGuard,
+  metaGuard,
+} from './guards'
+
+export type {
+  GuardType,
+  GuardReturn,
+  Guard,
+  AfterHook,
+  GuardRegistration,
+  GuardResult,
+  GuardManagerOptions,
+} from './guards'
+
+// ==================== 滚动行为 ====================
+export {
+  ScrollManager,
+  createScrollManager,
+  alwaysScrollToTop,
+  keepScrollPosition,
+  scrollToTopOnNewPage,
+  scrollToHashOrTop,
+  delayedScroll,
+  conditionalScroll,
+} from './scroll'
+
+export type {
+  ScrollBehaviorType,
+  ScrollTarget,
+  SavedScrollPosition,
+  ScrollStrategy,
+  ScrollManagerOptions,
+} from './scroll'
+
+// ==================== 匹配缓存 ====================
+export {
+  MatchCacheManager,
+  createMatchCacheManager,
+  createCacheKey,
+  withCache,
+} from './match-cache'
+
+export type {
+  MatchCacheItem,
+  MatchCacheStats,
+  MatchCacheOptions,
+} from './match-cache'
+
+// ==================== 性能监控 ====================
+export {
+  PerformanceMonitor,
+  createPerformanceMonitor,
+} from './performance'
+
+export type {
+  PerformanceMetrics,
+  PerformanceRecord,
+  PerformanceStats,
+  PerformanceWarning,
+  PerformanceMonitorOptions,
+} from './performance'
+
