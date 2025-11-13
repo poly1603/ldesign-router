@@ -17,34 +17,190 @@ export type RouterMode = 'history' | 'hash' | 'memory'
 /**
  * 路由预设
  */
-export type RouterPreset = 'spa' | 'mobile' | 'desktop' | 'admin' | 'blog'
+export type RouterPreset = 'spa' | 'mobile' | 'desktop' | 'admin' | 'blog' | 'docs'
 
 /**
- * Router Engine 插件配置选项
+ * 滚动行为类型
+ */
+export type ScrollBehavior = 'smooth' | 'auto' | 'instant'
+
+/**
+ * 路由动画配置
+ */
+export interface RouterAnimationConfig {
+  /** 动画类型 */
+  type?: 'fade' | 'slide' | 'zoom' | 'flip' | 'none'
+  /** 动画持续时间（毫秒） */
+  duration?: number
+  /** 动画模式 */
+  mode?: 'out-in' | 'in-out' | 'default'
+  /** 缓动函数 */
+  easing?: string
+  /** 是否启用动画 */
+  enabled?: boolean
+}
+
+/**
+ * 路由守卫配置
+ */
+export interface RouterGuardConfig {
+  /** 全局前置守卫 */
+  beforeEach?: (to: any, from: any, next: Function) => void
+  /** 全局后置守卫 */
+  afterEach?: (to: any, from: any) => void
+  /** 全局解析守卫 */
+  beforeResolve?: (to: any, from: any, next: Function) => void
+}
+
+/**
+ * 路由持久化配置
+ */
+export interface RouterPersistenceConfig {
+  /** 是否启用持久化 */
+  enabled?: boolean
+  /** 存储键名 */
+  key?: string
+  /** 存储类型 */
+  storage?: 'localStorage' | 'sessionStorage' | 'memory'
+  /** 是否保存查询参数 */
+  includeQuery?: boolean
+  /** 是否保存 hash */
+  includeHash?: boolean
+}
+
+/**
+ * 路由性能配置
+ */
+export interface RouterPerformanceConfig {
+  /** 是否启用路由缓存 */
+  cache?: boolean
+  /** 缓存大小 */
+  cacheSize?: number
+  /** 是否启用预加载 */
+  prefetch?: boolean
+  /** 预加载策略 */
+  prefetchStrategy?: 'hover' | 'visible' | 'idle' | 'manual'
+  /** 是否启用懒加载 */
+  lazyLoad?: boolean
+}
+
+/**
+ * 路由国际化配置
+ */
+export interface RouterI18nConfig {
+  /** 是否启用路由国际化 */
+  enabled?: boolean
+  /** 语言参数名 */
+  localeParam?: string
+  /** 默认语言 */
+  defaultLocale?: string
+  /** 支持的语言列表 */
+  locales?: string[]
+  /** 是否在 URL 中显示默认语言 */
+  showDefaultLocale?: boolean
+}
+
+/**
+ * Router Engine 插件完整配置选项
  */
 export interface RouterEnginePluginOptions {
+  // ========== 基础配置 ==========
   /** 插件名称 */
   name?: string
   /** 插件版本 */
   version?: string
-  /** 路由配置 */
+  /** 路由配置（必需） */
   routes: RouteRecordRaw[]
   /** 路由模式 */
   mode?: RouterMode
   /** 基础路径 */
   base?: string
-  /** 路由预设 */
+
+  // ========== 预设配置 ==========
+  /** 路由预设（快速配置常见场景） */
   preset?: RouterPreset
+
+  // ========== 高级配置 ==========
+  /** 路由动画配置 */
+  animation?: boolean | RouterAnimationConfig
+  /** 路由守卫配置 */
+  guards?: RouterGuardConfig
+  /** 滚动行为 */
+  scrollBehavior?: ScrollBehavior | ((to: any, from: any, savedPosition: any) => any)
+  /** 是否严格模式（路径末尾斜杠敏感） */
+  strict?: boolean
+  /** 是否区分大小写 */
+  sensitive?: boolean
+  /** 链接激活类名 */
+  linkActiveClass?: string
+  /** 链接精确激活类名 */
+  linkExactActiveClass?: string
+
+  // ========== 持久化配置 ==========
+  /** 路由持久化配置 */
+  persistence?: RouterPersistenceConfig
+
+  // ========== 性能配置 ==========
+  /** 性能优化配置 */
+  performance?: RouterPerformanceConfig
+
+  // ========== 国际化配置 ==========
+  /** 路由国际化配置 */
+  i18n?: RouterI18nConfig
+
+  // ========== 调试配置 ==========
   /** 是否启用调试模式 */
   debug?: boolean
-  /** 路由动画配置 */
-  animation?: boolean | {
-    type?: 'fade' | 'slide' | 'zoom' | 'none'
-    duration?: number
-    mode?: 'out-in' | 'in-out' | 'default'
-    easing?: string
-    enabled?: boolean
+  /** 是否启用性能监控 */
+  performanceMonitoring?: boolean
+
+  // ========== 扩展配置 ==========
+  /** 自定义元数据 */
+  meta?: Record<string, any>
+  /** 自定义钩子 */
+  hooks?: {
+    onBeforeInstall?: () => void | Promise<void>
+    onAfterInstall?: () => void | Promise<void>
+    onBeforeUninstall?: () => void | Promise<void>
+    onAfterUninstall?: () => void | Promise<void>
   }
+}
+
+/**
+ * 路由预设配置工厂
+ */
+export const RouterPresets: Record<RouterPreset, Partial<RouterEnginePluginOptions>> = {
+  spa: {
+    mode: 'history',
+    animation: { type: 'fade', duration: 200 },
+    performance: { cache: true, prefetch: true },
+  },
+  mobile: {
+    mode: 'hash',
+    animation: { type: 'slide', duration: 300 },
+    scrollBehavior: 'smooth',
+  },
+  desktop: {
+    mode: 'history',
+    animation: { type: 'fade', duration: 150 },
+    performance: { cache: true, cacheSize: 50 },
+  },
+  admin: {
+    mode: 'history',
+    persistence: { enabled: true, key: 'admin-route' },
+    performance: { cache: true, prefetch: true },
+  },
+  blog: {
+    mode: 'history',
+    scrollBehavior: 'smooth',
+    performance: { lazyLoad: true },
+  },
+  docs: {
+    mode: 'history',
+    scrollBehavior: 'smooth',
+    performance: { cache: true, prefetch: true },
+    i18n: { enabled: true },
+  },
 }
 
 /**
