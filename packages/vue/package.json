@@ -25,105 +25,97 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./es/index.d.ts",
-      "import": "./es/index.js",
-      "require": "./lib/index.cjs"
+      "types": "./esm/index.d.ts",
+      "import": "./esm/index.js",
+      "require": "./cjs/index.cjs"
     },
     "./adapter": {
-      "types": "./es/adapter/index.d.ts",
-      "import": "./es/adapter/index.js",
-      "require": "./lib/adapter/index.cjs"
+      "types": "./esm/adapter/index.d.ts",
+      "import": "./esm/adapter/index.js",
+      "require": "./cjs/adapter/index.cjs"
     },
     "./adapter/*": {
-      "types": "./es/adapter/*.d.ts",
-      "import": "./es/adapter/*.js",
-      "require": "./lib/adapter/*.cjs"
+      "types": "./esm/adapter/*.d.ts",
+      "import": "./esm/adapter/*.js",
+      "require": "./cjs/adapter/*.cjs"
     },
     "./components": {
-      "types": "./es/components/index.d.ts",
-      "import": "./es/components/index.js",
-      "require": "./lib/components/index.cjs"
+      "types": "./esm/components/index.d.ts",
+      "import": "./esm/components/index.js",
+      "require": "./cjs/components/index.cjs"
     },
     "./components/*": {
-      "types": "./es/components/*.d.ts",
-      "import": "./es/components/*.js",
-      "require": "./lib/components/*.cjs"
+      "types": "./esm/components/*.d.ts",
+      "import": "./esm/components/*.js",
+      "require": "./cjs/components/*.cjs"
     },
     "./composables": {
-      "types": "./es/composables/index.d.ts",
-      "import": "./es/composables/index.js",
-      "require": "./lib/composables/index.cjs"
+      "types": "./esm/composables/index.d.ts",
+      "import": "./esm/composables/index.js",
+      "require": "./cjs/composables/index.cjs"
     },
     "./composables/*": {
-      "types": "./es/composables/*.d.ts",
-      "import": "./es/composables/*.js",
-      "require": "./lib/composables/*.cjs"
+      "types": "./esm/composables/*.d.ts",
+      "import": "./esm/composables/*.js",
+      "require": "./cjs/composables/*.cjs"
     },
     "./plugins": {
-      "types": "./es/plugins/index.d.ts",
-      "import": "./es/plugins/index.js",
-      "require": "./lib/plugins/index.cjs"
+      "types": "./esm/plugins/index.d.ts",
+      "import": "./esm/plugins/index.js",
+      "require": "./cjs/plugins/index.cjs"
     },
     "./plugins/*": {
-      "types": "./es/plugins/*.d.ts",
-      "import": "./es/plugins/*.js",
-      "require": "./lib/plugins/*.cjs"
+      "types": "./esm/plugins/*.d.ts",
+      "import": "./esm/plugins/*.js",
+      "require": "./cjs/plugins/*.cjs"
     },
     "./router": {
-      "types": "./es/router/index.d.ts",
-      "import": "./es/router/index.js",
-      "require": "./lib/router/index.cjs"
+      "types": "./esm/router/index.d.ts",
+      "import": "./esm/router/index.js",
+      "require": "./cjs/router/index.cjs"
     },
     "./router/*": {
-      "types": "./es/router/*.d.ts",
-      "import": "./es/router/*.js",
-      "require": "./lib/router/*.cjs"
+      "types": "./esm/router/*.d.ts",
+      "import": "./esm/router/*.js",
+      "require": "./cjs/router/*.cjs"
     },
     "./types": {
-      "types": "./es/types/index.d.ts",
-      "import": "./es/types/index.js",
-      "require": "./lib/types/index.cjs"
+      "types": "./esm/types/index.d.ts",
+      "import": "./esm/types/index.js",
+      "require": "./cjs/types/index.cjs"
     },
     "./types/*": {
-      "types": "./es/types/*.d.ts",
-      "import": "./es/types/*.js",
-      "require": "./lib/types/*.cjs"
+      "types": "./esm/types/*.d.ts",
+      "import": "./esm/types/*.js",
+      "require": "./cjs/types/*.cjs"
     },
     "./__tests__/*": {
-      "types": "./es/__tests__/*.d.ts",
-      "import": "./es/__tests__/*.js",
-      "require": "./lib/__tests__/*.cjs"
+      "types": "./esm/__tests__/*.d.ts",
+      "import": "./esm/__tests__/*.js",
+      "require": "./cjs/__tests__/*.cjs"
     },
-    "./es/components/RouterBreadcrumb.vue.css": "./es/components/RouterBreadcrumb.vue.css",
-    "./es/components/RouterLink.vue.css": "./es/components/RouterLink.vue.css",
-    "./es/components/RouterTabs.vue.css": "./es/components/RouterTabs.vue.css",
-    "./es/components/RouterView.vue.css": "./es/components/RouterView.vue.css",
-    "./es/demo/Home.vue.css": "./es/demo/Home.vue.css",
-    "./es/demo/pages/About.vue.css": "./es/demo/pages/About.vue.css",
-    "./es/demo/pages/Home.vue.css": "./es/demo/pages/Home.vue.css",
-    "./es/index.css": "./es/index.css",
-    "./lib/components/RouterBreadcrumb.vue.css": "./lib/components/RouterBreadcrumb.vue.css",
-    "./lib/components/RouterLink.vue.css": "./lib/components/RouterLink.vue.css",
-    "./lib/components/RouterTabs.vue.css": "./lib/components/RouterTabs.vue.css",
-    "./lib/components/RouterView.vue.css": "./lib/components/RouterView.vue.css",
-    "./lib/demo/Home.vue.css": "./lib/demo/Home.vue.css",
-    "./lib/demo/pages/About.vue.css": "./lib/demo/pages/About.vue.css",
-    "./lib/demo/pages/Home.vue.css": "./lib/demo/pages/Home.vue.css",
-    "./lib/index.css": "./lib/index.css",
+    "./cjs/components/RouterBreadcrumb.vue.css": "./cjs/components/RouterBreadcrumb.vue.css",
+    "./cjs/components/RouterLink.vue.css": "./cjs/components/RouterLink.vue.css",
+    "./cjs/components/RouterTabs.vue.css": "./cjs/components/RouterTabs.vue.css",
+    "./cjs/components/RouterView.vue.css": "./cjs/components/RouterView.vue.css",
+    "./cjs/demo/Home.vue.css": "./cjs/demo/Home.vue.css",
+    "./cjs/demo/pages/About.vue.css": "./cjs/demo/pages/About.vue.css",
+    "./cjs/demo/pages/Home.vue.css": "./cjs/demo/pages/Home.vue.css",
+    "./cjs/index.css": "./cjs/index.css",
     "./dist/index.css": "./dist/index.css",
     "./dist/index.min.css": "./dist/index.min.css"
   },
-  "main": "./lib/index.cjs",
-  "module": "./es/index.js",
-  "types": "./es/index.d.ts",
+  "main": "./cjs/index.cjs",
+  "module": "./esm/index.js",
+  "types": "./esm/index.d.ts",
   "unpkg": "./dist/index.min.js",
   "jsdelivr": "./dist/index.min.js",
   "files": [
     "README.md",
     "LICENSE",
     "package.json",
-    "es",
-    "lib",
+    "esm",
+    "cjs",
     "dist"
   ],
   "scripts": {
