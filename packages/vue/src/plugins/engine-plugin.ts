@@ -4,8 +4,9 @@
  * 将 Vue Router 功能集成到 LDesign Engine 中
  */
 
-import type { Plugin } from '@ldesign/engine-core/types'
+import type { Plugin, RouterPluginAPI } from '@ldesign/engine-core/types'
 import type { RouteRecordRaw } from '@ldesign/router-core'
+import { ROUTER_EVENTS } from '@ldesign/engine-core/constants/events'
 import { createRouter } from '../router'
 import { createWebHistory, createWebHashHistory, createMemoryHistory } from 'vue-router'
 
@@ -319,7 +320,7 @@ export function createRouterEnginePlugin(
             if (mode === 'hash') {
               window.addEventListener('hashchange', () => {
                 const to = (router as any).vueRouter?.currentRoute?.value
-                engine.events?.emit?.('router:navigated', { to })
+                engine.events?.emit?.(ROUTER_EVENTS.NAVIGATED, { to })
               })
             }
           }
@@ -375,8 +376,33 @@ export function createRouterEnginePlugin(
           }
         }
 
+        // 注册 Router API 到 API 注册表
+        if ((engine as any).api) {
+          const vueRouter = (router as any).vueRouter
+          const routerAPI: RouterPluginAPI = {
+            name: 'router',
+            version: version || '1.0.0',
+            push: (path: string) => vueRouter.push(path),
+            replace: (path: string) => vueRouter.replace(path),
+            back: () => vueRouter.back(),
+            forward: () => vueRouter.forward(),
+            go: (n: number) => vueRouter.go(n),
+            getCurrentRoute: () => vueRouter.currentRoute.value,
+            getRoutes: () => vueRouter.getRoutes(),
+            addRoute: (route: any) => vueRouter.addRoute(route),
+            removeRoute: (name: string) => vueRouter.removeRoute(name),
+            hasRoute: (name: string) => vueRouter.hasRoute(name),
+            beforeEach: (guard: any) => vueRouter.beforeEach(guard),
+            afterEach: (hook: any) => vueRouter.afterEach(hook),
+          };
+          (engine as any).api.register(routerAPI)
+          if (debug) {
+            console.log('[Vue Router Plugin] Router API registered to API registry')
+          }
+        }
+
         // 发射路由器安装完成事件
-        engine.events?.emit?.('router:installed', { router, mode, base })
+        engine.events?.emit?.(ROUTER_EVENTS.INSTALLED, { mode, base })
 
         engine.logger?.info?.('Vue router plugin installed successfully')
       } catch (error) {
@@ -408,8 +434,13 @@ export function createRouterEnginePlugin(
           (engine as any).router = null
         }
 
+        // 注销 Router API
+        if ((engine as any).api) {
+          (engine as any).api.unregister('router')
+        }
+
         // 发射路由器卸载事件
-        engine.events?.emit?.('router:uninstalled')
+        engine.events?.emit?.(ROUTER_EVENTS.UNINSTALLED)
 
         engine.logger?.info?.('Vue router plugin uninstalled successfully')
       } catch (error) {
