@@ -233,67 +233,74 @@ interface PerformanceData {
 const performanceStart = ref<number>(0)
 const performanceEnd = ref<number>(0)
 
-// 解析过渡配置
+/**
+ * 通用配置解析函数
+ *
+ * ⚡ 性能优化：
+ * - 提取重复逻辑，减少代码重复
+ * - 避免每次都创建新对象
+ * - 统一配置合并策略
+ *
+ * @param defaults - 默认配置
+ * @param injected - 注入的配置
+ * @param propValue - props 传入的配置
+ * @returns 合并后的配置
+ *
+ * @internal
+ */
+function resolveConfig<T extends { enabled?: boolean }>(
+  defaults: T,
+  injected: T | boolean | null,
+  propValue: T | boolean | undefined,
+): T {
+  let config = { ...defaults }
+
+  // 合并注入的配置
+  if (injected !== null) {
+    if (typeof injected === 'boolean') {
+      config.enabled = injected
+    }
+    else {
+      config = { ...config, ...injected }
+    }
+  }
+
+  // 合并 props 配置（优先级最高）
+  if (propValue !== undefined) {
+    if (typeof propValue === 'boolean') {
+      config.enabled = propValue
+    }
+    else {
+      config = { ...config, ...propValue }
+    }
+  }
+
+  return config
+}
+
+// 🚀 优化：解析过渡配置
 const resolvedTransition = computed<TransitionConfig>(() => {
   const defaults: TransitionConfig = {
     type: 'fade',
     duration: 200,
     mode: 'out-in',
     easing: 'ease-in-out',
-    enabled: true
+    enabled: true,
   }
-  
-  // 合并注入的配置
-  let config = { ...defaults }
-  
-  if (injectedTransition !== null) {
-    if (typeof injectedTransition === 'boolean') {
-      config.enabled = injectedTransition
-    } else {
-      config = { ...config, ...injectedTransition }
-    }
-  }
-  
-  // 合并 props 配置
-  if (props.transition !== undefined) {
-    if (typeof props.transition === 'boolean') {
-      config.enabled = props.transition
-    } else {
-      config = { ...config, ...props.transition }
-    }
-  }
-  
-  return config
+
+  return resolveConfig(defaults, injectedTransition, props.transition)
 })
 
-// 解析缓存配置
+// 🚀 优化：解析缓存配置
 const resolvedCache = computed<CacheConfig>(() => {
   const defaults: CacheConfig = {
     enabled: false,
     include: undefined,
     exclude: undefined,
-    max: 10
+    max: 10,
   }
-  
-  let config = { ...defaults }
-  
-  if (injectedCache !== null) {
-    if (typeof injectedCache === 'boolean') {
-      config.enabled = injectedCache
-    } else {
-      config = { ...config, ...injectedCache }
-    }
-  }
-  
-  if (props.cache !== undefined) {
-    if (typeof props.cache === 'boolean') {
-      config.enabled = props.cache
-    } else {
-      config = { ...config, ...props.cache }
-    }
-  }
-  
-  return config
+
+  return resolveConfig(defaults, injectedCache, props.cache)
 })
 
 // 缓存配置
@@ -343,35 +350,46 @@ const handleFallback = () => {
 // 滚动处理
 const handleScroll = () => {
   if (props.scrollBehavior === false) return
-  
+
   const options: ScrollToOptions = {
-    behavior: props.scrollBehavior as ScrollBehavior
+    behavior: props.scrollBehavior as ScrollBehavior,
   }
-  
+
   if (props.scrollPosition === 'top') {
     options.top = 0
-  } else if (props.scrollPosition === 'bottom') {
+  }
+  else if (props.scrollPosition === 'bottom') {
     options.top = document.body.scrollHeight
-  } else if (typeof props.scrollPosition === 'object') {
+  }
+  else if (typeof props.scrollPosition === 'object') {
     options.top = props.scrollPosition.y
     options.left = props.scrollPosition.x
   }
-  
+
   window.scrollTo(options)
 }
 
-// 监听路由变化
+// 🚀 优化：监听路由变化（自动清理）
+// watchEffect 会在组件卸载时自动停止监听
+watchEffect(() => {
+  const newRoute = currentRoute.value
+
+  // 触发路由事件
+  emit('route-enter', newRoute)
+  emit('route-update', newRoute)
+  handleScroll()
+})
+
+// 监听路由离开事件
+let previousRoute: RouteLocationNormalizedLoaded | null = null
 watch(
   () => currentRoute.value,
   (newRoute, oldRoute) => {
     if (oldRoute && oldRoute.path !== newRoute.path) {
       emit('route-leave', oldRoute)
     }
-    emit('route-enter', newRoute)
-    emit('route-update', newRoute)
-    handleScroll()
+    previousRoute = oldRoute
   },
-  { immediate: true }
 )
 
 // 错误边界组件

@@ -212,6 +212,21 @@ export function createRouter(options: RouterOptions): Router {
 
     install: (app: App) => {
       app.use(vueRouter)
+
+      // 🚀 优化：在应用卸载时自动清理资源
+      app.config.globalProperties.$router = router
+
+      // 监听应用卸载事件
+      const originalUnmount = app.unmount
+      app.unmount = function () {
+        // 清理路由器资源（如果有 destroy 方法）
+        if (vueRouter && typeof (vueRouter as any).destroy === 'function') {
+          (vueRouter as any).destroy()
+        }
+
+        // 调用原始的 unmount
+        return originalUnmount.call(this)
+      }
     },
 
     vueRouter,
