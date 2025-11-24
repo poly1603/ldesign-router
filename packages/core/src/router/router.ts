@@ -43,22 +43,22 @@ import { NavigationFailureType } from '../types'
 export interface RouterOptions {
   /** 路由配置 */
   routes: RouteRecordRaw[]
-  
+
   /** 历史管理器 */
   history: RouterHistory
-  
+
   /** 滚动行为 */
   scrollBehavior?: ScrollStrategy
-  
+
   /** 是否启用缓存 */
   enableCache?: boolean
-  
+
   /** 缓存大小 */
   cacheSize?: number
-  
+
   /** 守卫超时时间 (ms) */
   guardTimeout?: number
-  
+
   /** 是否严格模式 */
   strict?: boolean
 }
@@ -69,10 +69,10 @@ export interface RouterOptions {
 export interface NavigationOptions {
   /** 是否替换历史记录 */
   replace?: boolean
-  
+
   /** 是否跳过守卫 */
   skipGuards?: boolean
-  
+
   /** 状态数据 */
   state?: Record<string, unknown>
 }
@@ -182,7 +182,7 @@ export class Router {
    */
   private createInitialRoute(): RouteLocationNormalized {
     const location = this.history.location
-    
+
     return {
       path: location.path,
       name: undefined,
@@ -298,17 +298,17 @@ export class Router {
       // 4. 执行守卫
       if (!options.skipGuards) {
         const guardResult = await this.guardManager.runBeforeGuards(targetRoute, from)
-        
+
         if (!guardResult.allowed) {
           if (guardResult.redirect) {
             // 重定向
             return this.navigate(guardResult.redirect, options)
           }
-          
+
           if (guardResult.error) {
             throw guardResult.error
           }
-          
+
           // 取消导航
           throw createNavigationCancelledError(targetRoute, from)
         }
@@ -371,7 +371,7 @@ export class Router {
 
     // 匹配路由
     const matchResult = this.matcher.match(normalized.path)
-    
+
     if (!matchResult.matched) {
       throw new Error(`No route matched for path: ${normalized.path}`)
     }
@@ -395,9 +395,9 @@ export class Router {
    */
   private isSameRoute(a: RouteLocationNormalized, b: RouteLocationNormalized): boolean {
     return a.path === b.path &&
-           a.name === b.name &&
-           JSON.stringify(a.query) === JSON.stringify(b.query) &&
-           a.hash === b.hash
+      a.name === b.name &&
+      JSON.stringify(a.query) === JSON.stringify(b.query) &&
+      a.hash === b.hash
   }
 
   // ==================== 守卫 ====================
@@ -564,6 +564,205 @@ export class Router {
     return {
       count: this.guardManager.getGuardCount(),
       guards: this.guardManager.getGuards(),
+    }
+  }
+
+  /**
+   * 批量添加路由
+   *
+   * @param routes - 路由配置数组
+   *
+   * @example
+   * ```typescript
+   * router.addRoutes([
+   *   { path: '/user', component: User },
+   *   { path: '/admin', component: Admin }
+   * ])
+   * ```
+   */
+  addRoutes(routes: RouteRecordRaw[]): void {
+    routes.forEach(route => {
+      this.addRoute(route)
+    })
+  }
+
+  /**
+   * 移除路由
+   *
+   * @param name - 路由名称
+   * @returns 是否成功移除
+   *
+   * @example
+   * ```typescript
+   * router.removeRoute('user')
+   * ```
+   */
+  removeRoute(name: string): boolean {
+    return this.matcher.removeRoute(name)
+  }
+
+  /**
+   * 检查路由是否存在
+   *
+   * @param name - 路由名称
+   * @returns 是否存在
+   *
+   * @example
+   * ```typescript
+   * if (router.hasRoute('user')) {
+   *   console.log('用户路由已注册')
+   * }
+   * ```
+   */
+  hasRoute(name: string): boolean {
+    return this.matcher.hasRoute(name)
+  }
+
+  /**
+   * 获取所有路由
+   *
+   * @returns 所有路由记录
+   *
+   * @example
+   * ```typescript
+   * const routes = router.getRoutes()
+   * console.log('路由总数:', routes.length)
+   * ```
+   */
+  getRoutes(): RouteRecordNormalized[] {
+    return this.matcher.getRoutes()
+  }
+
+  /**
+   * 路由健康检查
+   *
+   * 检查路由系统的健康状态
+   *
+   * @returns 健康检查结果
+   *
+   * @example
+   * ```typescript
+   * const health = router.healthCheck()
+   * if (!health.healthy) {
+   *   console.error('路由系统异常:', health.issues)
+   * }
+   * ```
+   */
+  healthCheck(): {
+    healthy: boolean
+    issues: string[]
+    stats: {
+      routes: number
+      guards: number
+      cacheSize: number
+      currentRoute: string
+    }
+  } {
+    const issues: string[] = []
+    const routes = this.getRoutes()
+
+    // 检查是否有路由
+    if (routes.length === 0) {
+      issues.push('未注册任何路由')
+    }
+
+    // 检查当前路由
+    if (!this.currentRoute) {
+      issues.push('当前路由未初始化')
+    }
+
+    // 检查缓存状态
+    const cacheStats = this.getCacheStats()
+    if (cacheStats.hitRate < 0.5 && cacheStats.totalRequests > 100) {
+      issues.push(`缓存命中率过低: ${(cacheStats.hitRate * 100).toFixed(1)}%`)
+    }
+
+    return {
+      healthy: issues.length === 0,
+      issues,
+      stats: {
+        routes: routes.length,
+        guards: this.guardManager.getGuardCount(),
+        cacheSize: cacheStats.size,
+        currentRoute: this.currentRoute?.path || '/',
+      },
+    }
+  }
+
+  /**
+   * 分析路由配置
+   *
+   * 分析路由配置,找出潜在问题
+   *
+   * @returns 分析结果
+   *
+   * @example
+   * ```typescript
+   * const analysis = router.analyzeRoutes()
+   * console.log('重复路径:', analysis.duplicatePaths)
+   * console.log('未命名路由:', analysis.unnamedRoutes)
+   * ```
+   */
+  analyzeRoutes(): {
+    totalRoutes: number
+    duplicatePaths: string[]
+    duplicateNames: string[]
+    unnamedRoutes: number
+    dynamicRoutes: number
+    staticRoutes: number
+  } {
+    const routes = this.getRoutes()
+    const pathMap = new Map<string, number>()
+    const nameMap = new Map<string, number>()
+    let unnamedRoutes = 0
+    let dynamicRoutes = 0
+    let staticRoutes = 0
+
+    routes.forEach((route) => {
+      // 统计路径
+      const path = route.path
+      pathMap.set(path, (pathMap.get(path) || 0) + 1)
+
+      // 统计名称
+      if (route.name) {
+        nameMap.set(route.name, (nameMap.get(route.name) || 0) + 1)
+      }
+      else {
+        unnamedRoutes++
+      }
+
+      // 统计动态/静态路由
+      if (path.includes(':') || path.includes('*')) {
+        dynamicRoutes++
+      }
+      else {
+        staticRoutes++
+      }
+    })
+
+    // 找出重复的路径和名称
+    const duplicatePaths: string[] = []
+    const duplicateNames: string[] = []
+
+    pathMap.forEach((count, path) => {
+      if (count > 1) {
+        duplicatePaths.push(path)
+      }
+    })
+
+    nameMap.forEach((count, name) => {
+      if (count > 1) {
+        duplicateNames.push(name)
+      }
+    })
+
+    return {
+      totalRoutes: routes.length,
+      duplicatePaths,
+      duplicateNames,
+      unnamedRoutes,
+      dynamicRoutes,
+      staticRoutes,
     }
   }
 

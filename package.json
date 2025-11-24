@@ -65,7 +65,11 @@
     "lint": "eslint . --fix",
     "lint:check": "eslint .",
     "clean": "pnpm -r run clean && rimraf es lib dist",
-    "test": "pnpm -r run test",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:watch": "vitest --watch",
+    "test:coverage": "vitest run --coverage",
+    "test:ui": "vitest --ui",
     "dev": "ldesign-builder build -f esm,cjs,dts --watch"
   },
   "dependencies": {},

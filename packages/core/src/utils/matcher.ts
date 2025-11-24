@@ -630,20 +630,100 @@ export class MatcherRegistry {
   /**
    * 移除路由
    *
-   * @param path - 路径模式
+   * @param nameOrPath - 路由名称或路径模式
+   * @returns 是否成功移除
    */
-  removeRoute(path: string): void {
-    // 尝试从静态路由中删除
-    this.staticRoutes.delete(path)
+  removeRoute(nameOrPath: string): boolean {
+    let removed = false
 
-    // 尝试从动态路由中删除
-    this.dynamicMatchers.delete(path)
-    this.dynamicRoutes.delete(path)
+    // 尝试按名称删除
+    for (const [path, route] of this.staticRoutes) {
+      if (route.name === nameOrPath) {
+        this.staticRoutes.delete(path)
+        removed = true
+        break
+      }
+    }
+
+    if (!removed) {
+      for (const [path, route] of this.dynamicRoutes) {
+        if (route.name === nameOrPath) {
+          this.dynamicMatchers.delete(path)
+          this.dynamicRoutes.delete(path)
+          removed = true
+          break
+        }
+      }
+    }
+
+    // 尝试按路径删除
+    if (!removed) {
+      removed = this.staticRoutes.delete(nameOrPath)
+      if (!removed) {
+        removed = this.dynamicMatchers.delete(nameOrPath) || this.dynamicRoutes.delete(nameOrPath)
+      }
+    }
 
     // 清空缓存
-    if (this.options.enableCache) {
+    if (removed && this.options.enableCache) {
       this.matchCache.clear()
     }
+
+    return removed
+  }
+
+  /**
+   * 检查路由是否存在
+   *
+   * @param nameOrPath - 路由名称或路径
+   * @returns 是否存在
+   */
+  hasRoute(nameOrPath: string): boolean {
+    // 检查静态路由
+    if (this.staticRoutes.has(nameOrPath)) {
+      return true
+    }
+
+    // 检查动态路由
+    if (this.dynamicRoutes.has(nameOrPath)) {
+      return true
+    }
+
+    // 按名称检查
+    for (const route of this.staticRoutes.values()) {
+      if (route.name === nameOrPath) {
+        return true
+      }
+    }
+
+    for (const route of this.dynamicRoutes.values()) {
+      if (route.name === nameOrPath) {
+        return true
+      }
+    }
+
+    return false
+  }
+
+  /**
+   * 获取所有路由
+   *
+   * @returns 所有路由记录
+   */
+  getRoutes(): RouteRecord[] {
+    const routes: RouteRecord[] = []
+
+    // 收集静态路由
+    for (const route of this.staticRoutes.values()) {
+      routes.push(route)
+    }
+
+    // 收集动态路由
+    for (const route of this.dynamicRoutes.values()) {
+      routes.push(route)
+    }
+
+    return routes
   }
 
   /**
