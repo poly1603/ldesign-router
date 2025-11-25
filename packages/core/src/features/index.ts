@@ -132,6 +132,20 @@ export type {
   GuardManagerOptions,
 } from './guards'
 
+// ==================== 并行守卫 ====================
+export {
+  ParallelGuardExecutor,
+  BatchGuardExecutor,
+  createParallelGuardExecutor,
+} from './parallel-guards'
+
+export type {
+  GuardDependency,
+  GuardExecutionPlan,
+  GuardExecutionResult,
+  ParallelGuardOptions,
+} from './parallel-guards'
+
 // ==================== 滚动行为 ====================
 export {
   ScrollManager,
