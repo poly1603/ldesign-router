@@ -29,12 +29,14 @@ import type {
 } from '../types'
 import type { RouterHistory } from '../types/history'
 import { createMatcherRegistry, type MatcherRegistry } from '../utils/matcher'
+import { createTrieMatcher as createTrieRouterMatcher, TrieMatcher } from '../utils/trie-matcher'
 import { createErrorManager, type ErrorManager, NavigationError, createNavigationCancelledError } from '../utils/errors'
 import { createNormalizer, type RouteNormalizer } from '../utils/normalizer'
 import { createMatchCacheManager, type MatchCacheManager } from '../features/match-cache'
 import { createGuardManager, type GuardManager, type Guard } from '../features/guards'
 import { createScrollManager, type ScrollManager, type ScrollStrategy } from '../features/scroll'
 import { createAliasManager, type AliasManager } from '../utils/alias'
+import { createMemoryManager, type MemoryManager } from '../utils/memory-manager'
 import { NavigationFailureType } from '../types'
 
 /**
@@ -61,6 +63,21 @@ export interface RouterOptions {
 
   /** 是否严格模式 */
   strict?: boolean
+
+  /** 是否使用 Trie 树匹配器（高性能模式） */
+  useTrie?: boolean
+
+  /** 是否启用匹配统计 */
+  enableMatchStats?: boolean
+
+  /** 是否启用自动内存管理 */
+  enableMemoryManagement?: boolean
+
+  /** 内存清理间隔（毫秒），默认 60000（1分钟） */
+  memoryCleanupInterval?: number
+
+  /** 内存使用阈值（0-1），默认 0.8（80%） */
+  memoryThreshold?: number
 }
 
 /**
@@ -93,13 +110,15 @@ type EventHandler = (...args: any[]) => void | Promise<void>
 export class Router {
   // 核心组件
   private history: RouterHistory
-  private matcher: MatcherRegistry
+  private matcher: MatcherRegistry | TrieMatcher
+  private useTrie: boolean
   private errorManager: ErrorManager
   private normalizer: RouteNormalizer
   private cacheManager: MatchCacheManager
   private guardManager: GuardManager
   private scrollManager: ScrollManager
   private aliasManager: AliasManager
+  private memoryManager: MemoryManager | null = null
 
   // 路由状态
   private routes: RouteRecordRaw[] = []
@@ -113,12 +132,24 @@ export class Router {
   constructor(options: RouterOptions) {
     this.history = options.history
     this.routes = options.routes
+    this.useTrie = options.useTrie ?? false
 
-    // 初始化核心组件
-    this.matcher = createMatcherRegistry({
-      enableCache: options.enableCache !== false,
-      cacheSize: options.cacheSize || 1000,
-    })
+    // 初始化核心组件 - 根据配置选择匹配器
+    if (this.useTrie) {
+      // 🚀 使用 Trie 树匹配器（高性能模式）
+      this.matcher = createTrieRouterMatcher({
+        enableCache: options.enableCache !== false,
+        cacheSize: options.cacheSize || 1000,
+        enableStats: options.enableMatchStats ?? false,
+      })
+    } else {
+      // 使用传统匹配器（兼容模式）
+      this.matcher = createMatcherRegistry({
+        enableCache: options.enableCache !== false,
+        cacheSize: options.cacheSize || 1000,
+      })
+    }
+    
     this.errorManager = createErrorManager()
     this.normalizer = createNormalizer({ strict: options.strict })
     this.cacheManager = createMatchCacheManager({
@@ -132,6 +163,18 @@ export class Router {
       strategy: options.scrollBehavior,
     })
     this.aliasManager = createAliasManager()
+
+    // 初始化内存管理器（如果启用）
+    if (options.enableMemoryManagement !== false) {
+      this.memoryManager = createMemoryManager({
+        cleanupInterval: options.memoryCleanupInterval || 60000,
+        memoryThreshold: options.memoryThreshold || 0.8,
+      })
+      
+      // 注册需要清理的资源
+      this.memoryManager.register('cache', this.cacheManager)
+      this.memoryManager.register('matcher', this.matcher)
+    }
 
     // 初始化路由
     this.initializeRoutes()
@@ -167,7 +210,12 @@ export class Router {
    * 注册路由
    */
   private registerRoute(route: RouteRecordRaw): void {
-    this.matcher.addRoute(route.path, route)
+    // 类型适配：将 symbol 类型的 name 转换为 string
+    const adaptedRoute = {
+      ...route,
+      name: typeof route.name === 'symbol' ? String(route.name) : route.name,
+    }
+    this.matcher.addRoute(route.path, adaptedRoute as any)
 
     // 递归注册子路由
     if (route.children) {
@@ -316,9 +364,9 @@ export class Router {
 
       // 5. 更新历史
       if (options.replace) {
-        this.history.replace(targetRoute.fullPath, options.state)
+        this.history.replace(targetRoute.fullPath as any, options.state as any)
       } else {
-        this.history.push(targetRoute.fullPath, options.state)
+        this.history.push(targetRoute.fullPath as any, options.state as any)
       }
 
       // 6. 更新当前路由
@@ -377,16 +425,22 @@ export class Router {
     }
 
     // 缓存匹配结果
+    // 转换 params：确保所有值都是字符串（处理 string[] 情况）
+    const stringParams: Record<string, string> = {}
+    for (const [key, value] of Object.entries(matchResult.params)) {
+      stringParams[key] = Array.isArray(value) ? (value[0] || '') : (value || '')
+    }
+    
     this.cacheManager.set(
       normalized.path,
       matchResult.route ? [matchResult.route as any] : [],
-      matchResult.params,
+      stringParams,
     )
 
     return {
       ...normalized,
       matched: matchResult.route ? [matchResult.route as any] : [],
-      params: { ...normalized.params, ...matchResult.params },
+      params: { ...normalized.params, ...stringParams },
     }
   }
 
@@ -478,30 +532,6 @@ export class Router {
     this.aliasManager.registerFromRoute(normalized)
   }
 
-  /**
-   * 移除路由
-   */
-  removeRoute(name: string | symbol): void {
-    const index = this.routes.findIndex(r => r.name === name)
-    if (index >= 0) {
-      this.routes.splice(index, 1)
-    }
-  }
-
-  /**
-   * 获取所有路由
-   */
-  getRoutes(): RouteRecordRaw[] {
-    return [...this.routes]
-  }
-
-  /**
-   * 检查路由是否存在
-   */
-  hasRoute(name: string | symbol): boolean {
-    return this.routes.some(r => r.name === name)
-  }
-
   // ==================== 状态访问 ====================
 
   /**
@@ -568,6 +598,42 @@ export class Router {
   }
 
   /**
+   * 获取匹配器统计（仅在使用 Trie 匹配器时可用）
+   *
+   * @returns 匹配器统计信息，如果未启用则返回 null
+   *
+   * @example
+   * ```typescript
+   * const stats = router.getMatcherStats()
+   * if (stats) {
+   *   console.log(`平均匹配时间: ${stats.avgMatchTime}ms`)
+   *   console.log(`缓存命中率: ${(stats.cacheHitRate * 100).toFixed(1)}%`)
+   * }
+   * ```
+   */
+  getMatcherStats() {
+    if (this.useTrie && 'getStats' in this.matcher) {
+      return (this.matcher as TrieMatcher).getStats()
+    }
+    return null
+  }
+
+  /**
+   * 重置匹配器统计（仅在使用 Trie 匹配器时可用）
+   *
+   * @example
+   * ```typescript
+   * router.resetMatcherStats()
+   * console.log('匹配器统计已重置')
+   * ```
+   */
+  resetMatcherStats(): void {
+    if (this.useTrie && 'resetStats' in this.matcher) {
+      (this.matcher as TrieMatcher).resetStats()
+    }
+  }
+
+  /**
    * 批量添加路由
    *
    * @param routes - 路由配置数组
@@ -589,20 +655,37 @@ export class Router {
   /**
    * 移除路由
    *
+   * 从路由器中移除指定名称的路由，同时清理相关缓存
+   *
    * @param name - 路由名称
    * @returns 是否成功移除
    *
    * @example
    * ```typescript
-   * router.removeRoute('user')
+   * const removed = router.removeRoute('user')
+   * if (removed) {
+   *   console.log('用户路由已移除')
+   * }
    * ```
    */
   removeRoute(name: string): boolean {
+    // 从内部路由数组中移除
+    const index = this.routes.findIndex(r => r.name === name)
+    if (index >= 0) {
+      this.routes.splice(index, 1)
+    }
+    
+    // 清除相关缓存
+    this.cacheManager.clear()
+    
+    // 从匹配器中移除
     return this.matcher.removeRoute(name)
   }
 
   /**
    * 检查路由是否存在
+   *
+   * 检查指定名称的路由是否已在路由器中注册
    *
    * @param name - 路由名称
    * @returns 是否存在
@@ -611,6 +694,8 @@ export class Router {
    * ```typescript
    * if (router.hasRoute('user')) {
    *   console.log('用户路由已注册')
+   * } else {
+   *   console.log('用户路由未注册')
    * }
    * ```
    */
@@ -621,16 +706,21 @@ export class Router {
   /**
    * 获取所有路由
    *
+   * 获取路由器中注册的所有路由记录（标准化后的）
+   *
    * @returns 所有路由记录
    *
    * @example
    * ```typescript
    * const routes = router.getRoutes()
    * console.log('路由总数:', routes.length)
+   * routes.forEach(route => {
+   *   console.log(`路由: ${route.name} -> ${route.path}`)
+   * })
    * ```
    */
   getRoutes(): RouteRecordNormalized[] {
-    return this.matcher.getRoutes()
+    return this.matcher.getRoutes() as any
   }
 
   /**
@@ -673,7 +763,7 @@ export class Router {
 
     // 检查缓存状态
     const cacheStats = this.getCacheStats()
-    if (cacheStats.hitRate < 0.5 && cacheStats.totalRequests > 100) {
+    if (cacheStats.hitRate < 0.5 && cacheStats.totalAccess > 100) {
       issues.push(`缓存命中率过低: ${(cacheStats.hitRate * 100).toFixed(1)}%`)
     }
 
@@ -725,7 +815,8 @@ export class Router {
 
       // 统计名称
       if (route.name) {
-        nameMap.set(route.name, (nameMap.get(route.name) || 0) + 1)
+        const routeName = String(route.name)
+        nameMap.set(routeName, (nameMap.get(routeName) || 0) + 1)
       }
       else {
         unnamedRoutes++
@@ -766,12 +857,100 @@ export class Router {
     }
   }
 
+  /**
+   * 获取内存使用情况
+   *
+   * 获取当前内存使用统计信息（需要启用内存管理）
+   *
+   * @returns 内存使用情况，如果未启用则返回 null
+   *
+   * @example
+   * ```typescript
+   * const memoryUsage = router.getMemoryUsage()
+   * if (memoryUsage) {
+   *   console.log(`内存使用: ${(memoryUsage.percentage * 100).toFixed(1)}%`)
+   *   console.log(`使用量: ${(memoryUsage.used / 1024 / 1024).toFixed(2)}MB`)
+   * }
+   * ```
+   */
+  getMemoryUsage() {
+    return this.memoryManager?.getMemoryUsage() || null
+  }
+
+  /**
+   * 强制触发内存清理
+   *
+   * 手动触发内存清理，清理未使用的资源
+   *
+   * @returns 清理的资源数量，如果未启用则返回 0
+   *
+   * @example
+   * ```typescript
+   * const cleaned = router.cleanupMemory()
+   * console.log(`已清理 ${cleaned} 个资源`)
+   * ```
+   */
+  cleanupMemory(): number {
+    if (!this.memoryManager) {
+      return 0
+    }
+    return this.memoryManager.cleanup(true)
+  }
+
+  /**
+   * 检测内存泄漏
+   *
+   * 检测长时间未访问的资源，可能存在内存泄漏
+   *
+   * @returns 可能泄漏的资源数量，如果未启用则返回 0
+   *
+   * @example
+   * ```typescript
+   * const leaks = router.detectMemoryLeaks()
+   * if (leaks > 0) {
+   *   console.warn(`检测到 ${leaks} 个可能的内存泄漏`)
+   * }
+   * ```
+   */
+  detectMemoryLeaks(): number {
+    if (!this.memoryManager) {
+      return 0
+    }
+    return this.memoryManager.detectLeaks()
+  }
+
+  /**
+   * 获取内存管理统计
+   *
+   * 获取内存管理器的详细统计信息
+   *
+   * @returns 内存统计，如果未启用则返回 null
+   *
+   * @example
+   * ```typescript
+   * const stats = router.getMemoryStats()
+   * if (stats) {
+   *   console.log(`清理次数: ${stats.cleanupCount}`)
+   *   console.log(`清理的资源总数: ${stats.cleanedResources}`)
+   * }
+   * ```
+   */
+  getMemoryStats() {
+    return this.memoryManager?.getStats() || null
+  }
+
   // ==================== 销毁 ====================
 
   /**
    * 销毁路由器
    */
   destroy(): void {
+    // 停止内存管理器
+    if (this.memoryManager) {
+      this.memoryManager.destroy()
+      this.memoryManager = null
+    }
+    
     this.cacheManager.destroy()
     this.guardManager.destroy()
     this.scrollManager.destroy()

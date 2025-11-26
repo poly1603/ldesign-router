@@ -7,6 +7,17 @@
  * @module features
  */
 
+// ==================== 高级缓存 ====================
+export {
+  AdvancedCacheManager,
+  createAdvancedCache,
+} from './advanced-cache'
+
+export type {
+  AdvancedCacheOptions,
+  CacheStats as AdvancedCacheStats,
+} from './advanced-cache'
+
 // ==================== 懒加载 ====================
 export {
   LazyLoadManager,
@@ -18,6 +29,21 @@ export type {
   LazyLoadState,
   ComponentLoader,
 } from './lazy-loading'
+
+// ==================== 高级懒加载 ====================
+export {
+  LazyLoadManager as AdvancedLazyLoadManager,
+  createLazyLoadManager,
+  LoadPriority,
+  NetworkCondition,
+  PrefetchStrategy as AdvancedPrefetchStrategy,
+} from './lazy-loading-advanced'
+
+export type {
+  RouteLoadConfig,
+  LazyLoadManagerOptions,
+  LoadStats,
+} from './lazy-loading-advanced'
 
 // ==================== SSR ====================
 export {
@@ -184,13 +210,13 @@ export type {
 export {
   PerformanceMonitor,
   createPerformanceMonitor,
-} from './performance'
+} from './performance-monitor'
 
 export type {
   PerformanceMetrics,
-  PerformanceRecord,
   PerformanceStats,
+  PerformanceThresholds,
   PerformanceWarning,
   PerformanceMonitorOptions,
-} from './performance'
+} from './performance-monitor'
 

@@ -106,7 +106,7 @@
  * - 性能监控
  * - 插槽自定义
  */
-import { ref, computed, inject, watch, onMounted, onUnmounted, defineComponent, h, Suspense, KeepAlive, Transition } from 'vue'
+import { ref, computed, inject, watch, watchEffect, onMounted, onUnmounted, defineComponent, h, Suspense, KeepAlive, Transition } from 'vue'
 import { RouterView as VueRouterView, useRoute } from 'vue-router'
 import type { RouteLocationNormalizedLoaded } from 'vue-router'
 
@@ -369,27 +369,27 @@ const handleScroll = () => {
   window.scrollTo(options)
 }
 
-// 🚀 优化：监听路由变化（自动清理）
-// watchEffect 会在组件卸载时自动停止监听
-watchEffect(() => {
-  const newRoute = currentRoute.value
-
-  // 触发路由事件
-  emit('route-enter', newRoute)
-  emit('route-update', newRoute)
-  handleScroll()
-})
-
-// 监听路由离开事件
+// 🚀 优化：合并路由监听逻辑，减少 watcher 数量
+// 使用单个 watch 替代 watchEffect + watch，提升性能
 let previousRoute: RouteLocationNormalizedLoaded | null = null
 watch(
   () => currentRoute.value,
   (newRoute, oldRoute) => {
+    // 触发路由进入和更新事件
+    emit('route-enter', newRoute)
+    emit('route-update', newRoute)
+    
+    // 处理滚动
+    handleScroll()
+    
+    // 触发路由离开事件
     if (oldRoute && oldRoute.path !== newRoute.path) {
       emit('route-leave', oldRoute)
     }
+    
     previousRoute = oldRoute
   },
+  { immediate: true } // 立即执行一次，模拟 watchEffect 的行为
 )
 
 // 错误边界组件

@@ -28,21 +28,15 @@
   },
   "type": "module",
   "exports": {
-    ".": "./packages/core/es/index.js",
-    "./core": "./packages/core/es/index.js",
-    "./vue": "./packages/vue/es/index.js",
-    "./react": "./packages/react/es/index.js",
-    "./solid": "./packages/solid/es/index.js",
-    "./svelte": "./packages/svelte/es/index.js",
-    "./angular": "./packages/angular/es/index.js",
-    "./lit": "./packages/lit/es/index.js",
-    "./preact": "./packages/preact/es/index.js",
-    "./qwik": "./packages/qwik/es/index.js",
-    "./vue2": "./packages/vue2/es/index.js"
+    ".": {
+      "types": "./es/index.d.ts",
+      "import": "./es/index.js",
+      "require": "./lib/index.cjs"
+    }
   },
-  "main": "./packages/core/lib/index.cjs",
-  "module": "./packages/core/es/index.js",
-  "types": "./packages/core/es/index.d.ts",
+  "main": "./lib/index.cjs",
+  "module": "./es/index.js",
+  "types": "./es/index.d.ts",
   "unpkg": "./dist/index.min.js",
   "jsdelivr": "./dist/index.min.js",
   "files": [
@@ -50,7 +44,8 @@
     "LICENSE",
     "package.json",
     "es",
-    "lib"
+    "lib",
+    "dist"
   ],
   "scripts": {
     "build": "ldesign-builder build -f esm,cjs,dts",

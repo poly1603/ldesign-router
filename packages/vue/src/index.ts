@@ -123,6 +123,40 @@ export {
   useParam,
 } from './composables'
 
+// ==================== 配置管理导出 ====================
+export {
+  provideRouterConfig,
+  injectRouterConfig,
+  injectRouter,
+  useRouter as useRouterConfig,
+  installRouterConfig,
+  createRouterConfig,
+  defaultRouterConfig,
+  ROUTER_CONFIG_KEY,
+  ROUTER_KEY,
+} from './config'
+
+export type {
+  RouterConfig,
+  RouterConfigContext,
+} from './config'
+
+// ==================== DevTools 集成导出 ====================
+export {
+  setupDevtools,
+  addPerformanceMetrics,
+  ROUTER_INSPECTOR_ID,
+  ROUTER_TIMELINE_ID,
+} from './devtools'
+
+export type {
+  DevtoolsPluginApi,
+  DevtoolsOptions,
+  InspectorOptions,
+  TimelineLayerOptions,
+  TimelineEventOptions,
+} from './devtools'
+
 // ==================== 插件导出 ====================
 // Vue Plugin - 用于标准 Vue 应用
 export {

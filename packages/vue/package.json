@@ -59,6 +59,26 @@
       "import": "./esm/composables/*.js",
       "require": "./cjs/composables/*.cjs"
     },
+    "./config": {
+      "types": "./esm/config/index.d.ts",
+      "import": "./esm/config/index.js",
+      "require": "./cjs/config/index.cjs"
+    },
+    "./config/*": {
+      "types": "./esm/config/*.d.ts",
+      "import": "./esm/config/*.js",
+      "require": "./cjs/config/*.cjs"
+    },
+    "./devtools": {
+      "types": "./esm/devtools/index.d.ts",
+      "import": "./esm/devtools/index.js",
+      "require": "./cjs/devtools/index.cjs"
+    },
+    "./devtools/*": {
+      "types": "./esm/devtools/*.d.ts",
+      "import": "./esm/devtools/*.js",
+      "require": "./cjs/devtools/*.cjs"
+    },
     "./plugins": {
       "types": "./esm/plugins/index.d.ts",
       "import": "./esm/plugins/index.js",
@@ -95,7 +115,10 @@
       "require": "./cjs/__tests__/*.cjs"
     },
     "./cjs/components/RouterBreadcrumb.vue.css": "./cjs/components/RouterBreadcrumb.vue.css",
+    "./cjs/components/RouterGuard.vue.css": "./cjs/components/RouterGuard.vue.css",
     "./cjs/components/RouterLink.vue.css": "./cjs/components/RouterLink.vue.css",
+    "./cjs/components/RouterModal.vue.css": "./cjs/components/RouterModal.vue.css",
+    "./cjs/components/RouterSkeleton.vue.css": "./cjs/components/RouterSkeleton.vue.css",
     "./cjs/components/RouterTabs.vue.css": "./cjs/components/RouterTabs.vue.css",
     "./cjs/components/RouterView.vue.css": "./cjs/components/RouterView.vue.css",
     "./cjs/demo/Home.vue.css": "./cjs/demo/Home.vue.css",

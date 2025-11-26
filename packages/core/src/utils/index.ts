@@ -1,6 +1,6 @@
 /**
  * @ldesign/router-core 工具函数统一导出
- * 
+ *
  * @module utils
  */
 
@@ -50,6 +50,30 @@ export type {
   MatchResult,
   MatcherOptions,
 } from './matcher'
+
+// Trie 树匹配器（高性能路由匹配）
+export {
+  TrieMatcher,
+  createTrieMatcher as createTrieRouterMatcher,
+} from './trie-matcher'
+
+export type {
+  TrieMatcherOptions,
+  MatchStats as TrieMatchStats,
+} from './trie-matcher'
+
+// 内存管理器
+export {
+  MemoryManager,
+  createMemoryManager,
+} from './memory-manager'
+
+export type {
+  MemoryUsage,
+  MemoryManagerOptions,
+  Cleanable,
+  MemoryStats,
+} from './memory-manager'
 
 // 错误处理
 export {

@@ -181,8 +181,9 @@ export class PathMatcher {
       const params: RouteParams = {}
       for (let i = 0; i < this.paramNames.length; i++) {
         const value = match[i + 1]
-        if (value !== undefined) {
-          params[this.paramNames[i]] = decodeURIComponent(value)
+        const paramName = this.paramNames[i]
+        if (value !== undefined && paramName !== undefined) {
+          params[paramName] = decodeURIComponent(value)
         }
       }
 
@@ -242,6 +243,7 @@ export class PathMatcher {
 
     for (let i = 0; i < parts.length; i++) {
       const part = parts[i]
+      if (!part) continue
       const segment = this.parseSegment(part, i === parts.length - 1)
 
       this.segments.push(segment)
@@ -317,7 +319,7 @@ export class PathMatcher {
 
       // 提取正则表达式
       const regexMatch = paramName.match(/^([^(]+)\((.+)\)\??$/)
-      if (regexMatch) {
+      if (regexMatch && regexMatch[1] && regexMatch[2]) {
         paramName = regexMatch[1]
         regex = new RegExp(regexMatch[2])
       }
@@ -473,7 +475,7 @@ export function matchPath(
 
   // 返回得分最高的
   matches.sort((a, b) => compareMatchResults(a.result, b.result))
-  return matches[0]
+  return matches[0] || null
 }
 
 /**
@@ -799,6 +801,17 @@ export class MatcherRegistry {
     // 按得分排序，返回最佳匹配
     matches.sort((a, b) => compareMatchResults(a.result, b.result))
     const best = matches[0]
+    
+    if (!best) {
+      const result = {
+        matched: false,
+        params: {},
+      }
+      if (this.options.enableCache) {
+        this.cacheResult(path, result)
+      }
+      return result
+    }
 
     const result = {
       matched: true,
@@ -824,7 +837,9 @@ export class MatcherRegistry {
     // LRU 缓存策略
     if (this.matchCache.size >= this.options.cacheSize) {
       const firstKey = this.matchCache.keys().next().value
-      this.matchCache.delete(firstKey)
+      if (firstKey !== undefined) {
+        this.matchCache.delete(firstKey)
+      }
     }
 
     this.matchCache.set(path, result)
@@ -834,22 +849,32 @@ export class MatcherRegistry {
    * 获取所有路由模式
    */
   getPatterns(): string[] {
-    return Array.from(this.matchers.keys())
+    const patterns: string[] = []
+    // 收集静态路径
+    for (const path of this.staticRoutes.keys()) {
+      patterns.push(path)
+    }
+    // 收集动态路径
+    for (const path of this.dynamicMatchers.keys()) {
+      patterns.push(path)
+    }
+    return patterns
   }
 
   /**
    * 检查路由是否存在
    */
   has(path: string): boolean {
-    return this.matchers.has(path)
+    return this.staticRoutes.has(path) || this.dynamicMatchers.has(path)
   }
 
   /**
    * 清空所有路由
    */
   clear(): void {
-    this.matchers.clear()
-    this.routes.clear()
+    this.staticRoutes.clear()
+    this.dynamicMatchers.clear()
+    this.dynamicRoutes.clear()
     this.matchCache.clear()
   }
 
@@ -857,7 +882,7 @@ export class MatcherRegistry {
    * 获取路由数量
    */
   get size(): number {
-    return this.matchers.size
+    return this.staticRoutes.size + this.dynamicMatchers.size
   }
 }
 
