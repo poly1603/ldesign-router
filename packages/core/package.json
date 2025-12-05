@@ -21,77 +21,85 @@
     "url": "https://github.com/ldesign/ldesign/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./es/index.d.ts",
       "import": "./es/index.js",
-      "require": "./lib/index.cjs"
+      "require": "./lib/index.cjs",
+      "default": "./es/index.js"
     },
     "./features": {
       "types": "./es/features/index.d.ts",
       "import": "./es/features/index.js",
-      "require": "./lib/features/index.cjs"
+      "require": "./lib/features/index.cjs",
+      "default": "./es/features/index.js"
     },
     "./features/*": {
       "types": "./es/features/*.d.ts",
       "import": "./es/features/*.js",
-      "require": "./lib/features/*.cjs"
+      "require": "./lib/features/*.cjs",
+      "default": "./es/features/*.js"
     },
     "./history": {
       "types": "./es/history/index.d.ts",
       "import": "./es/history/index.js",
-      "require": "./lib/history/index.cjs"
+      "require": "./lib/history/index.cjs",
+      "default": "./es/history/index.js"
     },
     "./history/*": {
       "types": "./es/history/*.d.ts",
       "import": "./es/history/*.js",
-      "require": "./lib/history/*.cjs"
+      "require": "./lib/history/*.cjs",
+      "default": "./es/history/*.js"
     },
     "./router": {
       "types": "./es/router/index.d.ts",
       "import": "./es/router/index.js",
-      "require": "./lib/router/index.cjs"
+      "require": "./lib/router/index.cjs",
+      "default": "./es/router/index.js"
     },
     "./router/*": {
       "types": "./es/router/*.d.ts",
       "import": "./es/router/*.js",
-      "require": "./lib/router/*.cjs"
+      "require": "./lib/router/*.cjs",
+      "default": "./es/router/*.js"
     },
     "./types": {
       "types": "./es/types/index.d.ts",
       "import": "./es/types/index.js",
-      "require": "./lib/types/index.cjs"
+      "require": "./lib/types/index.cjs",
+      "default": "./es/types/index.js"
     },
     "./types/*": {
       "types": "./es/types/*.d.ts",
       "import": "./es/types/*.js",
-      "require": "./lib/types/*.cjs"
+      "require": "./lib/types/*.cjs",
+      "default": "./es/types/*.js"
     },
     "./utils": {
       "types": "./es/utils/index.d.ts",
       "import": "./es/utils/index.js",
-      "require": "./lib/utils/index.cjs"
+      "require": "./lib/utils/index.cjs",
+      "default": "./es/utils/index.js"
     },
     "./utils/*": {
       "types": "./es/utils/*.d.ts",
       "import": "./es/utils/*.js",
-      "require": "./lib/utils/*.cjs"
+      "require": "./lib/utils/*.cjs",
+      "default": "./es/utils/*.js"
     },
-    "./__tests__/*": {
-      "types": "./es/__tests__/*.d.ts",
-      "import": "./es/__tests__/*.js",
-      "require": "./lib/__tests__/*.cjs"
-    }
+    "./package.json": "./package.json"
   },
   "main": "./lib/index.cjs",
   "module": "./es/index.js",
   "types": "./es/index.d.ts",
-  "unpkg": "./dist/index.min.js",
-  "jsdelivr": "./dist/index.min.js",
+  "unpkg": "./dist/index.js",
+  "jsdelivr": "./dist/index.js",
   "files": [
     "README.md",
     "LICENSE",
-    "package.json",
+    "CHANGELOG.md",
     "es",
     "lib",
     "dist"
@@ -124,5 +132,7 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  }
+  },
+  "typings": "./es/index.d.ts",
+  "browser": "./dist/index.js"
 }
