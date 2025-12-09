@@ -1,21 +1,17 @@
 /**
- * @ldesign/router-vue 构建配置
+ * @ldesign/router-core 构建配置
  */
 import { defineConfig } from '@ldesign/builder'
 
 export default defineConfig({
-  input: {
-    index: 'src/index.ts',
-    'plugins/index': 'src/plugins/index.ts',
-  },
+  input: 'src/index.ts',
   output: [
     { format: 'esm', dir: 'es', preserveModules: true, preserveModulesRoot: 'src' },
     { format: 'esm', dir: 'esm', preserveModules: true, preserveModulesRoot: 'src' },
     { format: 'cjs', dir: 'lib', preserveModules: true, preserveModulesRoot: 'src' },
-    { format: 'umd', dir: 'dist', name: 'LDesignRouterVue' },
+    { format: 'umd', dir: 'dist', name: 'LDesignRouterCore' },
   ],
-  external: ['vue', 'vue-router', '@ldesign/router-core', '@ldesign/device', '@ldesign/engine', '@ldesign/engine-core', '@ldesign/shared', 'tslib'],
+  external: [],
   dts: true,
   clean: true,
 })
-

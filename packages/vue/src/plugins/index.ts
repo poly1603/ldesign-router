@@ -35,3 +35,22 @@ export {
   createDefaultRouterEnginePlugin,
   routerPlugin,
 } from './engine-plugin'
+
+// 导入以便在函数中使用
+import { createRouterPlugin as _createRouterPlugin } from './vue-plugin'
+import { createRouterEnginePlugin as _createRouterEnginePlugin, createDefaultRouterEnginePlugin as _createDefaultRouterEnginePlugin } from './engine-plugin'
+
+/** 插件版本标识 */
+export const PLUGINS_VERSION = '1.0.0'
+
+/**
+ * 获取所有可用的插件创建函数
+ * @returns 插件创建函数集合
+ */
+export function getPluginCreators() {
+  return {
+    createRouterPlugin: _createRouterPlugin,
+    createRouterEnginePlugin: _createRouterEnginePlugin,
+    createDefaultRouterEnginePlugin: _createDefaultRouterEnginePlugin,
+  }
+}

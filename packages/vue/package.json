@@ -23,112 +23,120 @@
     "url": "https://github.com/ldesign/ldesign/issues"
   },
   "type": "module",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./esm/index.d.ts",
       "import": "./esm/index.js",
-      "require": "./cjs/index.cjs"
+      "require": "./lib/index.cjs",
+      "default": "./esm/index.js"
     },
     "./adapter": {
       "types": "./esm/adapter/index.d.ts",
       "import": "./esm/adapter/index.js",
-      "require": "./cjs/adapter/index.cjs"
+      "require": "./lib/adapter/index.cjs",
+      "default": "./esm/adapter/index.js"
     },
     "./adapter/*": {
       "types": "./esm/adapter/*.d.ts",
       "import": "./esm/adapter/*.js",
-      "require": "./cjs/adapter/*.cjs"
+      "require": "./lib/adapter/*.cjs",
+      "default": "./esm/adapter/*.js"
     },
     "./components": {
       "types": "./esm/components/index.d.ts",
       "import": "./esm/components/index.js",
-      "require": "./cjs/components/index.cjs"
+      "require": "./lib/components/index.cjs",
+      "default": "./esm/components/index.js"
     },
     "./components/*": {
       "types": "./esm/components/*.d.ts",
       "import": "./esm/components/*.js",
-      "require": "./cjs/components/*.cjs"
+      "require": "./lib/components/*.cjs",
+      "default": "./esm/components/*.js"
     },
     "./composables": {
       "types": "./esm/composables/index.d.ts",
       "import": "./esm/composables/index.js",
-      "require": "./cjs/composables/index.cjs"
+      "require": "./lib/composables/index.cjs",
+      "default": "./esm/composables/index.js"
     },
     "./composables/*": {
       "types": "./esm/composables/*.d.ts",
       "import": "./esm/composables/*.js",
-      "require": "./cjs/composables/*.cjs"
+      "require": "./lib/composables/*.cjs",
+      "default": "./esm/composables/*.js"
     },
     "./config": {
       "types": "./esm/config/index.d.ts",
       "import": "./esm/config/index.js",
-      "require": "./cjs/config/index.cjs"
+      "require": "./lib/config/index.cjs",
+      "default": "./esm/config/index.js"
     },
     "./config/*": {
       "types": "./esm/config/*.d.ts",
       "import": "./esm/config/*.js",
-      "require": "./cjs/config/*.cjs"
+      "require": "./lib/config/*.cjs",
+      "default": "./esm/config/*.js"
     },
     "./devtools": {
       "types": "./esm/devtools/index.d.ts",
       "import": "./esm/devtools/index.js",
-      "require": "./cjs/devtools/index.cjs"
+      "require": "./lib/devtools/index.cjs",
+      "default": "./esm/devtools/index.js"
     },
     "./devtools/*": {
       "types": "./esm/devtools/*.d.ts",
       "import": "./esm/devtools/*.js",
-      "require": "./cjs/devtools/*.cjs"
+      "require": "./lib/devtools/*.cjs",
+      "default": "./esm/devtools/*.js"
     },
     "./plugins": {
       "types": "./esm/plugins/index.d.ts",
       "import": "./esm/plugins/index.js",
-      "require": "./cjs/plugins/index.cjs"
+      "require": "./lib/plugins/index.cjs",
+      "default": "./esm/plugins/index.js"
     },
     "./plugins/*": {
       "types": "./esm/plugins/*.d.ts",
       "import": "./esm/plugins/*.js",
-      "require": "./cjs/plugins/*.cjs"
+      "require": "./lib/plugins/*.cjs",
+      "default": "./esm/plugins/*.js"
     },
     "./router": {
       "types": "./esm/router/index.d.ts",
       "import": "./esm/router/index.js",
-      "require": "./cjs/router/index.cjs"
+      "require": "./lib/router/index.cjs",
+      "default": "./esm/router/index.js"
     },
     "./router/*": {
       "types": "./esm/router/*.d.ts",
       "import": "./esm/router/*.js",
-      "require": "./cjs/router/*.cjs"
+      "require": "./lib/router/*.cjs",
+      "default": "./esm/router/*.js"
     },
     "./types": {
       "types": "./esm/types/index.d.ts",
       "import": "./esm/types/index.js",
-      "require": "./cjs/types/index.cjs"
+      "require": "./lib/types/index.cjs",
+      "default": "./esm/types/index.js"
     },
     "./types/*": {
       "types": "./esm/types/*.d.ts",
       "import": "./esm/types/*.js",
-      "require": "./cjs/types/*.cjs"
+      "require": "./lib/types/*.cjs",
+      "default": "./esm/types/*.js"
     },
-    "./__tests__/*": {
-      "types": "./esm/__tests__/*.d.ts",
-      "import": "./esm/__tests__/*.js",
-      "require": "./cjs/__tests__/*.cjs"
-    },
-    "./cjs/components/RouterBreadcrumb.vue.css": "./cjs/components/RouterBreadcrumb.vue.css",
-    "./cjs/components/RouterGuard.vue.css": "./cjs/components/RouterGuard.vue.css",
-    "./cjs/components/RouterLink.vue.css": "./cjs/components/RouterLink.vue.css",
-    "./cjs/components/RouterModal.vue.css": "./cjs/components/RouterModal.vue.css",
-    "./cjs/components/RouterSkeleton.vue.css": "./cjs/components/RouterSkeleton.vue.css",
-    "./cjs/components/RouterTabs.vue.css": "./cjs/components/RouterTabs.vue.css",
-    "./cjs/components/RouterView.vue.css": "./cjs/components/RouterView.vue.css",
-    "./cjs/demo/Home.vue.css": "./cjs/demo/Home.vue.css",
-    "./cjs/demo/pages/About.vue.css": "./cjs/demo/pages/About.vue.css",
-    "./cjs/demo/pages/Home.vue.css": "./cjs/demo/pages/Home.vue.css",
-    "./cjs/index.css": "./cjs/index.css",
+    "./lib/components/RouterBreadcrumb.vue.css": "./lib/components/RouterBreadcrumb.vue.css",
+    "./lib/components/RouterLink.vue.css": "./lib/components/RouterLink.vue.css",
+    "./lib/components/RouterTabs.vue.css": "./lib/components/RouterTabs.vue.css",
+    "./lib/components/RouterView.vue.css": "./lib/components/RouterView.vue.css",
+    "./lib/index.css": "./lib/index.css",
     "./dist/index.css": "./dist/index.css",
-    "./dist/index.min.css": "./dist/index.min.css"
+    "./dist/index.min.css": "./dist/index.min.css",
+    "./package.json": "./package.json"
   },
-  "main": "./cjs/index.cjs",
+  "main": "./lib/index.cjs",
   "module": "./esm/index.js",
   "types": "./esm/index.d.ts",
   "unpkg": "./dist/index.min.js",
@@ -136,9 +144,9 @@
   "files": [
     "README.md",
     "LICENSE",
-    "package.json",
+    "CHANGELOG.md",
     "esm",
-    "cjs",
+    "lib",
     "dist"
   ],
   "scripts": {
@@ -182,5 +190,7 @@
   "publishConfig": {
     "access": "public",
     "registry": "https://registry.npmjs.org/"
-  }
+  },
+  "typings": "./esm/index.d.ts",
+  "browser": "./dist/index.js"
 }
