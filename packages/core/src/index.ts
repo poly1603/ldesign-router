@@ -6,6 +6,25 @@
  * @module @ldesign/router-core
  */
 
+// ==================== 服务容器导出 ====================
+export {
+  RouterServiceContainerImpl,
+  createRouterServiceContainer,
+  RouterServiceLifetime,
+  ROUTER_SERVICES,
+} from './container'
+
+export type {
+  RouterServiceContainer,
+  RouterServiceIdentifier,
+  RouterServiceDescriptor,
+  RouterServiceProvider,
+  Constructor as RouterConstructor,
+  Factory as RouterFactory,
+  ResolveOptions as RouterResolveOptions,
+  RouterServiceContainerStats,
+} from './container'
+
 // ==================== 类型定义导出 ====================
 export type {
   // 基础类型
@@ -397,13 +416,43 @@ export {
   withCache,
   PerformanceMonitor,
   createPerformanceMonitor,
+  // 中间件系统
+  RouterMiddlewareManager,
+  createMiddlewareManager,
+  MiddlewareErrorStrategy,
+  // 增强路由匹配器
+  EnhancedRouteMatcher,
+  createEnhancedMatcher,
+  RouteMatchMode,
+  // 插件系统
+  RouterPluginManager,
+  DynamicRouteRegistry,
+  RouterEventHookManager,
+  createPluginManager as createRouterPluginManager,
+  createDynamicRouteRegistry,
+  createEventHookManager,
+  PluginLifecycleHook,
+  RouterEventType,
+  // 内存管理和错误处理
+  ResourceLifecycleManager,
+  SmartCacheManager,
+  MemoryLeakDetector,
+  RouterErrorTracker,
+  RouterError as RouterErrorEnhanced,
+  createLifecycleManager,
+  createSmartCache,
+  createMemoryLeakDetector,
+  createErrorTracker,
+  ResourceLifecycleState,
+  CacheCleanupStrategy,
+  RouterErrorType as RouterErrorTypeEnum,
 } from './features'
 
 export type {
   LazyLoadOptions,
   LazyLoadState,
-  ComponentLoader,
-  SSRContext,
+  ComponentLoader as FeaturesComponentLoader,
+  SSRContext as FeaturesSSRContext,
   SSRState,
   PrefetchStrategy,
   NetworkType,
@@ -428,7 +477,7 @@ export type {
   TransitionMode,
   TransitionConfig,
   TransitionManagerOptions,
-  NavigationDirection,
+  NavigationDirection as FeaturesNavigationDirection,
   StorageType,
   PersistedState,
   PersistenceOptions,
@@ -448,9 +497,38 @@ export type {
   MatchCacheStats,
   MatchCacheOptions,
   PerformanceMetrics,
-  PerformanceRecord,
   PerformanceStats,
   PerformanceWarning,
   PerformanceMonitorOptions,
+  // 中间件系统类型
+  MiddlewareFunction,
+  MiddlewareOptions,
+  MiddlewareCondition,
+  MiddlewareContext,
+  MiddlewareExecutionStats,
+  MiddlewarePerformanceReport,
+  MiddlewareManagerOptions,
+  MiddlewareResult,
+  // 增强路由匹配器类型
+  RouteParamValidator,
+  RouteGroupConfig,
+  RouteGuard,
+  RouteGuardFunction,
+  RouteMatchResult,
+  PermissionConfig,
+  EnhancedMatcherOptions,
+  // 插件系统类型
+  RouterPlugin,
+  RouterPluginOptions,
+  DynamicRouteConfig,
+  EventHookManagerOptions,
+  RouterEventData,
+  RouterEventListener,
+  // 内存管理和错误处理类型
+  Disposable,
+  ResourceReference,
+  MemoryLeakDetectorOptions,
+  CacheEntry,
+  ErrorContext,
 } from './features'
 

@@ -7,6 +7,22 @@
  * @module features
  */
 
+// ==================== 高级性能监控 ====================
+export {
+  AdvancedPerformanceMonitor,
+  createAdvancedPerformanceMonitor,
+} from './advanced-performance'
+
+export type {
+  PerformanceMetrics as AdvancedPerformanceMetrics,
+  PerformanceRecord as AdvancedPerformanceRecord,
+  AdvancedPerformanceStats,
+  PathPerformanceStats,
+  PerformanceWarning as AdvancedPerformanceWarning,
+  PerformanceThresholds as AdvancedPerformanceThresholds,
+  AdvancedPerformanceMonitorOptions,
+} from './advanced-performance'
+
 // ==================== 高级缓存 ====================
 export {
   AdvancedCacheManager,
@@ -167,9 +183,6 @@ export {
 
 export type {
   GuardDependency,
-  GuardExecutionPlan,
-  GuardExecutionResult,
-  ParallelGuardOptions,
 } from './parallel-guards'
 
 // ==================== 滚动行为 ====================
@@ -219,4 +232,84 @@ export type {
   PerformanceWarning,
   PerformanceMonitorOptions,
 } from './performance-monitor'
+
+// ==================== 中间件系统 ====================
+export {
+  RouterMiddlewareManager,
+  createMiddlewareManager,
+  MiddlewareErrorStrategy,
+} from './middleware'
+
+export type {
+  MiddlewareFunction,
+  MiddlewareOptions,
+  MiddlewareCondition,
+  MiddlewareContext,
+  MiddlewareExecutionStats,
+  MiddlewarePerformanceReport,
+  MiddlewareManagerOptions,
+  MiddlewareResult,
+} from './middleware'
+
+// ==================== 增强路由匹配器 ====================
+export {
+  EnhancedRouteMatcher,
+  createEnhancedMatcher,
+  RouteMatchMode,
+} from './enhanced-matcher'
+
+export type {
+  RouteParamValidator,
+  RouteGroupConfig,
+  RouteGuard,
+  RouteGuardFunction,
+  RouteMatchResult,
+  PermissionConfig,
+  EnhancedMatcherOptions,
+} from './enhanced-matcher'
+
+// ==================== 插件系统 ====================
+export {
+  RouterPluginManager,
+  DynamicRouteRegistry,
+  RouterEventHookManager,
+  createPluginManager,
+  createDynamicRouteRegistry,
+  createEventHookManager,
+  PluginLifecycleHook,
+  RouterEventType,
+} from './plugin-system'
+
+export type {
+  RouterPlugin,
+  RouterPluginOptions,
+  DynamicRouteConfig,
+  EventHookManagerOptions,
+  RouterEventData,
+  RouterEventListener,
+} from './plugin-system'
+
+// ==================== 内存管理和错误处理 ====================
+export {
+  ResourceLifecycleManager,
+  SmartCacheManager,
+  MemoryLeakDetector,
+  RouterErrorTracker,
+  RouterError,
+  createLifecycleManager,
+  createSmartCache,
+  createMemoryLeakDetector,
+  createErrorTracker,
+  ResourceLifecycleState,
+  CacheCleanupStrategy,
+  RouterErrorType,
+} from './memory-error-management'
+
+export type {
+  Disposable,
+  ResourceReference,
+  MemoryLeakDetectorOptions,
+  CacheEntry,
+  ErrorContext,
+} from './memory-error-management'
 
