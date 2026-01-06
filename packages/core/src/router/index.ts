@@ -98,3 +98,16 @@ export type {
   NavigationOptions as PromiseNavigationOptions,
   NavigationResult,
 } from './promise'
+
+// Trie 序列化器
+export {
+  TrieSerializer,
+  createTrieSerializer,
+} from './trie-serializer'
+
+export type {
+  SerializedTrie,
+  SerializeOptions,
+  DeserializeOptions,
+  SerializationStats,
+} from './trie-serializer'

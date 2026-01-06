@@ -313,3 +313,29 @@ export type {
   ErrorContext,
 } from './memory-error-management'
 
+// ==================== 时间旅行 ====================
+export {
+  TimeTravelManager,
+  createTimeTravel,
+} from './time-travel'
+
+export type {
+  RouteSnapshot,
+  TimeTravelOptions,
+  TimeTravelState,
+  TimeTravelListener,
+} from './time-travel'
+
+// ==================== 预测预加载 ====================
+export {
+  PredictivePrefetchManager,
+  createPredictivePrefetch,
+} from './predictive-prefetch'
+
+export type {
+  PredictionResult,
+  PredictivePrefetchOptions,
+  PredictivePrefetchState,
+  ComponentLoader as PredictiveComponentLoader,
+} from './predictive-prefetch'
+

@@ -2,9 +2,18 @@
  * Trie 树路由匹配器
  * 将路由匹配从 O(n) 优化到 O(m)，m 为路径深度
  * 性能提升约 300%
+ * 
+ * @typeParam THandler - 路由处理器类型，默认为 unknown
+ * @typeParam TMeta - 路由元数据类型，默认为 Record<string, unknown>
  */
 
-export interface RouteNode {
+/**
+ * 路由节点
+ * 
+ * @typeParam THandler - 路由处理器类型
+ * @typeParam TMeta - 路由元数据类型
+ */
+export interface RouteNode<THandler = unknown, TMeta = Record<string, unknown>> {
   /** 路径片段 */
   segment: string;
   /** 是否是动态参数 */
@@ -12,30 +21,57 @@ export interface RouteNode {
   /** 参数名称（如果是动态参数） */
   paramName?: string;
   /** 子节点 */
-  children: Map<string, RouteNode>;
+  children: Map<string, RouteNode<THandler, TMeta>>;
   /** 通配符子节点 */
-  wildcardChild?: RouteNode;
+  wildcardChild?: RouteNode<THandler, TMeta>;
   /** 路由处理器（叶子节点） */
-  handler?: any;
+  handler?: THandler;
   /** 路由元数据 */
-  meta?: any;
+  meta?: TMeta;
   /** 路由名称 */
   name?: string;
 }
 
-export interface MatchResult {
-  handler: any;
+/**
+ * 路由匹配结果
+ * 
+ * @typeParam THandler - 路由处理器类型
+ * @typeParam TMeta - 路由元数据类型
+ */
+export interface MatchResult<THandler = unknown, TMeta = Record<string, unknown>> {
+  /** 匹配到的处理器 */
+  handler: THandler;
+  /** 路由参数 */
   params: Record<string, string>;
-  meta?: any;
+  /** 路由元数据 */
+  meta?: TMeta;
+  /** 路由名称 */
   name?: string;
+  /** 匹配的路径 */
   matchedPath: string;
 }
 
 /**
  * Trie 树路由匹配器
+ * 
+ * @typeParam THandler - 路由处理器类型
+ * @typeParam TMeta - 路由元数据类型
+ * 
+ * @example
+ * ```typescript
+ * // 使用默认类型
+ * const trie = new RouteTrie()
+ * trie.addRoute('/user/:id', { component: UserPage })
+ * 
+ * // 使用自定义类型
+ * interface MyHandler { component: () => Promise<any> }
+ * interface MyMeta { requiresAuth: boolean }
+ * const typedTrie = new RouteTrie<MyHandler, MyMeta>()
+ * typedTrie.addRoute('/admin', { component: () => import('./Admin') }, { requiresAuth: true })
+ * ```
  */
-export class RouteTrie {
-  private root: RouteNode;
+export class RouteTrie<THandler = unknown, TMeta = Record<string, unknown>> {
+  private root: RouteNode<THandler, TMeta>;
   private routeCount = 0;
 
   constructor() {
@@ -44,8 +80,13 @@ export class RouteTrie {
 
   /**
    * 添加路由
+   * 
+   * @param path - 路由路径
+   * @param handler - 路由处理器
+   * @param meta - 路由元数据
+   * @param name - 路由名称
    */
-  addRoute(path: string, handler: any, meta?: any, name?: string): void {
+  addRoute(path: string, handler: THandler, meta?: TMeta, name?: string): void {
     const segments = this.normalizePath(path).split('/').filter(Boolean);
     let node = this.root;
 
@@ -76,8 +117,11 @@ export class RouteTrie {
 
   /**
    * 匹配路由
+   * 
+   * @param path - 要匹配的路径
+   * @returns 匹配结果，未匹配到返回 null
    */
-  match(path: string): MatchResult | null {
+  match(path: string): MatchResult<THandler, TMeta> | null {
     const segments = this.normalizePath(path).split('/').filter(Boolean);
     const params: Record<string, string> = {};
     const matchedSegments: string[] = [];
@@ -99,8 +143,11 @@ export class RouteTrie {
 
   /**
    * 根据名称查找路由
+   * 
+   * @param name - 路由名称
+   * @returns 路由节点，未找到返回 null
    */
-  findByName(name: string): RouteNode | null {
+  findByName(name: string): RouteNode<THandler, TMeta> | null {
     return this.findNodeByName(this.root, name);
   }
 
@@ -125,9 +172,11 @@ export class RouteTrie {
 
   /**
    * 获取所有路由
+   * 
+   * @returns 所有已注册的路由
    */
-  getAllRoutes(): Array<{ path: string; handler: any; meta?: any; name?: string }> {
-    const routes: Array<{ path: string; handler: any; meta?: any; name?: string }> = [];
+  getAllRoutes(): Array<{ path: string; handler: THandler; meta?: TMeta; name?: string }> {
+    const routes: Array<{ path: string; handler: THandler; meta?: TMeta; name?: string }> = [];
     this.collectRoutes(this.root, [], routes);
     return routes;
   }
@@ -150,7 +199,7 @@ export class RouteTrie {
   /**
    * 创建节点
    */
-  private createNode(segment: string, isDynamic = false, paramName?: string): RouteNode {
+  private createNode(segment: string, isDynamic = false, paramName?: string): RouteNode<THandler, TMeta> {
     return {
       segment,
       isDynamic,
@@ -167,12 +216,12 @@ export class RouteTrie {
    * 匹配节点（递归）
    */
   private matchNode(
-    node: RouteNode,
+    node: RouteNode<THandler, TMeta>,
     segments: string[],
     index: number,
     params: Record<string, string>,
     matchedSegments: string[]
-  ): RouteNode | null {
+  ): RouteNode<THandler, TMeta> | null {
     // 到达路径末尾
     if (index === segments.length) {
       return node.handler ? node : null;
@@ -255,7 +304,7 @@ export class RouteTrie {
   /**
    * 根据名称查找节点
    */
-  private findNodeByName(node: RouteNode, name: string): RouteNode | null {
+  private findNodeByName(node: RouteNode<THandler, TMeta>, name: string): RouteNode<THandler, TMeta> | null {
     if (node.name === name) {
       return node;
     }
@@ -278,7 +327,7 @@ export class RouteTrie {
   /**
    * 构建路径
    */
-  private buildPath(node: RouteNode, params: Record<string, string>): string {
+  private buildPath(node: RouteNode<THandler, TMeta>, params: Record<string, string>): string {
     const segments: string[] = [];
     this.buildPathSegments(this.root, node, segments, params);
     return '/' + segments.join('/');
@@ -288,8 +337,8 @@ export class RouteTrie {
    * 构建路径段
    */
   private buildPathSegments(
-    current: RouteNode,
-    target: RouteNode,
+    current: RouteNode<THandler, TMeta>,
+    target: RouteNode<THandler, TMeta>,
     segments: string[],
     params: Record<string, string>
   ): boolean {
@@ -326,7 +375,7 @@ export class RouteTrie {
   /**
    * 移除节点
    */
-  private removeNode(node: RouteNode, segments: string[], index: number): boolean {
+  private removeNode(node: RouteNode<THandler, TMeta>, segments: string[], index: number): boolean {
     if (index === segments.length) {
       if (node.handler) {
         node.handler = undefined;
@@ -369,9 +418,9 @@ export class RouteTrie {
    * 收集所有路由
    */
   private collectRoutes(
-    node: RouteNode,
+    node: RouteNode<THandler, TMeta>,
     pathSegments: string[],
-    routes: Array<{ path: string; handler: any; meta?: any; name?: string }>
+    routes: Array<{ path: string; handler: THandler; meta?: TMeta; name?: string }>
   ): void {
     if (node.handler) {
       routes.push({
@@ -417,7 +466,7 @@ export class RouteTrie {
     let totalDepth = 0;
     let leafNodes = 0;
 
-    const traverse = (node: RouteNode, depth: number) => {
+    const traverse = (node: RouteNode<THandler, TMeta>, depth: number) => {
       totalNodes++;
 
       if (node.isDynamic) {
@@ -455,7 +504,16 @@ export class RouteTrie {
 
 /**
  * 创建路由 Trie 树
+ * 
+ * @typeParam THandler - 路由处理器类型
+ * @typeParam TMeta - 路由元数据类型
+ * @returns 路由 Trie 树实例
+ * 
+ * @example
+ * ```typescript
+ * const trie = createRouteTrie<MyHandler, MyMeta>()
+ * ```
  */
-export function createRouteTrie(): RouteTrie {
-  return new RouteTrie();
+export function createRouteTrie<THandler = unknown, TMeta = Record<string, unknown>>(): RouteTrie<THandler, TMeta> {
+  return new RouteTrie<THandler, TMeta>();
 }
