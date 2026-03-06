@@ -2,7 +2,7 @@
  * @ldesign/router Engine 插件
  */
 import type { RouterEnginePluginOptions } from './types'
-import { createRouterServiceContainer } from '../di/service-container'
+import { createRouterServiceContainer } from '../container'
 
 export const routerStateKeys = {
   CONTAINER: 'router:container' as const,

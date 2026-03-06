@@ -339,3 +339,27 @@ export type {
   ComponentLoader as PredictiveComponentLoader,
 } from './predictive-prefetch'
 
+// ==================== 导航进度 ====================
+export {
+  NavigationProgress,
+  createNavigationProgress,
+} from './navigation-progress'
+
+export type {
+  NavigationProgressOptions,
+  NavigationProgressState,
+  ProgressListener,
+} from './navigation-progress'
+
+// ==================== 路由 Meta 管理 ====================
+export {
+  RouteMetaManager,
+  createRouteMetaManager,
+} from './route-meta-manager'
+
+export type {
+  MetaManagerOptions,
+  MetaInfo,
+  MetaChangeListener,
+} from './route-meta-manager'
+

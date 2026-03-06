@@ -532,5 +532,40 @@ export type {
   ErrorContext,
 } from './features'
 
+// ==================== 导航进度 ====================
+export {
+  NavigationProgress,
+  createNavigationProgress,
+} from './features/navigation-progress'
+
+export type {
+  NavigationProgressOptions,
+  NavigationProgressState,
+  ProgressListener,
+} from './features/navigation-progress'
+
+// ==================== 路由 Meta 管理 ====================
+export {
+  RouteMetaManager,
+  createRouteMetaManager,
+} from './features/route-meta-manager'
+
+export type {
+  MetaManagerOptions,
+  MetaInfo,
+  MetaChangeListener,
+} from './features/route-meta-manager'
+
+// ==================== 路由序列化 ====================
+export {
+  RouteSerializer,
+  createRouteSerializer,
+} from './utils/route-serializer'
+
+export type {
+  SerializedRoute,
+  RouteSerializerOptions,
+} from './utils/route-serializer'
+
 // Engine 插件
 export * from './engine'

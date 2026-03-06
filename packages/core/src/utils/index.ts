@@ -237,3 +237,14 @@ export type {
   DevToolsHook,
 } from './optimization'
 
+// 路由序列化器
+export {
+  RouteSerializer,
+  createRouteSerializer,
+} from './route-serializer'
+
+export type {
+  SerializedRoute,
+  RouteSerializerOptions,
+} from './route-serializer'
+

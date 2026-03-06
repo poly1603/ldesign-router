@@ -271,7 +271,7 @@ export class RouteBuilder {
  * 路由器链式API
  */
 export class ChainableRouter {
-  private routes: RouteRecordRaw[] = []
+  private _routes: RouteRecordRaw[] = []
 
   // ==================== 路由配置 ====================
 
@@ -285,7 +285,7 @@ export class ChainableRouter {
       configure(builder)
     }
 
-    this.routes.push(builder.build())
+    this._routes.push(builder.build())
     return this
   }
 
@@ -293,7 +293,7 @@ export class ChainableRouter {
    * 添加多个路由
    */
   routes(routes: RouteRecordRaw[]): this {
-    this.routes.push(...routes)
+    this._routes.push(...routes)
     return this
   }
 
@@ -301,14 +301,14 @@ export class ChainableRouter {
    * 获取路由配置
    */
   getRoutes(): RouteRecordRaw[] {
-    return this.routes
+    return this._routes
   }
 
   /**
    * 清空路由
    */
   clear(): this {
-    this.routes = []
+    this._routes = []
     return this
   }
 
@@ -345,7 +345,7 @@ export class ChainableRouter {
       path: prefix + (route.path.startsWith('/') ? '' : '/') + route.path,
     }))
 
-    this.routes.push(...groupRoutes)
+    this._routes.push(...groupRoutes)
     return this
   }
 }

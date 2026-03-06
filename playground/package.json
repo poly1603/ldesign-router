@@ -1,0 +1,25 @@
+{
+  "name": "@ldesign/router-playground",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:vue": "vite --mode vue",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ldesign/engine-vue3": "workspace:*",
+    "@ldesign/router-core": "workspace:*",
+    "@ldesign/router-vue": "workspace:*",
+    "vue": "^3.5.18",
+    "vue-router": "^4.2.5"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.3",
+    "typescript": "^5.7.3",
+    "vite": "^5.0.12",
+    "vue-tsc": "^3.0.5"
+  }
+}

@@ -121,6 +121,42 @@ export {
   useHasQueryParam,
   useQueryParam,
   useParam,
+  // 路由缓存
+  useRouteCache,
+  // 权限
+  useRoutePermission,
+  // 预取
+  useRoutePrefetch,
+  // 历史记录
+  useRouteHistory,
+  // 过渡动画
+  useRouteTransition,
+  transitionPresetStyles,
+  // 新增 Composables
+  useNavigationProgress,
+  useRouteTitle,
+  useRouteWatcher,
+  // 路由数据与工具 Composables
+  useAsyncRouteData,
+  useRouteAnnouncer,
+  useRouteScroll,
+  useRouteDebounce,
+} from './composables'
+
+export type {
+  RouteCacheOptions,
+  RoutePrefetchOptions,
+  HistoryItem,
+  TransitionType,
+  TransitionDirection,
+  RouteTransitionOptions,
+  TransitionState,
+  RouteWatchSource,
+  RouteWatcherOptions,
+  AsyncRouteDataOptions,
+  RouteAnnouncerOptions,
+  RouteScrollOptions,
+  RouteDebounceOptions,
 } from './composables'
 
 // ==================== 配置管理导出 ====================

@@ -6,7 +6,7 @@
 
 import { computed } from 'vue'
 import type { ComputedRef } from 'vue'
-import { useRoute as vueUseRoute, onBeforeRouteLeave as vueOnBeforeRouteLeave, onBeforeRouteUpdate as vueOnBeforeRouteUpdate } from 'vue-router'
+import { useRoute as vueUseRoute, useRouter as vueUseRouter, onBeforeRouteLeave as vueOnBeforeRouteLeave, onBeforeRouteUpdate as vueOnBeforeRouteUpdate } from 'vue-router'
 import type { RouteRecordName } from 'vue-router'
 import type {
   RouteParams,
@@ -1261,3 +1261,714 @@ export type TransitionType =
       }
     `,
   }
+
+// ==================== 导航进度 Composable ====================
+
+import {
+  NavigationProgress,
+  createNavigationProgress,
+  type NavigationProgressOptions,
+  type NavigationProgressState,
+} from '@ldesign/router-core'
+
+let _globalProgress: NavigationProgress | null = null
+
+/**
+ * 导航进度条 Composable
+ *
+ * 提供 loading bar 的响应式状态，自动与路由导航绑定
+ *
+ * @param options - 进度条配置
+ * @returns 进度状态和控制方法
+ *
+ * @example
+ * ```vue
+ * <template>
+ *   <div
+ *     v-if="progress.isLoading"
+ *     class="progress-bar"
+ *     :style="{ width: (progress.progress * 100) + '%' }"
+ *   />
+ * </template>
+ *
+ * <script setup lang="ts">
+ * const { progress, start, finish } = useNavigationProgress()
+ * </script>
+ * ```
+ */
+export function useNavigationProgress(options?: NavigationProgressOptions) {
+  if (!_globalProgress) {
+    _globalProgress = createNavigationProgress(options)
+  }
+
+  const state = ref<NavigationProgressState>({
+    progress: 0,
+    isLoading: false,
+    isFinished: false,
+  })
+
+  const unsubscribe = _globalProgress.onChange((newState) => {
+    state.value = { ...newState }
+  })
+
+  onUnmounted(() => {
+    unsubscribe()
+  })
+
+  return {
+    progress: computed(() => state.value),
+    start: () => _globalProgress!.start(),
+    finish: () => _globalProgress!.finish(),
+    fail: () => _globalProgress!.fail(),
+    set: (val: number) => _globalProgress!.set(val),
+    inc: (amount?: number) => _globalProgress!.inc(amount),
+    /** 获取底层 NavigationProgress 实例 */
+    instance: _globalProgress,
+  }
+}
+
+// ==================== 路由标题 Composable ====================
+
+/**
+ * 自动设置页面标题的 Composable
+ *
+ * 监听路由变化并根据路由 meta.title 自动更新 document.title
+ *
+ * @param template - 标题模板，%s 为占位符。例如 '%s | My App'
+ * @param defaultTitle - 默认标题
+ *
+ * @example
+ * ```vue
+ * <script setup lang="ts">
+ * const { title } = useRouteTitle('%s - My App', 'Home')
+ * </script>
+ * ```
+ */
+export function useRouteTitle(
+  template: string | ((title: string) => string) = '%s',
+  defaultTitle = '',
+) {
+  const route = vueUseRoute()
+
+  const formatTitle = (raw: string): string => {
+    if (typeof template === 'function') return template(raw)
+    return template.replace('%s', raw)
+  }
+
+  const title = computed(() => {
+    // 从 matched 路由链中查找最后一个有 title 的
+    let t = defaultTitle
+    if (route.matched) {
+      for (const record of route.matched) {
+        if (record.meta?.title) {
+          t = record.meta.title as string
+        }
+      }
+    }
+    if (route.meta?.title) {
+      t = route.meta.title as string
+    }
+    return t || defaultTitle
+  })
+
+  const formattedTitle = computed(() => formatTitle(title.value))
+
+  // 自动更新 document.title
+  watch(
+    formattedTitle,
+    (newTitle) => {
+      if (typeof document !== 'undefined' && newTitle) {
+        document.title = newTitle
+      }
+    },
+    { immediate: true },
+  )
+
+  return {
+    title,
+    formattedTitle,
+  }
+}
+
+// ==================== 路由监听 Composable ====================
+
+export type RouteWatchSource = 'path' | 'fullPath' | 'name' | 'params' | 'query' | 'hash'
+
+export interface RouteWatcherOptions {
+  /** 监听的属性，默认 'fullPath' */
+  source?: RouteWatchSource
+  /** 是否立即执行 */
+  immediate?: boolean
+  /** 是否深度监听（对 params/query 有效） */
+  deep?: boolean
+}
+
+/**
+ * 路由变化监听 Composable
+ *
+ * 通用的路由变化监听工具，比直接 watch route 更简洁
+ *
+ * @param callback - 路由变化回调
+ * @param options - 配置项
+ *
+ * @example
+ * ```vue
+ * <script setup lang="ts">
+ * // 监听路径变化
+ * useRouteWatcher((newPath, oldPath) => {
+ *   console.log(`From ${oldPath} to ${newPath}`)
+ * })
+ *
+ * // 监听 query 变化
+ * useRouteWatcher(
+ *   (newQuery, oldQuery) => { console.log('query changed', newQuery) },
+ *   { source: 'query', deep: true }
+ * )
+ * </script>
+ * ```
+ */
+export function useRouteWatcher(
+  callback: (newValue: any, oldValue: any) => void,
+  options: RouteWatcherOptions = {},
+) {
+  const route = vueUseRoute()
+  const { source = 'fullPath', immediate = false, deep = false } = options
+
+  const getSource = () => {
+    switch (source) {
+      case 'path': return route.path
+      case 'fullPath': return route.fullPath
+      case 'name': return route.name
+      case 'params': return route.params
+      case 'query': return route.query
+      case 'hash': return route.hash
+      default: return route.fullPath
+    }
+  }
+
+  const stopWatch = watch(
+    () => getSource(),
+    (newVal, oldVal) => {
+      callback(newVal, oldVal)
+    },
+    { immediate, deep },
+  )
+
+  onUnmounted(() => {
+    stopWatch()
+  })
+
+  return stopWatch
+}
+
+// ==================== 异步路由数据 Composable ====================
+
+/**
+ * 异步路由数据选项
+ */
+export interface AsyncRouteDataOptions<T = any> {
+  /** 是否在创建时立即执行 */
+  immediate?: boolean
+  /** 监听的路由属性变化来触发 refetch，默认 ['params', 'query'] */
+  watch?: ('params' | 'query' | 'hash' | 'path')[]
+  /** 缓存键，默认使用 route.fullPath */
+  cacheKey?: string | ((route: any) => string)
+  /** 缓存时间（毫秒），0 = 不缓存 */
+  cacheTime?: number
+  /** 初始数据 */
+  initialData?: T
+  /** 数据转换函数 */
+  transform?: (data: any) => T
+  /** 成功回调 */
+  onSuccess?: (data: T) => void
+  /** 错误回调 */
+  onError?: (error: Error) => void
+}
+
+const asyncDataCache = new Map<string, { data: any; timestamp: number }>()
+
+/**
+ * 路由级异步数据加载
+ * 
+ * 当路由参数或查询参数变化时自动重新获取数据，支持缓存、loading/error 状态和重试。
+ * 
+ * @template T - 数据类型
+ * @param fetcher - 数据获取函数，接收当前路由作为参数
+ * @param options - 配置选项
+ * @returns 数据状态和控制方法
+ * 
+ * @example
+ * ```vue
+ * <script setup lang="ts">
+ * const { data, loading, error, refresh } = useAsyncRouteData(
+ *   (route) => fetch(`/api/users/${route.params.id}`).then(r => r.json()),
+ *   { immediate: true, watch: ['params'] }
+ * )
+ * </script>
+ * ```
+ */
+export function useAsyncRouteData<T = any>(
+  fetcher: (route: ReturnType<typeof vueUseRoute>) => Promise<T>,
+  options: AsyncRouteDataOptions<T> = {},
+) {
+  const route = vueUseRoute()
+  const {
+    immediate = true,
+    watch: watchSources = ['params', 'query'],
+    cacheKey,
+    cacheTime = 0,
+    initialData,
+    transform,
+    onSuccess,
+    onError,
+  } = options
+
+  const data = ref<T | undefined>(initialData) as Ref<T | undefined>
+  const loading = ref(false)
+  const error = ref<Error | null>(null)
+  const fetchCount = ref(0)
+
+  const getCacheKey = (): string => {
+    if (typeof cacheKey === 'function') return cacheKey(route)
+    if (typeof cacheKey === 'string') return cacheKey
+    return route.fullPath
+  }
+
+  const getCached = (): T | undefined => {
+    if (cacheTime <= 0) return undefined
+    const key = getCacheKey()
+    const cached = asyncDataCache.get(key)
+    if (!cached) return undefined
+    if (Date.now() - cached.timestamp > cacheTime) {
+      asyncDataCache.delete(key)
+      return undefined
+    }
+    return cached.data
+  }
+
+  const execute = async () => {
+    // Check cache first
+    const cached = getCached()
+    if (cached !== undefined) {
+      data.value = cached
+      return
+    }
+
+    loading.value = true
+    error.value = null
+    fetchCount.value++
+    const currentFetch = fetchCount.value
+
+    try {
+      let result = await fetcher(route)
+      // Stale request check
+      if (currentFetch !== fetchCount.value) return
+
+      if (transform) result = transform(result)
+      data.value = result
+
+      // Store in cache
+      if (cacheTime > 0) {
+        asyncDataCache.set(getCacheKey(), { data: result, timestamp: Date.now() })
+      }
+
+      onSuccess?.(result)
+    } catch (e) {
+      if (currentFetch !== fetchCount.value) return
+      error.value = e instanceof Error ? e : new Error(String(e))
+      onError?.(error.value)
+    } finally {
+      if (currentFetch === fetchCount.value) {
+        loading.value = false
+      }
+    }
+  }
+
+  const refresh = () => execute()
+
+  const clearCache = (key?: string) => {
+    if (key) {
+      asyncDataCache.delete(key)
+    } else {
+      asyncDataCache.delete(getCacheKey())
+    }
+  }
+
+  // Watch route changes
+  const getWatchSources = () => watchSources.map(s => {
+    switch (s) {
+      case 'params': return route.params
+      case 'query': return route.query
+      case 'hash': return route.hash
+      case 'path': return route.path
+      default: return route.fullPath
+    }
+  })
+
+  watch(
+    () => getWatchSources(),
+    () => { execute() },
+    { deep: true },
+  )
+
+  // Immediate fetch
+  if (immediate) {
+    execute()
+  }
+
+  return {
+    data: computed(() => data.value),
+    loading: computed(() => loading.value),
+    error: computed(() => error.value),
+    refresh,
+    clearCache,
+    /** Execute count, useful for tracking refetches */
+    fetchCount: computed(() => fetchCount.value),
+  }
+}
+
+// ==================== 路由无障碍播报 Composable ====================
+
+/**
+ * 路由播报选项
+ */
+export interface RouteAnnouncerOptions {
+  /** aria-live 级别 */
+  politeness?: 'polite' | 'assertive'
+  /** 播报模板，%s 为路由标题占位符 */
+  template?: string | ((title: string) => string)
+  /** 播报延迟(ms) */
+  announceDelay?: number
+}
+
+let _announcerElement: HTMLElement | null = null
+
+/**
+ * 路由变化无障碍播报
+ * 
+ * 为 SPA 路由切换提供屏幕阅读器播报支持，在路由变化时自动
+ * 通过 ARIA live region 告知辅助技术当前页面已切换。
+ * 
+ * @param options - 播报配置
+ * @returns 播报控制方法
+ * 
+ * @example
+ * ```vue
+ * <script setup lang="ts">
+ * const { announce } = useRouteAnnouncer({
+ *   template: '已导航到 %s',
+ *   politeness: 'polite',
+ * })
+ * </script>
+ * ```
+ */
+export function useRouteAnnouncer(options: RouteAnnouncerOptions = {}) {
+  const route = vueUseRoute()
+  const {
+    politeness = 'polite',
+    template = '%s',
+    announceDelay = 100,
+  } = options
+
+  const message = ref('')
+  const isActive = ref(false)
+
+  // Create or get the announcer element
+  const ensureAnnouncer = () => {
+    if (typeof document === 'undefined') return
+    if (_announcerElement) return _announcerElement
+
+    const el = document.createElement('div')
+    el.setAttribute('role', 'status')
+    el.setAttribute('aria-live', politeness)
+    el.setAttribute('aria-atomic', 'true')
+    Object.assign(el.style, {
+      position: 'absolute',
+      width: '1px',
+      height: '1px',
+      padding: '0',
+      margin: '-1px',
+      overflow: 'hidden',
+      clip: 'rect(0, 0, 0, 0)',
+      whiteSpace: 'nowrap',
+      borderWidth: '0',
+    })
+    document.body.appendChild(el)
+    _announcerElement = el
+    return el
+  }
+
+  const formatMessage = (title: string): string => {
+    if (typeof template === 'function') return template(title)
+    return template.replace('%s', title)
+  }
+
+  const announce = (text?: string) => {
+    const el = ensureAnnouncer()
+    if (!el) return
+
+    const title = text || (route.meta?.title as string) || String(route.name ?? route.path)
+    const formatted = formatMessage(title)
+
+    // Clear then set to trigger screen reader re-announcement
+    el.textContent = ''
+    isActive.value = true
+    message.value = formatted
+
+    setTimeout(() => {
+      el.textContent = formatted
+      isActive.value = false
+    }, 50)
+  }
+
+  // Auto announce on route change
+  let announceTimer: ReturnType<typeof setTimeout> | null = null
+  watch(
+    () => route.fullPath,
+    () => {
+      if (announceTimer) clearTimeout(announceTimer)
+      announceTimer = setTimeout(() => announce(), announceDelay)
+    },
+  )
+
+  onUnmounted(() => {
+    if (announceTimer) clearTimeout(announceTimer)
+  })
+
+  return {
+    /** Current announcement message */
+    message: computed(() => message.value),
+    /** Whether an announcement is being processed */
+    isActive: computed(() => isActive.value),
+    /** Manually announce a message */
+    announce,
+  }
+}
+
+// ==================== 路由滚动 Composable ====================
+
+/**
+ * 路由滚动选项
+ */
+export interface RouteScrollOptions {
+  /** 滚动行为 */
+  behavior?: ScrollBehavior
+  /** 滚动容器选择器，默认 window */
+  selector?: string
+  /** 新路由是否自动滚动到顶部 */
+  scrollToTop?: boolean
+  /** 保存键前缀 */
+  saveKey?: string
+}
+
+const scrollPositions = new Map<string, { x: number; y: number }>()
+
+/**
+ * 路由滚动位置管理
+ * 
+ * 在路由切换时自动保存/恢复滚动位置，支持 hash 锚点、自定义容器。
+ * 
+ * @param options - 滚动配置
+ * @returns 滚动控制方法
+ * 
+ * @example
+ * ```vue
+ * <script setup lang="ts">
+ * const { savedPosition, scrollTo, savePosition } = useRouteScroll({
+ *   scrollToTop: true,
+ *   behavior: 'smooth',
+ * })
+ * </script>
+ * ```
+ */
+export function useRouteScroll(options: RouteScrollOptions = {}) {
+  const route = vueUseRoute()
+  const {
+    behavior = 'auto',
+    selector,
+    scrollToTop = true,
+    saveKey = 'route-scroll',
+  } = options
+
+  const savedPosition = ref<{ x: number; y: number } | null>(null)
+
+  const getScrollElement = (): Element | Window => {
+    if (selector && typeof document !== 'undefined') {
+      return document.querySelector(selector) || window
+    }
+    return typeof window !== 'undefined' ? window : null as any
+  }
+
+  const getCurrentPosition = (): { x: number; y: number } => {
+    const el = getScrollElement()
+    if (el === window || !el) {
+      return { x: window.scrollX || 0, y: window.scrollY || 0 }
+    }
+    return { x: (el as Element).scrollLeft, y: (el as Element).scrollTop }
+  }
+
+  const savePosition = () => {
+    const key = `${saveKey}:${route.fullPath}`
+    const pos = getCurrentPosition()
+    scrollPositions.set(key, pos)
+    savedPosition.value = pos
+  }
+
+  const scrollTo = (pos: { x?: number; y?: number } | string) => {
+    const el = getScrollElement()
+    if (!el) return
+
+    if (typeof pos === 'string') {
+      // Scroll to element by selector / hash
+      const target = typeof document !== 'undefined' ? document.querySelector(pos) : null
+      if (target) {
+        target.scrollIntoView({ behavior })
+        return
+      }
+    }
+
+    const { x = 0, y = 0 } = pos as { x?: number; y?: number }
+    if (el === window) {
+      window.scrollTo({ left: x, top: y, behavior })
+    } else {
+      ;(el as Element).scrollTo({ left: x, top: y, behavior })
+    }
+  }
+
+  const restorePosition = () => {
+    const key = `${saveKey}:${route.fullPath}`
+    const pos = scrollPositions.get(key)
+    if (pos) {
+      savedPosition.value = pos
+      // Restore after DOM update
+      setTimeout(() => scrollTo(pos), 50)
+      return true
+    }
+    return false
+  }
+
+  // On route change: save old position, restore or scroll to top
+  let previousPath = route.fullPath
+  watch(
+    () => route.fullPath,
+    (newPath) => {
+      // Save current position for previous route
+      const prevKey = `${saveKey}:${previousPath}`
+      scrollPositions.set(prevKey, getCurrentPosition())
+      previousPath = newPath
+
+      // Try to restore, or scroll to top
+      setTimeout(() => {
+        if (route.hash) {
+          scrollTo(route.hash)
+        } else if (!restorePosition() && scrollToTop) {
+          scrollTo({ x: 0, y: 0 })
+        }
+      }, 80)
+    },
+  )
+
+  return {
+    /** Last saved scroll position */
+    savedPosition: computed(() => savedPosition.value),
+    /** Manually save current scroll position */
+    savePosition,
+    /** Scroll to a position or element */
+    scrollTo,
+    /** Restore saved position for current route */
+    restorePosition,
+    /** Clear all saved positions */
+    clearPositions: () => scrollPositions.clear(),
+  }
+}
+
+// ==================== 导航防抖 Composable ====================
+
+/**
+ * 导航防抖选项
+ */
+export interface RouteDebounceOptions {
+  /** 防抖延迟(ms) */
+  delay?: number
+  /** 是否在延迟前立即执行第一次 */
+  leading?: boolean
+}
+
+/**
+ * 路由导航防抖
+ * 
+ * 防止用户快速连续点击导致导航重复执行，自动对 router.push 进行防抖处理。
+ * 
+ * @param options - 防抖配置
+ * @returns 防抖的导航方法
+ * 
+ * @example
+ * ```vue
+ * <template>
+ *   <button @click="navigate('/dashboard')" :disabled="isNavigating">
+ *     Go
+ *   </button>
+ * </template>
+ * 
+ * <script setup lang="ts">
+ * const { navigate, isNavigating, cancel } = useRouteDebounce({ delay: 300 })
+ * </script>
+ * ```
+ */
+export function useRouteDebounce(options: RouteDebounceOptions = {}) {
+  const { delay = 300, leading = false } = options
+
+  const isNavigating = ref(false)
+  let timer: ReturnType<typeof setTimeout> | null = null
+  let lastTarget: string | Record<string, any> | null = null
+
+  let _router: ReturnType<typeof vueUseRouter> | null = null
+  const getRouter = () => {
+    if (!_router) _router = vueUseRouter()
+    return _router!
+  }
+
+  const navigate = (to: string | Record<string, any>, replace = false) => {
+    lastTarget = to
+
+    if (leading && !timer) {
+      isNavigating.value = true
+      const router = getRouter()
+      const nav = replace ? router.replace(to as any) : router.push(to as any)
+      nav.finally(() => { isNavigating.value = false })
+    }
+
+    if (timer) clearTimeout(timer)
+
+    timer = setTimeout(() => {
+      timer = null
+      if (!leading && lastTarget) {
+        isNavigating.value = true
+        const router = getRouter()
+        const nav = replace ? router.replace(lastTarget as any) : router.push(lastTarget as any)
+        nav.finally(() => { isNavigating.value = false })
+        lastTarget = null
+      }
+    }, delay)
+  }
+
+  const cancel = () => {
+    if (timer) {
+      clearTimeout(timer)
+      timer = null
+    }
+    lastTarget = null
+    isNavigating.value = false
+  }
+
+  onUnmounted(() => cancel())
+
+  return {
+    /** Debounced navigate function */
+    navigate,
+    /** Whether a navigation is pending or in-flight */
+    isNavigating: computed(() => isNavigating.value),
+    /** Cancel pending navigation */
+    cancel,
+  }
+}
